@@ -1,94 +1,165 @@
-# 10x Astro Starter
+# AI Task Manager (MVP)
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+![Version](https://img.shields.io/badge/version-0.0.1-informational)
 
-## Tech Stack
+A lightweight **web** task manager focused on one thing: helping users decide **what matters most**.  
+Tasks use a simple **3-level priority model** (Low / Medium / High), with **optional AI** acting as a “second opinion” that suggests a priority plus a short justification. Users always stay in control (accept / edit / reject with a reason).
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+## Table of contents
 
-## Prerequisites
+- [1. Project name](#1-project-name)
+- [2. Project description](#2-project-description)
+- [3. Tech stack](#3-tech-stack)
+- [4. Getting started locally](#4-getting-started-locally)
+- [5. Available scripts](#5-available-scripts)
+- [6. Project scope](#6-project-scope)
+- [7. Project status](#7-project-status)
+- [8. License](#8-license)
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+---
 
-## Getting Started
+## 1. Project name
 
-1. Clone the repository:
+**AI Task Manager (MVP)**  
+Repository/package name: **10x-astro-starter**
+
+## 2. Project description
+
+AI Task Manager is designed for users who manage many tasks and want a fast way to **prioritize** without heavy calendar planning.
+
+Core concepts:
+
+- **Multiple task lists** per user (e.g., “Today”, “This week”, “Project A”)
+- Tasks have: **title**, **description**, **priority** (Low/Medium/High), **status** (To do / Done)
+- **Done tasks are hidden by default** and can be shown via a filter
+- **Manual ordering** of tasks within the same priority (e.g., drag & drop)
+- Optional **AI priority suggestion** (never automatic):
+    - suggests priority + one-sentence reasoning
+    - user can **accept**, **modify**, or **reject with a required reason**
+- **AI interaction analytics** is part of the MVP (to measure usefulness and guide future personalization)
+
+> See: [`doc/prd.md`](./doc/prd.md) for the full Product Requirements Document.
+
+## 3. Tech stack
+
+Frontend:
+
+- **Astro 5** (web framework)
+- **React 19** (interactive UI components)
+- **TypeScript 5**
+- **Tailwind CSS 4**
+- **shadcn/ui** (UI component patterns; Radix primitives + utilities)
+
+Backend / data:
+
+- **Supabase** (PostgreSQL database + Auth + SDK; can be hosted in Supabase Cloud or self-hosted)
+
+Tooling:
+
+- **ESLint** + **Prettier** (linting & formatting)
+- **Husky** + **lint-staged** (pre-commit quality gates)
+
+CI/CD & hosting:
+
+- **GitHub Actions**
+- **SMALL.pl** (deployment target)
+
+> See: [`doc/tech-stack.md`](./doc/tech-stack.md) for the rationale and stack notes.
+
+## 4. Getting started locally
+
+### Prerequisites
+
+- **Node.js**: `22.14.0` (from `.nvmrc`)
+- Package manager: `npm` (recommended)
+
+If you use `nvm`:
 
 ```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
+nvm use
 ```
 
-2. Install dependencies:
+### Install
 
 ```bash
 npm install
 ```
 
-3. Run the development server:
+### Environment variables
+
+This project is intended to use **Supabase** for Auth and data storage.  
+Create a `.env` file (or `.env.local`) as needed by your implementation.
+
+Typical Supabase configuration includes:
+
+- Supabase project URL
+- Supabase public (anon) key
+
+> If this repository contains an `.env.example`, copy it to `.env` and fill in the values.
+
+### Run the dev server
 
 ```bash
 npm run dev
 ```
 
-4. Build for production:
+Astro will print the local URL in the console (commonly `http://localhost:4321`).
+
+### Production build & preview
 
 ```bash
 npm run build
+npm run preview
 ```
 
-## Available Scripts
+## 5. Available scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
+From [`package.json`](./package.json):
 
-## Project Structure
+- `npm run dev` — start the local dev server
+- `npm run build` — build for production
+- `npm run preview` — preview the production build locally
+- `npm run astro` — run Astro CLI
+- `npm run lint` — run ESLint
+- `npm run lint:fix` — run ESLint with auto-fix
+- `npm run format` — format the repository with Prettier
 
-```md
-.
-├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
-```
+## 6. Project scope
 
-## AI Development Support
+### In scope (MVP)
 
-This project is configured with AI development tools to enhance the development experience, providing guidelines for:
+- Web app for a **single user account** (no sharing/collaboration)
+- User authentication (register/login/logout) and resource authorization
+- Multiple task lists per user (CRUD)
+- Task CRUD:
+    - title (required)
+    - description (optional but recommended)
+    - priority (required: Low/Medium/High)
+    - status (To do / Done)
+- Default view shows **only To do** tasks
+- Filter to include/show **Done** tasks
+- Sorting by priority (High → Medium → Low)
+- Manual ordering within the same priority
+- Optional AI-powered priority suggestion + justification
+- AI interaction logging for analytics (accept/modify/reject + timestamps and reject reason)
+- Basic onboarding (first run) + ability to reopen onboarding
 
-- Project structure
-- Coding practices
-- Frontend development
-- Styling with Tailwind
-- Accessibility best practices
-- Astro and React guidelines
+### Out of scope (not in MVP)
 
-### Cursor IDE
+- Sharing tasks with other users / collaboration
+- Calendar scheduling, time-based reminders
+- Automatic priority changes without explicit user action
+- Advanced planning (subtasks, dependencies, stages)
+- Mobile app
 
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
+## 7. Project status
 
-### GitHub Copilot
+**MVP: In progress** (package version `0.0.1`).
 
-AI instructions for GitHub Copilot are available in `.github/copilot-instructions.md`
+The repository currently provides the frontend stack and tooling (Astro + React + TS + Tailwind), and the PRD defines the full MVP feature set. The Supabase backend integration and product features are expected to be implemented iteratively.
 
-### Windsurf
+## 8. License
 
-The `.windsurfrules` file contains AI configuration for Windsurf.
+No license file is included in this repository yet.
 
-## Contributing
-
-Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
-
-## License
-
-MIT
+If you plan to make this project public/open-source, add a `LICENSE` file (e.g., MIT, Apache-2.0) and update this section accordingly.
