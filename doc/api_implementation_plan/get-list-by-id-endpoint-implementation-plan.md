@@ -23,10 +23,10 @@ Endpoint służy do pobierania szczegółów pojedynczej listy zadań na podstaw
 ```typescript
 // Response DTO (linie 80-85)
 interface ListDTO {
-  id: string;           // UUID listy
-  name: string;         // Nazwa listy (1-100 znaków)
-  createdAt: string;    // ISO8601 timestamp
-  updatedAt: string;    // ISO8601 timestamp
+  id: string; // UUID listy
+  name: string; // Nazwa listy (1-100 znaków)
+  createdAt: string; // ISO8601 timestamp
+  updatedAt: string; // ISO8601 timestamp
 }
 
 // Error response (linie 35-39)
@@ -44,7 +44,7 @@ interface ErrorResponseDTO {
 import { z } from "zod";
 
 export const getListByIdParamsSchema = z.object({
-  id: z.string().uuid("Invalid list ID format")
+  id: z.string().uuid("Invalid list ID format"),
 });
 
 export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
@@ -53,6 +53,7 @@ export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
 ## 4. Szczegóły odpowiedzi
 
 ### Sukces (200 OK):
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -63,6 +64,7 @@ export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
 ```
 
 ### Błąd 401 Unauthorized:
+
 ```json
 {
   "error": "Unauthorized",
@@ -71,6 +73,7 @@ export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
 ```
 
 ### Błąd 404 Not Found:
+
 ```json
 {
   "error": "Not Found",
@@ -79,6 +82,7 @@ export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
 ```
 
 ### Błąd 400 Bad Request (opcjonalnie):
+
 ```json
 {
   "error": "Bad Request",
@@ -121,33 +125,38 @@ export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnianie:
+
 - Sprawdzenie `context.locals.user` przed przetwarzaniem żądania
 - Brak użytkownika → natychmiastowy return 401
 
 ### Autoryzacja:
+
 - RLS policy na tabeli `lists`: `using (user_id = auth.uid())`
 - Automatyczne filtrowanie - użytkownik nie może pobrać cudzej listy
 - Brak listy w wyniku zapytania → 404 (nie ujawniamy czy lista istnieje)
 
 ### Walidacja danych:
+
 - Walidacja UUID zapobiega SQL injection
 - Zod schema z dokładnym typem `uuid`
 
 ### Ochrona przed atakami:
+
 - **IDOR:** RLS zapewnia, że użytkownik widzi tylko swoje zasoby
 - **Information Disclosure:** 404 dla nieistniejących i cudzych list (identyczna odpowiedź)
 
 ## 7. Obsługa błędów
 
-| Scenariusz | Kod HTTP | Typ błędu | Komunikat |
-|------------|----------|-----------|-----------|
-| Brak sesji użytkownika | 401 | Unauthorized | Authentication required |
-| Nieprawidłowy format UUID | 400 | Bad Request | Invalid list ID format |
-| Lista nie istnieje | 404 | Not Found | List not found |
-| Lista należy do innego użytkownika | 404 | Not Found | List not found |
-| Błąd bazy danych | 500 | Internal Server Error | Internal server error |
+| Scenariusz                         | Kod HTTP | Typ błędu             | Komunikat               |
+| ---------------------------------- | -------- | --------------------- | ----------------------- |
+| Brak sesji użytkownika             | 401      | Unauthorized          | Authentication required |
+| Nieprawidłowy format UUID          | 400      | Bad Request           | Invalid list ID format  |
+| Lista nie istnieje                 | 404      | Not Found             | List not found          |
+| Lista należy do innego użytkownika | 404      | Not Found             | List not found          |
+| Błąd bazy danych                   | 500      | Internal Server Error | Internal server error   |
 
 ### Strategia obsługi:
+
 ```typescript
 // Kolejność sprawdzania w endpoint handler:
 1. if (!user) → 401
@@ -159,15 +168,18 @@ export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
 ## 8. Rozważania dotyczące wydajności
 
 ### Obecna optymalizacja:
+
 - **Indeks:** `lists_user_id_idx` na `lists(user_id)` wspiera filtrowanie RLS
 - **Primary Key:** `id` ma automatyczny indeks B-tree
 - **Pojedyncze zapytanie:** SELECT z WHERE id + RLS
 
 ### Potencjalne optymalizacje (przyszłość):
+
 - Cache warstwy aplikacji dla często odczytywanych list
 - HTTP caching headers (ETag, Cache-Control) dla klientów
 
 ### Złożoność zapytania:
+
 - O(1) - lookup po primary key z filtrem RLS
 - Bardzo wydajne dla pojedynczego rekordu
 
@@ -181,7 +193,7 @@ export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
 import { z } from "zod";
 
 export const getListByIdParamsSchema = z.object({
-  id: z.string().uuid("Invalid list ID format")
+  id: z.string().uuid("Invalid list ID format"),
 });
 
 export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
@@ -195,10 +207,7 @@ export type GetListByIdParams = z.infer<typeof getListByIdParamsSchema>;
 import type { SupabaseClient } from "../db/supabase.client";
 import type { ListDTO } from "../../types";
 
-export async function getListById(
-  supabase: SupabaseClient,
-  listId: string
-): Promise<ListDTO | null> {
+export async function getListById(supabase: SupabaseClient, listId: string): Promise<ListDTO | null> {
   const { data, error } = await supabase
     .from("lists")
     .select("id, name, created_at, updated_at")
@@ -217,7 +226,7 @@ export async function getListById(
     id: data.id,
     name: data.name,
     createdAt: data.created_at,
-    updatedAt: data.updated_at
+    updatedAt: data.updated_at,
   };
 }
 ```
@@ -240,7 +249,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
     return new Response(
       JSON.stringify({
         error: "Unauthorized",
-        message: "Authentication required"
+        message: "Authentication required",
       }),
       { status: 401, headers: { "Content-Type": "application/json" } }
     );
@@ -253,7 +262,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       JSON.stringify({
         error: "Bad Request",
         message: "Invalid list ID format",
-        details: validation.error.flatten().fieldErrors
+        details: validation.error.flatten().fieldErrors,
       }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
@@ -268,7 +277,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
       return new Response(
         JSON.stringify({
           error: "Not Found",
-          message: "List not found"
+          message: "List not found",
         }),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
@@ -277,14 +286,14 @@ export const GET: APIRoute = async ({ params, locals }) => {
     // 5. Zwrócenie listy
     return new Response(JSON.stringify(list), {
       status: 200,
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Error fetching list:", error);
     return new Response(
       JSON.stringify({
         error: "Internal Server Error",
-        message: "Internal server error"
+        message: "Internal server error",
       }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
@@ -297,6 +306,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
 **Plik:** `src/middleware/index.ts`
 
 Upewnić się, że middleware:
+
 - Ustawia `context.locals.user` z sesji Supabase
 - Ustawia `context.locals.supabase` z klientem Supabase
 - Działa dla ścieżek `/api/*`
@@ -304,17 +314,20 @@ Upewnić się, że middleware:
 ### Krok 5: Testy manualne
 
 1. **Test 401:** Wywołanie bez tokenu autoryzacji
+
    ```bash
    curl -X GET http://localhost:3000/api/lists/550e8400-e29b-41d4-a716-446655440000
    ```
 
 2. **Test 400:** Wywołanie z nieprawidłowym UUID
+
    ```bash
    curl -X GET http://localhost:3000/api/lists/invalid-uuid \
      -H "Authorization: Bearer <token>"
    ```
 
 3. **Test 404:** Wywołanie z nieistniejącym UUID
+
    ```bash
    curl -X GET http://localhost:3000/api/lists/550e8400-e29b-41d4-a716-446655440000 \
      -H "Authorization: Bearer <token>"

@@ -3,6 +3,7 @@
 ## 1. Przegląd punktu końcowego
 
 Endpoint służy do tworzenia nowego zadania w określonej liście zadań. Zadanie jest przypisywane do listy identyfikowanej przez `listId` w ścieżce URL. Nowe zadanie otrzymuje automatycznie:
+
 - status = 1 (TODO)
 - sort_order = następna wartość w sekwencji dla danej listy
 - done_at = null
@@ -16,6 +17,7 @@ Endpoint służy do tworzenia nowego zadania w określonej liście zadań. Zadan
   - `listId` (uuid, wymagany) - identyfikator listy, do której dodawane jest zadanie
 
 - **Request Body:**
+
 ```json
 {
   "title": "string",
@@ -69,16 +71,9 @@ interface ErrorResponseDTO {
 import { z } from "zod";
 
 export const createTaskSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(200, "Title must be at most 200 characters"),
+  title: z.string().min(1, "Title is required").max(200, "Title must be at most 200 characters"),
   description: z.string().nullable().optional(),
-  priority: z
-    .number()
-    .int()
-    .min(1, "Priority must be at least 1")
-    .max(3, "Priority must be at most 3"),
+  priority: z.number().int().min(1, "Priority must be at least 1").max(3, "Priority must be at most 3"),
 });
 
 export const listIdParamSchema = z.object({
@@ -89,6 +84,7 @@ export const listIdParamSchema = z.object({
 ## 4. Szczegóły odpowiedzi
 
 ### Sukces (201 Created):
+
 ```json
 {
   "id": "uuid",
@@ -106,12 +102,12 @@ export const listIdParamSchema = z.object({
 
 ### Błędy:
 
-| Kod | Scenariusz | Przykładowa odpowiedź |
-|-----|------------|----------------------|
-| 400 | Błąd walidacji | `{ "error": "Bad Request", "message": "Validation failed", "details": { "title": "Title is required" } }` |
-| 401 | Brak autentykacji | `{ "error": "Unauthorized", "message": "Authentication required" }` |
-| 404 | Lista nie znaleziona | `{ "error": "Not Found", "message": "List not found" }` |
-| 500 | Błąd serwera | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }` |
+| Kod | Scenariusz           | Przykładowa odpowiedź                                                                                     |
+| --- | -------------------- | --------------------------------------------------------------------------------------------------------- |
+| 400 | Błąd walidacji       | `{ "error": "Bad Request", "message": "Validation failed", "details": { "title": "Title is required" } }` |
+| 401 | Brak autentykacji    | `{ "error": "Unauthorized", "message": "Authentication required" }`                                       |
+| 404 | Lista nie znaleziona | `{ "error": "Not Found", "message": "List not found" }`                                                   |
+| 500 | Błąd serwera         | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }`                         |
 
 ## 5. Przepływ danych
 
@@ -151,15 +147,18 @@ export const listIdParamSchema = z.object({
 ## 6. Względy bezpieczeństwa
 
 ### Autentykacja
+
 - Weryfikacja sesji przez `context.locals.supabase.auth.getUser()`
 - Brak sesji = 401 Unauthorized
 
 ### Autoryzacja
+
 - RLS (Row Level Security) na tabeli `tasks` zapewnia dostęp tylko do własnych danych
 - Dodatkowa walidacja: sprawdzenie czy `listId` należy do użytkownika przed INSERT
 - FK constraint `(list_id, user_id) → lists(id, user_id)` gwarantuje spójność
 
 ### Walidacja danych
+
 - Wszystkie dane wejściowe walidowane przez Zod przed użyciem
 - UUID format sprawdzany dla `listId`
 - Długość `title` ograniczona (1-200 znaków)
@@ -167,6 +166,7 @@ export const listIdParamSchema = z.object({
 - `description` może być null lub string
 
 ### Ochrona przed atakami
+
 - **SQL Injection:** Supabase używa prepared statements
 - **XSS:** Dane przechowywane jako tekst, escapowanie po stronie klienta
 - **IDOR:** RLS + walidacja właściciela listy
@@ -186,14 +186,15 @@ export const listIdParamSchema = z.object({
 
 ### Mapowanie błędów Supabase:
 
-| Kod Supabase | HTTP Status | Akcja |
-|--------------|-------------|-------|
-| PGRST116 (no rows) | 404 | List not found |
-| 23503 (FK violation) | 404 | List not found |
-| 23505 (unique violation) | 500 | Retry with new sort_order |
-| Inne | 500 | Internal server error |
+| Kod Supabase             | HTTP Status | Akcja                     |
+| ------------------------ | ----------- | ------------------------- |
+| PGRST116 (no rows)       | 404         | List not found            |
+| 23503 (FK violation)     | 404         | List not found            |
+| 23505 (unique violation) | 500         | Retry with new sort_order |
+| Inne                     | 500         | Internal server error     |
 
 ### Logowanie błędów:
+
 - Błędy 500 logowane z pełnym stack trace
 - Błędy 400/401/404 logowane na poziomie info/warn
 - Nie logować wrażliwych danych (tokeny, hasła)
@@ -201,11 +202,13 @@ export const listIdParamSchema = z.object({
 ## 8. Rozważania dotyczące wydajności
 
 ### Optymalizacje:
+
 - Pojedyncze zapytanie do sprawdzenia listy i pobrania MAX(sort_order) przez CTE lub subquery
 - Indeks `tasks_list_id_idx` przyspiesza wyszukiwanie
 - Indeks unikalny `(list_id, sort_order)` wspiera constraint
 
 ### Potencjalne wąskie gardła:
+
 - **Konflikt sort_order:** Przy równoczesnych insertach może wystąpić konflikt unikalności
   - Rozwiązanie: retry z nowym sort_order lub użycie `ON CONFLICT`
 - **Duże listy:** MAX(sort_order) może być wolne dla bardzo dużych list
@@ -247,16 +250,11 @@ RETURNING *;
 import { z } from "zod";
 
 export const createTaskSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(200, "Title must be at most 200 characters"),
+  title: z.string().min(1, "Title is required").max(200, "Title must be at most 200 characters"),
   description: z.string().nullable().optional(),
-  priority: z
-    .number()
-    .int()
-    .min(1, "Priority must be at least 1")
-    .max(3, "Priority must be at most 3") as z.ZodType<1 | 2 | 3>,
+  priority: z.number().int().min(1, "Priority must be at least 1").max(3, "Priority must be at most 3") as z.ZodType<
+    1 | 2 | 3
+  >,
 });
 
 export const listIdParamSchema = z.object({
@@ -277,11 +275,7 @@ import type { TaskDTO, CreateTaskCommand } from "../../types";
 export class TaskService {
   constructor(private supabase: SupabaseClient) {}
 
-  async createTask(
-    listId: string,
-    userId: string,
-    command: CreateTaskCommand
-  ): Promise<TaskDTO> {
+  async createTask(listId: string, userId: string, command: CreateTaskCommand): Promise<TaskDTO> {
     // 1. Sprawdź czy lista istnieje i należy do użytkownika
     const { data: list, error: listError } = await this.supabase
       .from("lists")
@@ -401,11 +395,7 @@ export class DatabaseError extends AppError {
 import type { APIRoute } from "astro";
 import { createTaskSchema, listIdParamSchema } from "../../../../lib/schemas/task.schema";
 import { TaskService } from "../../../../lib/services/task.service";
-import {
-  NotFoundError,
-  ValidationError,
-  UnauthorizedError
-} from "../../../../lib/errors";
+import { NotFoundError, ValidationError, UnauthorizedError } from "../../../../lib/errors";
 import type { TaskDTO, ErrorResponseDTO } from "../../../../types";
 
 export const prerender = false;
@@ -413,7 +403,10 @@ export const prerender = false;
 export const POST: APIRoute = async ({ params, request, locals }) => {
   try {
     // 1. Sprawdź autentykację
-    const { data: { user }, error: authError } = await locals.supabase.auth.getUser();
+    const {
+      data: { user },
+      error: authError,
+    } = await locals.supabase.auth.getUser();
 
     if (authError || !user) {
       return new Response(
@@ -434,9 +427,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
         JSON.stringify({
           error: "Bad Request",
           message: "Invalid list ID format",
-          details: Object.fromEntries(
-            Object.entries(details).map(([k, v]) => [k, v?.[0] ?? "Invalid"])
-          ),
+          details: Object.fromEntries(Object.entries(details).map(([k, v]) => [k, v?.[0] ?? "Invalid"])),
         } satisfies ErrorResponseDTO),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
@@ -452,9 +443,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
         JSON.stringify({
           error: "Bad Request",
           message: "Validation failed",
-          details: Object.fromEntries(
-            Object.entries(details).map(([k, v]) => [k, v?.[0] ?? "Invalid"])
-          ),
+          details: Object.fromEntries(Object.entries(details).map(([k, v]) => [k, v?.[0] ?? "Invalid"])),
         } satisfies ErrorResponseDTO),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
@@ -462,18 +451,13 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 
     // 4. Utwórz zadanie przez serwis
     const taskService = new TaskService(locals.supabase);
-    const task = await taskService.createTask(
-      paramResult.data.listId,
-      user.id,
-      bodyResult.data
-    );
+    const task = await taskService.createTask(paramResult.data.listId, user.id, bodyResult.data);
 
     // 5. Zwróć sukces
     return new Response(JSON.stringify(task), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });
-
   } catch (error) {
     // Obsługa znanych błędów
     if (error instanceof NotFoundError) {
@@ -516,6 +500,7 @@ export const POST: APIRoute = async ({ params, request, locals }) => {
 **Plik:** `src/lib/services/__tests__/task.service.test.ts`
 
 Scenariusze do przetestowania:
+
 1. Pomyślne utworzenie zadania
 2. Lista nie istnieje - zwraca NotFoundError
 3. Lista należy do innego użytkownika - zwraca NotFoundError
@@ -526,6 +511,7 @@ Scenariusze do przetestowania:
 ### Krok 6: Testy integracyjne (opcjonalne)
 
 Scenariusze E2E:
+
 1. POST bez autentykacji → 401
 2. POST z nieprawidłowym listId → 400
 3. POST z pustym title → 400

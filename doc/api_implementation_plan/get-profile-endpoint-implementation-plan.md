@@ -24,12 +24,12 @@ Profil użytkownika jest tworzony automatycznie podczas rejestracji (przez trigg
 ```typescript
 // DTO odpowiedzi
 interface ProfileDTO {
-  id: string;                              // UUID użytkownika
-  activeListId: string | null;             // UUID aktywnej listy lub null
-  onboardingCompletedAt: string | null;    // ISO8601 timestamp lub null
-  onboardingVersion: number;               // Wersja onboardingu (domyślnie 1)
-  createdAt: string;                       // ISO8601 timestamp
-  updatedAt: string;                       // ISO8601 timestamp
+  id: string; // UUID użytkownika
+  activeListId: string | null; // UUID aktywnej listy lub null
+  onboardingCompletedAt: string | null; // ISO8601 timestamp lub null
+  onboardingVersion: number; // Wersja onboardingu (domyślnie 1)
+  createdAt: string; // ISO8601 timestamp
+  updatedAt: string; // ISO8601 timestamp
 }
 
 // Standardowa odpowiedź błędu
@@ -65,11 +65,11 @@ type ProfileEntity = Database["public"]["Tables"]["profiles"]["Row"];
 
 ### Błędy
 
-| Kod | Typ błędu | Opis |
-|-----|-----------|------|
-| 401 | Unauthorized | Użytkownik nie jest zalogowany |
-| 404 | Not Found | Profil nie istnieje (edge case) |
-| 500 | Internal Server Error | Błąd serwera/bazy danych |
+| Kod | Typ błędu             | Opis                            |
+| --- | --------------------- | ------------------------------- |
+| 401 | Unauthorized          | Użytkownik nie jest zalogowany  |
+| 404 | Not Found             | Profil nie istnieje (edge case) |
+| 500 | Internal Server Error | Błąd serwera/bazy danych        |
 
 ## 5. Przepływ danych
 
@@ -110,20 +110,24 @@ type ProfileEntity = Database["public"]["Tables"]["profiles"]["Row"];
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnianie
+
 - Wymagana aktywna sesja Supabase Auth
 - Token weryfikowany przez Supabase SDK
 - Sesja dostępna przez `context.locals.supabase.auth.getUser()`
 
 ### Autoryzacja
+
 - RLS (Row Level Security) na tabeli `profiles` zapewnia dostęp tylko do własnego profilu
 - Policy: `using (id = auth.uid())`
 - Brak możliwości dostępu do profilu innego użytkownika
 
 ### Walidacja
+
 - Brak danych wejściowych do walidacji
 - UUID użytkownika pochodzi z zaufanego źródła (sesja Supabase)
 
 ### Ochrona danych
+
 - Nie ujawniać szczegółów wewnętrznych błędów w odpowiedzi
 - Nie logować wrażliwych danych użytkownika
 - Używać HTTPS (konfiguracja serwera)
@@ -132,30 +136,34 @@ type ProfileEntity = Database["public"]["Tables"]["profiles"]["Row"];
 
 ### Scenariusze błędów i odpowiedzi:
 
-| Scenariusz | Kod | Response Body |
-|------------|-----|---------------|
-| Brak nagłówka Authorization | 401 | `{ "error": "Unauthorized", "message": "Authentication required" }` |
-| Nieprawidłowy/wygasły token | 401 | `{ "error": "Unauthorized", "message": "Invalid or expired session" }` |
-| Profil nie istnieje | 404 | `{ "error": "Not Found", "message": "Profile not found" }` |
-| Błąd połączenia z bazą | 500 | `{ "error": "Internal Server Error", "message": "Unable to fetch profile" }` |
-| Nieoczekiwany błąd | 500 | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }` |
+| Scenariusz                  | Kod | Response Body                                                                     |
+| --------------------------- | --- | --------------------------------------------------------------------------------- |
+| Brak nagłówka Authorization | 401 | `{ "error": "Unauthorized", "message": "Authentication required" }`               |
+| Nieprawidłowy/wygasły token | 401 | `{ "error": "Unauthorized", "message": "Invalid or expired session" }`            |
+| Profil nie istnieje         | 404 | `{ "error": "Not Found", "message": "Profile not found" }`                        |
+| Błąd połączenia z bazą      | 500 | `{ "error": "Internal Server Error", "message": "Unable to fetch profile" }`      |
+| Nieoczekiwany błąd          | 500 | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }` |
 
 ### Logowanie błędów:
+
 - Błędy 500: logować pełny stack trace do konsoli serwera
 - Błędy 401/404: logować na poziomie info/warn (bez wrażliwych danych)
 
 ## 8. Rozważania dotyczące wydajności
 
 ### Optymalizacje:
+
 - **Proste zapytanie**: SELECT pojedynczego rekordu po PRIMARY KEY - bardzo szybkie
 - **RLS**: Minimalne narzuty dzięki prostej policy `id = auth.uid()`
 - **Brak JOIN-ów**: Endpoint zwraca tylko dane z tabeli profiles
 
 ### Potencjalne wąskie gardła:
+
 - Weryfikacja sesji przez Supabase Auth (minimalne opóźnienie)
 - Połączenie z bazą danych (connection pooling w Supabase)
 
 ### Rekomendacje:
+
 - Brak potrzeby cache'owania (dane zawsze aktualne)
 - Rozważyć cache sesji w middleware dla wielu requestów
 
@@ -187,15 +195,8 @@ function mapProfileEntityToDTO(entity: Database["public"]["Tables"]["profiles"][
 }
 
 // Główna funkcja service
-export async function getProfile(
-  supabase: SupabaseClient,
-  userId: string
-): Promise<ProfileResult> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
+export async function getProfile(supabase: SupabaseClient, userId: string): Promise<ProfileResult> {
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", userId).single();
 
   if (error) {
     if (error.code === "PGRST116") {
@@ -222,7 +223,10 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {
   // 1. Sprawdź sesję użytkownika
-  const { data: { user }, error: authError } = await locals.supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await locals.supabase.auth.getUser();
 
   if (authError || !user) {
     const errorResponse: ErrorResponseDTO = {

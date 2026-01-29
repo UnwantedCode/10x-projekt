@@ -24,6 +24,7 @@ Node: 22.14.0 (see `.nvmrc`)
 ## Detailed Guidelines
 
 See `.claude/rules/` for context-specific rules:
+
 - `general.md` - Project structure, coding practices
 - `astro.md` - Astro patterns (auto-loaded for .astro files)
 - `react.md` - React patterns (auto-loaded for .tsx files)

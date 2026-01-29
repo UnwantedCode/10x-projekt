@@ -84,7 +84,7 @@ type SortOrder = "asc" | "desc";
 // src/lib/schemas/task.schema.ts
 
 const listIdParamSchema = z.object({
-  listId: z.string().uuid("Invalid list ID format")
+  listId: z.string().uuid("Invalid list ID format"),
 });
 
 const getTasksQuerySchema = z.object({
@@ -94,7 +94,7 @@ const getTasksQuerySchema = z.object({
   sort: z.enum(["priority", "sort_order", "created_at"]).optional().default("priority"),
   order: z.enum(["asc", "desc"]).optional().default("desc"),
   limit: z.coerce.number().int().min(1).max(500).optional().default(100),
-  offset: z.coerce.number().int().min(0).optional().default(0)
+  offset: z.coerce.number().int().min(0).optional().default(0),
 });
 ```
 
@@ -129,6 +129,7 @@ const getTasksQuerySchema = z.object({
 ### Błędy:
 
 **400 Bad Request** - Nieprawidłowe parametry:
+
 ```json
 {
   "error": "VALIDATION_ERROR",
@@ -141,6 +142,7 @@ const getTasksQuerySchema = z.object({
 ```
 
 **401 Unauthorized** - Brak autentykacji:
+
 ```json
 {
   "error": "UNAUTHORIZED",
@@ -149,6 +151,7 @@ const getTasksQuerySchema = z.object({
 ```
 
 **404 Not Found** - Lista nie istnieje lub nie należy do użytkownika:
+
 ```json
 {
   "error": "NOT_FOUND",
@@ -157,6 +160,7 @@ const getTasksQuerySchema = z.object({
 ```
 
 **500 Internal Server Error** - Błąd serwera:
+
 ```json
 {
   "error": "INTERNAL_ERROR",
@@ -242,17 +246,20 @@ const getTasksQuerySchema = z.object({
 ## 6. Względy bezpieczeństwa
 
 ### 6.1 Autentykacja
+
 - Endpoint wymaga zalogowanego użytkownika
 - Weryfikacja sesji przez middleware Astro z wykorzystaniem Supabase Auth
 - Brak sesji → 401 Unauthorized
 
 ### 6.2 Autoryzacja
+
 - Użytkownik może pobierać zadania tylko ze swoich list
 - Weryfikacja własności listy przed pobraniem zadań
 - RLS (Row Level Security) w Supabase jako dodatkowa warstwa zabezpieczeń
 - Lista nie należąca do użytkownika → 404 Not Found (nie 403, aby nie ujawniać istnienia zasobów)
 
 ### 6.3 Walidacja danych wejściowych
+
 - Walidacja UUID dla `listId` (zapobieganie SQL injection)
 - Walidacja typów i zakresów dla wszystkich query params
 - Ograniczenie długości parametru `search` do 200 znaków
@@ -260,27 +267,29 @@ const getTasksQuerySchema = z.object({
 - Sanityzacja parametru `search` przed użyciem w ILIKE
 
 ### 6.4 Ochrona przed atakami
-- **ILIKE Injection**: Escapowanie znaków specjalnych (%, _, \) w parametrze search
+
+- **ILIKE Injection**: Escapowanie znaków specjalnych (%, \_, \) w parametrze search
 - **DoS**: Limit maksymalnej liczby zwracanych rekordów (500)
 - **Information Disclosure**: Zwracanie 404 zamiast 403 dla nieistniejących/nieautoryzowanych zasobów
 
 ## 7. Obsługa błędów
 
-| Scenariusz | Kod HTTP | Error Code | Komunikat |
-|------------|----------|------------|-----------|
-| Brak sesji/tokenu | 401 | UNAUTHORIZED | Authentication required |
-| Nieprawidłowy format listId | 400 | VALIDATION_ERROR | Invalid list ID format |
-| Nieprawidłowa wartość status | 400 | VALIDATION_ERROR | Status must be 1 or 2 |
-| Nieprawidłowa wartość priority | 400 | VALIDATION_ERROR | Priority must be 1, 2, or 3 |
-| Nieprawidłowa wartość sort | 400 | VALIDATION_ERROR | Sort must be priority, sort_order, or created_at |
-| Nieprawidłowa wartość order | 400 | VALIDATION_ERROR | Order must be asc or desc |
-| limit poza zakresem | 400 | VALIDATION_ERROR | Limit must be between 1 and 500 |
-| offset ujemny | 400 | VALIDATION_ERROR | Offset must be non-negative |
-| Lista nie istnieje | 404 | NOT_FOUND | List not found |
-| Lista nie należy do użytkownika | 404 | NOT_FOUND | List not found |
-| Błąd bazy danych | 500 | INTERNAL_ERROR | An unexpected error occurred |
+| Scenariusz                      | Kod HTTP | Error Code       | Komunikat                                        |
+| ------------------------------- | -------- | ---------------- | ------------------------------------------------ |
+| Brak sesji/tokenu               | 401      | UNAUTHORIZED     | Authentication required                          |
+| Nieprawidłowy format listId     | 400      | VALIDATION_ERROR | Invalid list ID format                           |
+| Nieprawidłowa wartość status    | 400      | VALIDATION_ERROR | Status must be 1 or 2                            |
+| Nieprawidłowa wartość priority  | 400      | VALIDATION_ERROR | Priority must be 1, 2, or 3                      |
+| Nieprawidłowa wartość sort      | 400      | VALIDATION_ERROR | Sort must be priority, sort_order, or created_at |
+| Nieprawidłowa wartość order     | 400      | VALIDATION_ERROR | Order must be asc or desc                        |
+| limit poza zakresem             | 400      | VALIDATION_ERROR | Limit must be between 1 and 500                  |
+| offset ujemny                   | 400      | VALIDATION_ERROR | Offset must be non-negative                      |
+| Lista nie istnieje              | 404      | NOT_FOUND        | List not found                                   |
+| Lista nie należy do użytkownika | 404      | NOT_FOUND        | List not found                                   |
+| Błąd bazy danych                | 500      | INTERNAL_ERROR   | An unexpected error occurred                     |
 
 ### Logowanie błędów:
+
 - Błędy 5xx powinny być logowane z pełnym stack trace
 - Błędy 4xx logowane na poziomie debug/info
 - Nie logować wrażliwych danych użytkownika
@@ -288,21 +297,25 @@ const getTasksQuerySchema = z.object({
 ## 8. Rozważania dotyczące wydajności
 
 ### 8.1 Indeksy bazodanowe (już istniejące w db-plan.md)
+
 - `tasks_list_id_idx` na `tasks(list_id)` - wspiera filtrowanie po liście
 - `tasks_list_status_priority_sort_idx` na `tasks(list_id, status, priority, sort_order)` - wspiera główny przypadek użycia (aktywna lista + TODO + sortowanie)
 - `tasks_search_text_trgm_gin` (GIN trigram) na `tasks(search_text)` - wspiera wyszukiwanie ILIKE
 
 ### 8.2 Optymalizacja zapytań
+
 - Użycie kolumny wygenerowanej `search_text` zamiast konkatenacji w zapytaniu
 - Wykonanie count z tymi samymi filtrami co główne zapytanie
 - Rozważenie użycia `count: 'exact'` w Supabase dla małych zbiorów danych
 
 ### 8.3 Paginacja
+
 - Domyślny limit 100 rekordów
 - Maksymalny limit 500 rekordów
 - Offset-based pagination (wystarczająca dla MVP)
 
 ### 8.4 Potencjalne optymalizacje (poza MVP)
+
 - Cursor-based pagination dla dużych zbiorów
 - Caching wyników dla często odpytywanych list
 - Partial response (wybór pól do zwrócenia)
@@ -317,7 +330,7 @@ Utworzyć plik `src/lib/schemas/task.schema.ts`:
 import { z } from "zod";
 
 export const listIdParamSchema = z.object({
-  listId: z.string().uuid("Invalid list ID format")
+  listId: z.string().uuid("Invalid list ID format"),
 });
 
 export const getTasksQuerySchema = z.object({
@@ -327,7 +340,7 @@ export const getTasksQuerySchema = z.object({
   sort: z.enum(["priority", "sort_order", "created_at"]).optional(),
   order: z.enum(["asc", "desc"]).optional(),
   limit: z.coerce.number().int().min(1).max(500).optional(),
-  offset: z.coerce.number().int().min(0).optional()
+  offset: z.coerce.number().int().min(0).optional(),
 });
 
 export type GetTasksQueryInput = z.infer<typeof getTasksQuerySchema>;
@@ -352,25 +365,15 @@ const DEFAULT_OFFSET = 0;
 const SORT_FIELD_MAP: Record<string, string> = {
   priority: "priority",
   sort_order: "sort_order",
-  created_at: "created_at"
+  created_at: "created_at",
 };
 
 export class TaskService {
-
   /**
    * Weryfikuje czy lista istnieje i należy do użytkownika
    */
-  static async verifyListOwnership(
-    supabase: SupabaseClient,
-    userId: string,
-    listId: string
-  ): Promise<boolean> {
-    const { data, error } = await supabase
-      .from("lists")
-      .select("id")
-      .eq("id", listId)
-      .eq("user_id", userId)
-      .single();
+  static async verifyListOwnership(supabase: SupabaseClient, userId: string, listId: string): Promise<boolean> {
+    const { data, error } = await supabase.from("lists").select("id").eq("id", listId).eq("user_id", userId).single();
 
     return !error && data !== null;
   }
@@ -392,11 +395,7 @@ export class TaskService {
     const offset = params.offset ?? DEFAULT_OFFSET;
 
     // Budowanie bazowego zapytania
-    let query = supabase
-      .from("tasks")
-      .select("*", { count: "exact" })
-      .eq("list_id", listId)
-      .eq("user_id", userId);
+    let query = supabase.from("tasks").select("*", { count: "exact" }).eq("list_id", listId).eq("user_id", userId);
 
     // Filtr statusu (domyślnie tylko TODO)
     query = query.eq("status", status);
@@ -440,8 +439,8 @@ export class TaskService {
       pagination: {
         total: count ?? 0,
         limit,
-        offset
-      }
+        offset,
+      },
     };
   }
 
@@ -459,7 +458,7 @@ export class TaskService {
       sortOrder: entity.sort_order as number,
       doneAt: entity.done_at as string | null,
       createdAt: entity.created_at as string,
-      updatedAt: entity.updated_at as string
+      updatedAt: entity.updated_at as string,
     };
   }
 
@@ -467,10 +466,7 @@ export class TaskService {
    * Escapuje znaki specjalne dla wzorca ILIKE
    */
   private static escapeILikePattern(pattern: string): string {
-    return pattern
-      .replace(/\\/g, "\\\\")
-      .replace(/%/g, "\\%")
-      .replace(/_/g, "\\_");
+    return pattern.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
   }
 }
 ```
@@ -494,11 +490,11 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
     if (!user) {
       const errorResponse: ErrorResponseDTO = {
         error: "UNAUTHORIZED",
-        message: "Authentication required"
+        message: "Authentication required",
       };
       return new Response(JSON.stringify(errorResponse), {
         status: 401,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
     }
 
@@ -508,11 +504,11 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
       const errorResponse: ErrorResponseDTO = {
         error: "VALIDATION_ERROR",
         message: "Invalid request parameters",
-        details: { listId: "Invalid list ID format" }
+        details: { listId: "Invalid list ID format" },
       };
       return new Response(JSON.stringify(errorResponse), {
         status: 400,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
     }
     const { listId } = pathResult.data;
@@ -531,58 +527,48 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
       const errorResponse: ErrorResponseDTO = {
         error: "VALIDATION_ERROR",
         message: "Invalid query parameters",
-        details
+        details,
       };
       return new Response(JSON.stringify(errorResponse), {
         status: 400,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     // 4. Weryfikacja własności listy
     const supabase = locals.supabase;
-    const listExists = await TaskService.verifyListOwnership(
-      supabase,
-      user.id,
-      listId
-    );
+    const listExists = await TaskService.verifyListOwnership(supabase, user.id, listId);
 
     if (!listExists) {
       const errorResponse: ErrorResponseDTO = {
         error: "NOT_FOUND",
-        message: "List not found"
+        message: "List not found",
       };
       return new Response(JSON.stringify(errorResponse), {
         status: 404,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
     }
 
     // 5. Pobranie zadań
-    const response: TasksResponseDTO = await TaskService.getTasksByListId(
-      supabase,
-      user.id,
-      listId,
-      queryResult.data
-    );
+    const response: TasksResponseDTO = await TaskService.getTasksByListId(supabase, user.id, listId, queryResult.data);
 
     // 6. Zwrócenie odpowiedzi
     return new Response(JSON.stringify(response), {
       status: 200,
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     });
-
   } catch (error) {
     // Logowanie błędu (w produkcji użyć właściwego loggera)
     console.error("Error fetching tasks:", error);
 
     const errorResponse: ErrorResponseDTO = {
       error: "INTERNAL_ERROR",
-      message: "An unexpected error occurred"
+      message: "An unexpected error occurred",
     };
     return new Response(JSON.stringify(errorResponse), {
       status: 500,
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     });
   }
 };

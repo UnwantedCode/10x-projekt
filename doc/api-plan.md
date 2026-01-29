@@ -2,12 +2,12 @@
 
 ## 1. Resources
 
-| Resource | Database Table | Description |
-|----------|---------------|-------------|
-| Profile | `public.profiles` | User profile extension (active list, onboarding state) |
-| List | `public.lists` | Task lists for organizing tasks |
-| Task | `public.tasks` | Individual tasks with priority and status |
-| AI Interaction | `public.ai_interactions` | AI suggestion history and user decisions |
+| Resource       | Database Table           | Description                                            |
+| -------------- | ------------------------ | ------------------------------------------------------ |
+| Profile        | `public.profiles`        | User profile extension (active list, onboarding state) |
+| List           | `public.lists`           | Task lists for organizing tasks                        |
+| Task           | `public.tasks`           | Individual tasks with priority and status              |
+| AI Interaction | `public.ai_interactions` | AI suggestion history and user decisions               |
 
 ## 2. Endpoints
 
@@ -18,6 +18,7 @@
 Retrieves the current user's profile.
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -30,9 +31,11 @@ Retrieves the current user's profile.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Profile retrieved successfully
 
 **Error Codes:**
+
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - Profile not found (should not happen with proper triggers)
 
@@ -43,6 +46,7 @@ Retrieves the current user's profile.
 Updates the current user's profile.
 
 **Request Payload:**
+
 ```json
 {
   "activeListId": "uuid | null"
@@ -50,6 +54,7 @@ Updates the current user's profile.
 ```
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -62,9 +67,11 @@ Updates the current user's profile.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Profile updated successfully
 
 **Error Codes:**
+
 - `400 Bad Request` - Invalid activeListId (list doesn't exist or doesn't belong to user)
 - `401 Unauthorized` - User not authenticated
 
@@ -75,6 +82,7 @@ Updates the current user's profile.
 Marks onboarding as completed for the current user.
 
 **Request Payload:**
+
 ```json
 {
   "version": 1
@@ -82,6 +90,7 @@ Marks onboarding as completed for the current user.
 ```
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -94,9 +103,11 @@ Marks onboarding as completed for the current user.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Onboarding marked as complete
 
 **Error Codes:**
+
 - `400 Bad Request` - Invalid version (must be > 0)
 - `401 Unauthorized` - User not authenticated
 
@@ -115,6 +126,7 @@ Retrieves all lists for the current user.
 | `offset` | integer | Pagination offset (default: 0) |
 
 **Response Payload:**
+
 ```json
 {
   "data": [
@@ -134,9 +146,11 @@ Retrieves all lists for the current user.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Lists retrieved successfully
 
 **Error Codes:**
+
 - `401 Unauthorized` - User not authenticated
 
 ---
@@ -146,6 +160,7 @@ Retrieves all lists for the current user.
 Retrieves a specific list by ID.
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -156,9 +171,11 @@ Retrieves a specific list by ID.
 ```
 
 **Success Codes:**
+
 - `200 OK` - List retrieved successfully
 
 **Error Codes:**
+
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - List not found or doesn't belong to user
 
@@ -169,6 +186,7 @@ Retrieves a specific list by ID.
 Creates a new task list.
 
 **Request Payload:**
+
 ```json
 {
   "name": "string"
@@ -176,6 +194,7 @@ Creates a new task list.
 ```
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -186,9 +205,11 @@ Creates a new task list.
 ```
 
 **Success Codes:**
+
 - `201 Created` - List created successfully
 
 **Error Codes:**
+
 - `400 Bad Request` - Validation error (name empty, too long, or duplicate)
 - `401 Unauthorized` - User not authenticated
 
@@ -199,6 +220,7 @@ Creates a new task list.
 Updates an existing list.
 
 **Request Payload:**
+
 ```json
 {
   "name": "string"
@@ -206,6 +228,7 @@ Updates an existing list.
 ```
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -216,9 +239,11 @@ Updates an existing list.
 ```
 
 **Success Codes:**
+
 - `200 OK` - List updated successfully
 
 **Error Codes:**
+
 - `400 Bad Request` - Validation error (name empty, too long, or duplicate)
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - List not found or doesn't belong to user
@@ -230,6 +255,7 @@ Updates an existing list.
 Deletes a list and all its tasks (cascade).
 
 **Response Payload:**
+
 ```json
 {
   "success": true
@@ -237,9 +263,11 @@ Deletes a list and all its tasks (cascade).
 ```
 
 **Success Codes:**
+
 - `200 OK` - List deleted successfully
 
 **Error Codes:**
+
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - List not found or doesn't belong to user
 
@@ -263,6 +291,7 @@ Retrieves tasks for a specific list with filtering and sorting.
 | `offset` | integer | Pagination offset (default: 0) |
 
 **Response Payload:**
+
 ```json
 {
   "data": [
@@ -288,9 +317,11 @@ Retrieves tasks for a specific list with filtering and sorting.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Tasks retrieved successfully
 
 **Error Codes:**
+
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - List not found or doesn't belong to user
 
@@ -301,6 +332,7 @@ Retrieves tasks for a specific list with filtering and sorting.
 Retrieves a specific task by ID.
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -317,9 +349,11 @@ Retrieves a specific task by ID.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Task retrieved successfully
 
 **Error Codes:**
+
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - Task not found or doesn't belong to user
 
@@ -330,6 +364,7 @@ Retrieves a specific task by ID.
 Creates a new task in the specified list.
 
 **Request Payload:**
+
 ```json
 {
   "title": "string",
@@ -339,6 +374,7 @@ Creates a new task in the specified list.
 ```
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -355,9 +391,11 @@ Creates a new task in the specified list.
 ```
 
 **Success Codes:**
+
 - `201 Created` - Task created successfully
 
 **Error Codes:**
+
 - `400 Bad Request` - Validation error (title empty/too long, invalid priority)
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - List not found or doesn't belong to user
@@ -369,6 +407,7 @@ Creates a new task in the specified list.
 Updates an existing task.
 
 **Request Payload:**
+
 ```json
 {
   "title": "string",
@@ -382,6 +421,7 @@ Updates an existing task.
 All fields are optional - only provided fields will be updated.
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -398,9 +438,11 @@ All fields are optional - only provided fields will be updated.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Task updated successfully
 
 **Error Codes:**
+
 - `400 Bad Request` - Validation error
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - Task not found or doesn't belong to user
@@ -413,6 +455,7 @@ All fields are optional - only provided fields will be updated.
 Deletes a task.
 
 **Response Payload:**
+
 ```json
 {
   "success": true
@@ -420,9 +463,11 @@ Deletes a task.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Task deleted successfully
 
 **Error Codes:**
+
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - Task not found or doesn't belong to user
 
@@ -433,6 +478,7 @@ Deletes a task.
 Bulk reorder tasks within a list (for drag-and-drop).
 
 **Request Payload:**
+
 ```json
 {
   "taskOrders": [
@@ -444,6 +490,7 @@ Bulk reorder tasks within a list (for drag-and-drop).
 ```
 
 **Response Payload:**
+
 ```json
 {
   "success": true,
@@ -452,9 +499,11 @@ Bulk reorder tasks within a list (for drag-and-drop).
 ```
 
 **Success Codes:**
+
 - `200 OK` - Tasks reordered successfully
 
 **Error Codes:**
+
 - `400 Bad Request` - Invalid payload or duplicate sort orders
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - List or tasks not found
@@ -469,6 +518,7 @@ Bulk reorder tasks within a list (for drag-and-drop).
 Requests an AI priority suggestion for a task.
 
 **Request Payload:**
+
 ```json
 {
   "taskId": "uuid | null",
@@ -480,6 +530,7 @@ Requests an AI priority suggestion for a task.
 Note: `taskId` is optional. When provided, the interaction will be linked to an existing task. When null, use this endpoint during task creation.
 
 **Response Payload:**
+
 ```json
 {
   "interactionId": "uuid",
@@ -492,9 +543,11 @@ Note: `taskId` is optional. When provided, the interaction will be linked to an 
 ```
 
 **Success Codes:**
+
 - `200 OK` - Suggestion generated successfully
 
 **Error Codes:**
+
 - `400 Bad Request` - Invalid payload (title required)
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - Task not found (when taskId provided)
@@ -507,6 +560,7 @@ Note: `taskId` is optional. When provided, the interaction will be linked to an 
 Records the user's decision on an AI suggestion.
 
 **Request Payload:**
+
 ```json
 {
   "decision": 1,
@@ -516,11 +570,13 @@ Records the user's decision on an AI suggestion.
 ```
 
 Decision values:
+
 - `1` - accepted (finalPriority and rejectedReason must be null)
 - `2` - modified (finalPriority required, rejectedReason must be null)
 - `3` - rejected (rejectedReason required, finalPriority must be null)
 
 **Response Payload:**
+
 ```json
 {
   "id": "uuid",
@@ -536,9 +592,11 @@ Decision values:
 ```
 
 **Success Codes:**
+
 - `200 OK` - Decision recorded successfully
 
 **Error Codes:**
+
 - `400 Bad Request` - Validation error (inconsistent decision fields)
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - Interaction not found or doesn't belong to user
@@ -557,6 +615,7 @@ Retrieves AI interaction history for a specific task.
 | `offset` | integer | Pagination offset (default: 0) |
 
 **Response Payload:**
+
 ```json
 {
   "data": [
@@ -583,9 +642,11 @@ Retrieves AI interaction history for a specific task.
 ```
 
 **Success Codes:**
+
 - `200 OK` - Interactions retrieved successfully
 
 **Error Codes:**
+
 - `401 Unauthorized` - User not authenticated
 - `404 Not Found` - Task not found or doesn't belong to user
 
@@ -598,6 +659,7 @@ Retrieves AI interaction history for a specific task.
 The API uses **Supabase Auth** with JWT tokens.
 
 **Implementation:**
+
 1. Users authenticate via Supabase Auth SDK (email/password or OAuth providers)
 2. Supabase issues a JWT token stored in cookies or local storage
 3. All API requests include the JWT in the `Authorization` header:
@@ -615,11 +677,13 @@ The API uses **Supabase Auth** with JWT tokens.
 ### 3.3 Authorization
 
 **Row Level Security (RLS):**
+
 - All database tables have RLS enabled
 - Policies enforce `user_id = auth.uid()` for all operations
 - Users can only access their own data
 
 **API-Level Authorization:**
+
 1. Middleware extracts user ID from JWT via `context.locals.supabase.auth.getUser()`
 2. API handlers include user_id in all queries
 3. Foreign key constraints with composite keys prevent cross-user data access
@@ -627,6 +691,7 @@ The API uses **Supabase Auth** with JWT tokens.
 ### 3.4 Error Responses
 
 **401 Unauthorized:**
+
 ```json
 {
   "error": "Unauthorized",
@@ -635,6 +700,7 @@ The API uses **Supabase Auth** with JWT tokens.
 ```
 
 **403 Forbidden:**
+
 ```json
 {
   "error": "Forbidden",
@@ -649,53 +715,61 @@ The API uses **Supabase Auth** with JWT tokens.
 ### 4.1 Validation Rules by Resource
 
 #### Profile
-| Field | Validation |
-|-------|------------|
-| `activeListId` | Must be a valid UUID of a list owned by the user, or null |
-| `onboardingVersion` | Must be > 0 |
+
+| Field               | Validation                                                |
+| ------------------- | --------------------------------------------------------- |
+| `activeListId`      | Must be a valid UUID of a list owned by the user, or null |
+| `onboardingVersion` | Must be > 0                                               |
 
 #### List
-| Field | Validation |
-|-------|------------|
+
+| Field  | Validation                                                     |
+| ------ | -------------------------------------------------------------- |
 | `name` | Required, 1-100 characters, unique per user (case-insensitive) |
 
 #### Task
-| Field | Validation |
-|-------|------------|
-| `title` | Required, 1-200 characters |
-| `description` | Optional, no limit |
-| `priority` | Required, integer 1-3 (1=low, 2=medium, 3=high) |
-| `status` | Integer 1-2 (1=todo, 2=done), default: 1 |
-| `sortOrder` | Integer > 0, unique within list |
+
+| Field         | Validation                                      |
+| ------------- | ----------------------------------------------- |
+| `title`       | Required, 1-200 characters                      |
+| `description` | Optional, no limit                              |
+| `priority`    | Required, integer 1-3 (1=low, 2=medium, 3=high) |
+| `status`      | Integer 1-2 (1=todo, 2=done), default: 1        |
+| `sortOrder`   | Integer > 0, unique within list                 |
 
 #### AI Interaction Decision
-| Field | Validation |
-|-------|------------|
-| `decision` | Integer 1-3 (1=accepted, 2=modified, 3=rejected) |
-| `finalPriority` | Required if decision=2, must be null otherwise |
+
+| Field            | Validation                                                     |
+| ---------------- | -------------------------------------------------------------- |
+| `decision`       | Integer 1-3 (1=accepted, 2=modified, 3=rejected)               |
+| `finalPriority`  | Required if decision=2, must be null otherwise                 |
 | `rejectedReason` | Required if decision=3 (max 300 chars), must be null otherwise |
 
 ### 4.2 Business Logic Implementation
 
 #### Task Creation
+
 1. Validate title and priority
 2. Auto-assign `sort_order` as `MAX(sort_order) + 1` for the list
 3. Set `status = 1` (todo) and `user_id` from auth context
 4. Create task record
 
 #### Status Change (Todo ↔ Done)
+
 1. Database trigger `trg_tasks_done_at` handles `done_at`:
    - Set to `now()` when status changes to 2 (done)
    - Set to `null` when status changes to 1 (todo)
 2. API returns updated task with correct `doneAt` value
 
 #### Task Reordering
+
 1. Validate all task IDs belong to the specified list and user
 2. Validate no duplicate sort orders in the request
 3. Update all tasks in a single transaction
 4. On conflict, return 409 with details
 
 #### AI Suggestion Flow
+
 1. Generate prompt from title and description
 2. Call AI service with prompt
 3. Store hash of prompt (GDPR compliance, no raw text)
@@ -707,6 +781,7 @@ The API uses **Supabase Auth** with JWT tokens.
 5. Return interaction ID for decision tracking
 
 #### AI Decision Recording
+
 1. Validate decision consistency:
    - `accepted`: no finalPriority, no rejectedReason
    - `modified`: finalPriority required
@@ -715,12 +790,15 @@ The API uses **Supabase Auth** with JWT tokens.
 3. If decision is `accepted` or `modified`, optionally update task priority
 
 #### List Deletion
+
 1. Cascade delete all tasks (handled by FK constraint)
 2. If deleted list was active, set `active_list_id = null` in profile
 3. Frontend should handle empty state
 
 #### Default Sorting
+
 Tasks are sorted by:
+
 1. Priority descending (3 → 2 → 1)
 2. Sort order ascending within same priority
 
@@ -739,6 +817,7 @@ All error responses follow a consistent format:
 ```
 
 **Common Error Types:**
+
 - `ValidationError` - Invalid input data
 - `NotFoundError` - Resource not found
 - `ConflictError` - Duplicate or conflict

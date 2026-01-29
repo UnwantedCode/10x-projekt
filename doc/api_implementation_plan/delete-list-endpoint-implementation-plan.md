@@ -3,6 +3,7 @@
 ## 1. Przegląd punktu końcowego
 
 Endpoint służy do trwałego usunięcia listy zadań użytkownika wraz ze wszystkimi powiązanymi danymi. Dzięki kaskadowym kluczom obcym w bazie danych, usunięcie listy automatycznie usuwa:
+
 - Wszystkie zadania przypisane do listy (`tasks`)
 - Wszystkie interakcje AI powiązane z tymi zadaniami (`ai_interactions`)
 - Automatycznie czyści `active_list_id` w profilu użytkownika, jeśli usuwana lista była aktywna
@@ -42,13 +43,14 @@ interface ErrorResponseDTO {
 ```typescript
 // Zod schema dla parametru id
 const deleteListParamsSchema = z.object({
-  id: z.string().uuid("Invalid list ID format")
+  id: z.string().uuid("Invalid list ID format"),
 });
 ```
 
 ## 4. Szczegóły odpowiedzi
 
 ### Sukces (200 OK)
+
 ```json
 {
   "success": true
@@ -56,6 +58,7 @@ const deleteListParamsSchema = z.object({
 ```
 
 ### Błąd 401 Unauthorized
+
 ```json
 {
   "error": "Unauthorized",
@@ -64,6 +67,7 @@ const deleteListParamsSchema = z.object({
 ```
 
 ### Błąd 404 Not Found
+
 ```json
 {
   "error": "Not Found",
@@ -72,6 +76,7 @@ const deleteListParamsSchema = z.object({
 ```
 
 ### Błąd 400 Bad Request
+
 ```json
 {
   "error": "Bad Request",
@@ -83,6 +88,7 @@ const deleteListParamsSchema = z.object({
 ```
 
 ### Błąd 500 Internal Server Error
+
 ```json
 {
   "error": "Internal Server Error",
@@ -129,6 +135,7 @@ const deleteListParamsSchema = z.object({
 ```
 
 ### Kaskadowe operacje w bazie danych:
+
 1. `DELETE FROM lists WHERE id = :id AND user_id = :userId`
 2. Automatycznie (przez FK CASCADE):
    - Usunięcie wszystkich `tasks` gdzie `list_id = :id`
@@ -139,35 +146,40 @@ const deleteListParamsSchema = z.object({
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnianie
+
 - Wymaga aktywnej sesji Supabase Auth
 - Sesja weryfikowana przez middleware przed dotarciem do endpointu
 - Brak sesji → natychmiastowy zwrot 401
 
 ### Autoryzacja
+
 - Row Level Security (RLS) w Supabase zapewnia, że użytkownik może usunąć tylko własne listy
 - Policy: `user_id = auth.uid()` na operacji DELETE
 - Próba usunięcia cudzej listy skutkuje 0 affected rows → 404
 
 ### Walidacja danych wejściowych
+
 - UUID walidowany przez Zod przed przekazaniem do bazy danych
 - Zapobiega SQL injection i nieprawidłowym zapytaniom
 
 ### Ochrona przed IDOR
+
 - RLS automatycznie filtruje po `user_id`
 - Użytkownik nie może manipulować zapytaniem, aby usunąć cudze dane
 
 ## 7. Obsługa błędów
 
-| Scenariusz | Kod HTTP | Typ błędu | Komunikat |
-|------------|----------|-----------|-----------|
-| Brak sesji użytkownika | 401 | Unauthorized | User not authenticated |
-| Nieprawidłowy format UUID | 400 | Bad Request | Invalid list ID format |
-| Lista nie istnieje | 404 | Not Found | List not found or doesn't belong to user |
-| Lista należy do innego użytkownika | 404 | Not Found | List not found or doesn't belong to user |
-| Błąd połączenia z bazą | 500 | Internal Server Error | An unexpected error occurred |
-| Nieoczekiwany wyjątek | 500 | Internal Server Error | An unexpected error occurred |
+| Scenariusz                         | Kod HTTP | Typ błędu             | Komunikat                                |
+| ---------------------------------- | -------- | --------------------- | ---------------------------------------- |
+| Brak sesji użytkownika             | 401      | Unauthorized          | User not authenticated                   |
+| Nieprawidłowy format UUID          | 400      | Bad Request           | Invalid list ID format                   |
+| Lista nie istnieje                 | 404      | Not Found             | List not found or doesn't belong to user |
+| Lista należy do innego użytkownika | 404      | Not Found             | List not found or doesn't belong to user |
+| Błąd połączenia z bazą             | 500      | Internal Server Error | An unexpected error occurred             |
+| Nieoczekiwany wyjątek              | 500      | Internal Server Error | An unexpected error occurred             |
 
 ### Logowanie błędów
+
 - Błędy 500 logowane do konsoli serwera z pełnym stack trace
 - Błędy 4xx logowane z poziomem warn (opcjonalnie)
 - Nie ujawniać szczegółów wewnętrznych błędów klientowi
@@ -175,15 +187,18 @@ const deleteListParamsSchema = z.object({
 ## 8. Rozważania dotyczące wydajności
 
 ### Optymalizacje
+
 - Pojedyncze zapytanie DELETE (kaskady obsługiwane przez bazę danych)
 - RLS eliminuje potrzebę dodatkowego zapytania sprawdzającego własność
 - Indeks na `lists.user_id` wspiera filtrowanie RLS
 
 ### Potencjalne wąskie gardła
+
 - Duża liczba zadań w liście → dłuższy czas kaskadowego usuwania
 - Wiele ai_interactions na zadanie → dodatkowy czas usuwania
 
 ### Mitygacja
+
 - Operacja DELETE jest atomowa (transakcja w PostgreSQL)
 - Timeout na poziomie Astro/Supabase zapewnia przerwanie zbyt długich operacji
 - W przyszłości: rozważyć soft delete dla bardzo dużych list
@@ -191,19 +206,23 @@ const deleteListParamsSchema = z.object({
 ## 9. Etapy wdrożenia
 
 ### Krok 1: Utworzenie schematu walidacji
+
 Utworzyć plik `src/lib/schemas/list.schema.ts` (jeśli nie istnieje) z:
+
 ```typescript
 import { z } from "zod";
 
 export const deleteListParamsSchema = z.object({
-  id: z.string().uuid("Invalid list ID format")
+  id: z.string().uuid("Invalid list ID format"),
 });
 
 export type DeleteListParams = z.infer<typeof deleteListParamsSchema>;
 ```
 
 ### Krok 2: Utworzenie/rozszerzenie serwisu list
+
 Utworzyć lub rozszerzyć `src/lib/services/list.service.ts`:
+
 ```typescript
 import type { SupabaseClient } from "@/db/supabase.client";
 
@@ -213,11 +232,7 @@ export class ListService {
    * Cascades to tasks and ai_interactions.
    * @throws Error if list not found or deletion fails
    */
-  static async deleteList(
-    supabase: SupabaseClient,
-    listId: string,
-    userId: string
-  ): Promise<void> {
+  static async deleteList(supabase: SupabaseClient, listId: string, userId: string): Promise<void> {
     const { error, count } = await supabase
       .from("lists")
       .delete({ count: "exact" })
@@ -244,7 +259,9 @@ export class ListNotFoundError extends Error {
 ```
 
 ### Krok 3: Utworzenie endpointu API
+
 Utworzyć plik `src/pages/api/lists/[id].ts`:
+
 ```typescript
 import type { APIRoute } from "astro";
 import { deleteListParamsSchema } from "@/lib/schemas/list.schema";
@@ -260,7 +277,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     return new Response(
       JSON.stringify({
         error: "Unauthorized",
-        message: "User not authenticated"
+        message: "User not authenticated",
       } satisfies ErrorResponseDTO),
       { status: 401, headers: { "Content-Type": "application/json" } }
     );
@@ -274,7 +291,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       JSON.stringify({
         error: "Bad Request",
         message: "Invalid list ID format",
-        details: { id: fieldErrors.id?.[0] ?? "Invalid format" }
+        details: { id: fieldErrors.id?.[0] ?? "Invalid format" },
       } satisfies ErrorResponseDTO),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
@@ -286,17 +303,17 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
     await ListService.deleteList(locals.supabase, listId, user.id);
 
-    return new Response(
-      JSON.stringify({ success: true } satisfies SuccessResponseDTO),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ success: true } satisfies SuccessResponseDTO), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     // 4. Handle known errors
     if (error instanceof ListNotFoundError) {
       return new Response(
         JSON.stringify({
           error: "Not Found",
-          message: "List not found or doesn't belong to user"
+          message: "List not found or doesn't belong to user",
         } satisfies ErrorResponseDTO),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
@@ -307,7 +324,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     return new Response(
       JSON.stringify({
         error: "Internal Server Error",
-        message: "An unexpected error occurred"
+        message: "An unexpected error occurred",
       } satisfies ErrorResponseDTO),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
@@ -316,13 +333,17 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 ```
 
 ### Krok 4: Weryfikacja typów i importów
+
 Upewnić się, że:
+
 - `SupabaseClient` importowany z `@/db/supabase.client`
 - `locals.user` i `locals.supabase` dostępne (ustawiane przez middleware)
 - Aliasy ścieżek (`@/`) skonfigurowane w `tsconfig.json`
 
 ### Krok 5: Testy manualne
+
 Przetestować scenariusze:
+
 1. ✅ Usunięcie własnej listy → 200 + success: true
 2. ✅ Usunięcie nieistniejącej listy → 404
 3. ✅ Próba bez autoryzacji → 401
@@ -331,4 +352,5 @@ Przetestować scenariusze:
 6. ✅ Sprawdzenie wyczyszczenia active_list_id w profiles
 
 ### Krok 6: Integracja z istniejącymi endpointami
+
 Jeśli plik `src/pages/api/lists/[id].ts` już istnieje z innymi metodami (GET, PATCH), dodać eksport `DELETE` do istniejącego pliku zamiast tworzenia nowego.

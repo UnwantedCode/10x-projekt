@@ -52,6 +52,7 @@ const taskIdParamSchema = z.object({
 ## 4. Szczegoly odpowiedzi
 
 ### Sukces (200 OK):
+
 ```json
 {
   "id": "uuid",
@@ -69,12 +70,12 @@ const taskIdParamSchema = z.object({
 
 ### Bledy:
 
-| Kod | Opis | Przyklad odpowiedzi |
-|-----|------|---------------------|
-| 400 | Nieprawidlowy format UUID | `{"error": "Bad Request", "message": "Invalid task ID format"}` |
-| 401 | Brak autoryzacji | `{"error": "Unauthorized", "message": "Authentication required"}` |
-| 404 | Zadanie nie znalezione | `{"error": "Not Found", "message": "Task not found"}` |
-| 500 | Blad serwera | `{"error": "Internal Server Error", "message": "An unexpected error occurred"}` |
+| Kod | Opis                      | Przyklad odpowiedzi                                                             |
+| --- | ------------------------- | ------------------------------------------------------------------------------- |
+| 400 | Nieprawidlowy format UUID | `{"error": "Bad Request", "message": "Invalid task ID format"}`                 |
+| 401 | Brak autoryzacji          | `{"error": "Unauthorized", "message": "Authentication required"}`               |
+| 404 | Zadanie nie znalezione    | `{"error": "Not Found", "message": "Task not found"}`                           |
+| 500 | Blad serwera              | `{"error": "Internal Server Error", "message": "An unexpected error occurred"}` |
 
 ## 5. Przeplyw danych
 
@@ -115,35 +116,40 @@ const taskIdParamSchema = z.object({
 ## 6. Wzgledy bezpieczenstwa
 
 ### 6.1 Autentykacja
+
 - Weryfikacja sesji uzytkownika poprzez `supabase.auth.getUser()`
 - Sprawdzenie obecnosci tokena JWT w naglowkach zadania
 
 ### 6.2 Autoryzacja
+
 - **Row Level Security (RLS)** w Supabase automatycznie filtruje zadania
 - Policy: `using (user_id = auth.uid())` zapewnia dostep tylko do wlasnych zadan
 - Nie jest wymagane jawne sprawdzanie `user_id` w kodzie aplikacji
 
 ### 6.3 Walidacja danych
+
 - Walidacja UUID za pomoca Zod przed zapytaniem do bazy
 - Zapobiega SQL injection i nieprawidlowym zapytaniom
 
 ### 6.4 Ukrywanie informacji
+
 - Blad 404 zwracany zarowno gdy zadanie nie istnieje, jak i gdy nie nalezy do uzytkownika
 - Zapobiega enumeracji zadan innych uzytkownikow
 
 ## 7. Obsluga bledow
 
-| Scenariusz | Kod HTTP | Typ bledu | Komunikat |
-|------------|----------|-----------|-----------|
-| Nieprawidlowy format UUID | 400 | Bad Request | "Invalid task ID format" |
-| Brak naglowka Authorization | 401 | Unauthorized | "Authentication required" |
-| Nieważny token JWT | 401 | Unauthorized | "Invalid or expired token" |
-| Zadanie nie istnieje | 404 | Not Found | "Task not found" |
-| Zadanie nalezy do innego uzytkownika | 404 | Not Found | "Task not found" |
-| Blad polaczenia z baza | 500 | Internal Server Error | "An unexpected error occurred" |
-| Nieoczekiwany wyjatek | 500 | Internal Server Error | "An unexpected error occurred" |
+| Scenariusz                           | Kod HTTP | Typ bledu             | Komunikat                      |
+| ------------------------------------ | -------- | --------------------- | ------------------------------ |
+| Nieprawidlowy format UUID            | 400      | Bad Request           | "Invalid task ID format"       |
+| Brak naglowka Authorization          | 401      | Unauthorized          | "Authentication required"      |
+| Nieważny token JWT                   | 401      | Unauthorized          | "Invalid or expired token"     |
+| Zadanie nie istnieje                 | 404      | Not Found             | "Task not found"               |
+| Zadanie nalezy do innego uzytkownika | 404      | Not Found             | "Task not found"               |
+| Blad polaczenia z baza               | 500      | Internal Server Error | "An unexpected error occurred" |
+| Nieoczekiwany wyjatek                | 500      | Internal Server Error | "An unexpected error occurred" |
 
 ### Logowanie bledow
+
 - Bledy 500 powinny byc logowane po stronie serwera z pelnym stack trace
 - Bledy 4xx moga byc logowane na poziomie debug/info
 - Nie logowac wrażliwych danych (tokeny, dane uzytkownika)
@@ -151,26 +157,32 @@ const taskIdParamSchema = z.object({
 ## 8. Rozważania dotyczace wydajnosci
 
 ### 8.1 Zapytanie do bazy
+
 - Pojedyncze zapytanie `SELECT` po kluczu glownym (UUID) - O(1)
 - Indeks PK na `tasks.id` zapewnia optymalna wydajnosc
 - RLS nie wymaga dodatkowych joinow dzieki schematowi owner-only
 
 ### 8.2 Optymalizacje
+
 - Wybieranie tylko potrzebnych kolumn (bez `search_text`)
 - Brak potrzeby cache'owania dla pojedynczych rekordow w MVP
 
 ### 8.3 Rozmiar odpowiedzi
+
 - Odpowiedz zawiera tylko jedno zadanie - minimalny transfer danych
 - Brak paginacji wymaganej dla tego endpointu
 
 ## 9. Etapy wdrozenia
 
 ### Krok 1: Utworzenie struktury katalogow
+
 Utworzyc katalogi jesli nie istnieja:
+
 - `src/lib/services/` - dla logiki biznesowej
 - `src/pages/api/tasks/` - dla endpointu API
 
 ### Krok 2: Implementacja serwisu TaskService
+
 Utworzyc plik `src/lib/services/task.service.ts`:
 
 ```typescript
@@ -203,15 +215,13 @@ function mapTaskEntityToDTO(entity: Database["public"]["Tables"]["tasks"]["Row"]
 }
 
 // Glowna funkcja serwisu
-export async function getTaskById(
-  supabase: SupabaseClient,
-  taskId: string
-): Promise<TaskServiceResult<TaskDTO>> {
+export async function getTaskById(supabase: SupabaseClient, taskId: string): Promise<TaskServiceResult<TaskDTO>> {
   // Implementacja w kroku 2
 }
 ```
 
 ### Krok 3: Implementacja logiki getTaskById
+
 Uzupelnic funkcje `getTaskById`:
 
 1. Walidacja UUID za pomoca Zod
@@ -221,6 +231,7 @@ Uzupelnic funkcje `getTaskById`:
 5. Zwrot wyniku lub bledu
 
 ### Krok 4: Utworzenie endpointu API
+
 Utworzyc plik `src/pages/api/tasks/[id].ts`:
 
 ```typescript
@@ -238,6 +249,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
 ```
 
 ### Krok 5: Implementacja handlera GET
+
 W handlerze `GET`:
 
 1. Walidacja `params.id` za pomoca `taskIdSchema.safeParse()`
@@ -246,9 +258,11 @@ W handlerze `GET`:
 4. Mapowanie wyniku na odpowiednia odpowiedz HTTP
 
 ### Krok 6: Dodanie typu SupabaseClient do kontekstu Astro
+
 Zaktualizowac `src/env.d.ts` (jesli potrzeba) o deklaracje typu dla `locals.supabase`.
 
 ### Krok 7: Testy manualne
+
 Przetestowac endpoint:
 
 ```bash
@@ -265,4 +279,5 @@ curl -i -H "Authorization: Bearer <token>" \
 ```
 
 ### Krok 8: Dokumentacja
+
 Zaktualizowac dokumentacje API o nowy endpoint (jesli istnieje).

@@ -19,6 +19,7 @@ The operation is atomic - either all task orders are updated successfully, or no
       - `sortOrder` (number) - New sort order position (must be > 0)
 
 **Request Body Example:**
+
 ```json
 {
   "taskOrders": [
@@ -98,14 +99,14 @@ export const reorderTasksSchema = z.object({
 
 ### Error Responses
 
-| Status Code | Error Type | Response Example |
-|-------------|------------|------------------|
-| 400 | Bad Request | `{ "error": "Bad Request", "message": "Duplicate sort orders are not allowed" }` |
-| 401 | Unauthorized | `{ "error": "Unauthorized", "message": "User not authenticated" }` |
-| 404 | Not Found | `{ "error": "Not Found", "message": "List not found" }` |
-| 404 | Not Found | `{ "error": "Not Found", "message": "One or more tasks not found in the specified list" }` |
-| 409 | Conflict | `{ "error": "Conflict", "message": "Sort order conflict detected" }` |
-| 500 | Server Error | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }` |
+| Status Code | Error Type   | Response Example                                                                           |
+| ----------- | ------------ | ------------------------------------------------------------------------------------------ |
+| 400         | Bad Request  | `{ "error": "Bad Request", "message": "Duplicate sort orders are not allowed" }`           |
+| 401         | Unauthorized | `{ "error": "Unauthorized", "message": "User not authenticated" }`                         |
+| 404         | Not Found    | `{ "error": "Not Found", "message": "List not found" }`                                    |
+| 404         | Not Found    | `{ "error": "Not Found", "message": "One or more tasks not found in the specified list" }` |
+| 409         | Conflict     | `{ "error": "Conflict", "message": "Sort order conflict detected" }`                       |
+| 500         | Server Error | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }`          |
 
 ## 5. Data Flow
 
@@ -153,11 +154,13 @@ export const reorderTasksSchema = z.object({
 Due to the `UNIQUE(list_id, sort_order)` constraint, the update must be performed carefully to avoid constraint violations. Two approaches:
 
 **Approach A: Temporary NULL values (Recommended)**
+
 1. Set `sort_order = NULL` for all affected tasks (temporarily)
 2. Update each task with the new `sort_order` value
 3. All within a single transaction
 
 **Approach B: Use negative values as intermediates**
+
 1. Set `sort_order = -sort_order` for all affected tasks
 2. Update to final positive values
 3. Constraint allows negative during transition
@@ -167,16 +170,19 @@ Due to the `UNIQUE(list_id, sort_order)` constraint, the update must be performe
 ## 6. Security Considerations
 
 ### Authentication
+
 - User must be authenticated via Supabase Auth
 - Authentication is verified by middleware which sets `context.locals.user`
 - Return 401 if `context.locals.user` is null
 
 ### Authorization
+
 - RLS policies on `tasks` table ensure users can only modify their own tasks
 - Composite FK `(list_id, user_id)` guarantees task belongs to user's list
 - Service layer verifies list ownership before processing
 
 ### Input Validation
+
 - All UUIDs validated for correct format
 - `sortOrder` must be positive integers
 - Array must be non-empty
@@ -184,6 +190,7 @@ Due to the `UNIQUE(list_id, sort_order)` constraint, the update must be performe
 - Use Zod for schema validation
 
 ### Data Integrity
+
 - Transaction ensures atomic updates
 - Database constraints prevent invalid states
 - RLS prevents cross-user data access
@@ -192,48 +199,49 @@ Due to the `UNIQUE(list_id, sort_order)` constraint, the update must be performe
 
 ### Validation Errors (400)
 
-| Condition | Error Message |
-|-----------|---------------|
-| Missing `taskOrders` field | "taskOrders is required" |
-| Empty `taskOrders` array | "At least one task order is required" |
-| Invalid UUID format | "Invalid task ID format" |
-| Invalid `sortOrder` type | "Sort order must be a positive integer" |
-| `sortOrder` <= 0 | "Sort order must be a positive integer" |
-| Duplicate task IDs | "Duplicate task IDs are not allowed" |
-| Duplicate sort orders | "Duplicate sort orders are not allowed" |
-| Invalid `listId` format | "Invalid list ID format" |
+| Condition                  | Error Message                           |
+| -------------------------- | --------------------------------------- |
+| Missing `taskOrders` field | "taskOrders is required"                |
+| Empty `taskOrders` array   | "At least one task order is required"   |
+| Invalid UUID format        | "Invalid task ID format"                |
+| Invalid `sortOrder` type   | "Sort order must be a positive integer" |
+| `sortOrder` <= 0           | "Sort order must be a positive integer" |
+| Duplicate task IDs         | "Duplicate task IDs are not allowed"    |
+| Duplicate sort orders      | "Duplicate sort orders are not allowed" |
+| Invalid `listId` format    | "Invalid list ID format"                |
 
 ### Authorization Errors (401)
 
-| Condition | Error Message |
-|-----------|---------------|
+| Condition               | Error Message            |
+| ----------------------- | ------------------------ |
 | No authentication token | "User not authenticated" |
-| Invalid/expired token | "User not authenticated" |
+| Invalid/expired token   | "User not authenticated" |
 
 ### Not Found Errors (404)
 
-| Condition | Error Message |
-|-----------|---------------|
-| List does not exist | "List not found" |
-| List belongs to another user | "List not found" (same message for security) |
-| Task ID not in list | "One or more tasks not found in the specified list" |
+| Condition                    | Error Message                                       |
+| ---------------------------- | --------------------------------------------------- |
+| List does not exist          | "List not found"                                    |
+| List belongs to another user | "List not found" (same message for security)        |
+| Task ID not in list          | "One or more tasks not found in the specified list" |
 
 ### Conflict Errors (409)
 
-| Condition | Error Message |
-|-----------|---------------|
+| Condition                       | Error Message                  |
+| ------------------------------- | ------------------------------ |
 | Sort order constraint violation | "Sort order conflict detected" |
 
 ### Server Errors (500)
 
-| Condition | Error Message |
-|-----------|---------------|
+| Condition                   | Error Message                  |
+| --------------------------- | ------------------------------ |
 | Database connection failure | "An unexpected error occurred" |
-| Transaction failure | "An unexpected error occurred" |
+| Transaction failure         | "An unexpected error occurred" |
 
 ## 8. Performance Considerations
 
 ### Potential Bottlenecks
+
 1. **Large number of tasks**: Reordering many tasks in a single request
 2. **Constraint checking**: UNIQUE constraint validation for each update
 3. **Transaction locks**: Row-level locks during update
@@ -241,6 +249,7 @@ Due to the `UNIQUE(list_id, sort_order)` constraint, the update must be performe
 ### Optimization Strategies
 
 1. **Batch Updates**: Use a single SQL statement with CASE/WHEN for bulk updates
+
    ```sql
    UPDATE tasks
    SET sort_order = CASE id
@@ -266,6 +275,7 @@ Due to the `UNIQUE(list_id, sort_order)` constraint, the update must be performe
 **File**: `src/lib/schemas/task.schema.ts`
 
 Create or extend the task schema file with validation for reorder command:
+
 - `taskOrderItemSchema` - validates individual task order items
 - `reorderTasksSchema` - validates the complete command with refinements for duplicates
 - `listIdParamSchema` - validates the listId URL parameter
@@ -275,6 +285,7 @@ Create or extend the task schema file with validation for reorder command:
 **File**: `src/lib/services/task.service.ts`
 
 Create a service function `reorderTasks` that:
+
 1. Accepts `supabase` client, `listId`, `userId`, and `taskOrders` array
 2. Verifies list exists and belongs to user (single query)
 3. Verifies all task IDs exist and belong to the list (single query)
@@ -290,7 +301,7 @@ interface ReorderTasksParams {
   taskOrders: TaskOrderItem[];
 }
 
-async function reorderTasks(params: ReorderTasksParams): Promise<number>
+async function reorderTasks(params: ReorderTasksParams): Promise<number>;
 ```
 
 ### Step 3: Create API Route Handler
@@ -298,6 +309,7 @@ async function reorderTasks(params: ReorderTasksParams): Promise<number>
 **File**: `src/pages/api/lists/[listId]/tasks/reorder.ts`
 
 Implement the POST handler:
+
 1. Export `prerender = false`
 2. Extract `listId` from `Astro.params`
 3. Validate `listId` format
@@ -309,6 +321,7 @@ Implement the POST handler:
 ### Step 4: Implement Error Handling
 
 In the service and route handler:
+
 1. Create custom error types or use error codes for different scenarios
 2. Map service errors to appropriate HTTP status codes
 3. Log errors for debugging (use console.error or logging service)
@@ -317,6 +330,7 @@ In the service and route handler:
 ### Step 5: Handle Database Constraints
 
 Implement the two-phase update strategy in the service:
+
 1. Build SQL query using Supabase's `.rpc()` or raw SQL for complex update
 2. Alternatively, use Supabase's batch update capabilities
 3. Handle constraint violations gracefully (catch and return 409)
@@ -324,6 +338,7 @@ Implement the two-phase update strategy in the service:
 ### Step 6: Testing Considerations
 
 Test cases to implement:
+
 1. **Happy path**: Valid reorder request returns 200 with correct count
 2. **Empty array**: Returns 400
 3. **Invalid UUID**: Returns 400

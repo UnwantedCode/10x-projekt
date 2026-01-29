@@ -2,6 +2,7 @@
 paths:
   - "src/**/*.{tsx,astro}"
 ---
+
 ## Frontend
 
 ### General Guidelines

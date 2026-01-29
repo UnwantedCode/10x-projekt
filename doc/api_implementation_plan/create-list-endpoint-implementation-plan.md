@@ -52,11 +52,7 @@ interface ErrorResponseDTO {
 import { z } from "zod";
 
 export const createListSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .max(100, "Name must be at most 100 characters")
-    .trim(),
+  name: z.string().min(1, "Name is required").max(100, "Name must be at most 100 characters").trim(),
 });
 
 export type CreateListInput = z.infer<typeof createListSchema>;
@@ -65,6 +61,7 @@ export type CreateListInput = z.infer<typeof createListSchema>;
 ## 4. Szczegóły odpowiedzi
 
 ### Sukces (201 Created):
+
 ```json
 {
   "id": "550e8400-e29b-41d4-a716-446655440000",
@@ -75,6 +72,7 @@ export type CreateListInput = z.infer<typeof createListSchema>;
 ```
 
 ### Błąd walidacji (400 Bad Request):
+
 ```json
 {
   "error": "VALIDATION_ERROR",
@@ -86,6 +84,7 @@ export type CreateListInput = z.infer<typeof createListSchema>;
 ```
 
 ### Duplikat nazwy (400 Bad Request):
+
 ```json
 {
   "error": "DUPLICATE_NAME",
@@ -94,6 +93,7 @@ export type CreateListInput = z.infer<typeof createListSchema>;
 ```
 
 ### Brak autoryzacji (401 Unauthorized):
+
 ```json
 {
   "error": "UNAUTHORIZED",
@@ -102,6 +102,7 @@ export type CreateListInput = z.infer<typeof createListSchema>;
 ```
 
 ### Błąd serwera (500 Internal Server Error):
+
 ```json
 {
   "error": "INTERNAL_ERROR",
@@ -165,35 +166,39 @@ export type CreateListInput = z.infer<typeof createListSchema>;
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnienie:
+
 - Wymagana aktywna sesja Supabase
 - Użytkownik identyfikowany przez `auth.uid()` z tokenu JWT
 - Brak sesji = 401 Unauthorized
 
 ### Autoryzacja:
+
 - RLS policy na tabeli `lists`: `user_id = auth.uid()`
 - Użytkownik może tworzyć listy tylko dla siebie
 - `user_id` ustawiany automatycznie z sesji, nie z request body
 
 ### Walidacja danych:
+
 - Zod schema waliduje strukturę i typy
 - Constraint DB `CHECK (char_length(name) BETWEEN 1 AND 100)` jako dodatkowa warstwa
 - `trim()` na nazwie usuwa białe znaki na początku/końcu
 
 ### Ochrona przed atakami:
+
 - **SQL Injection:** Supabase SDK używa parametryzowanych zapytań
 - **XSS:** Dane nie są renderowane jako HTML; nazwa przechowywana as-is
 - **Mass Assignment:** Tylko pole `name` akceptowane z body
 
 ## 7. Obsługa błędów
 
-| Scenariusz | Kod HTTP | Kod błędu | Wiadomość |
-|------------|----------|-----------|-----------|
-| Brak body w żądaniu | 400 | VALIDATION_ERROR | Invalid request data |
-| Pusta nazwa (po trim) | 400 | VALIDATION_ERROR | Name is required |
-| Nazwa > 100 znaków | 400 | VALIDATION_ERROR | Name must be at most 100 characters |
-| Duplikat nazwy (case-insensitive) | 400 | DUPLICATE_NAME | A list with this name already exists |
-| Brak sesji/tokenu | 401 | UNAUTHORIZED | Authentication required |
-| Błąd bazy danych | 500 | INTERNAL_ERROR | An unexpected error occurred |
+| Scenariusz                        | Kod HTTP | Kod błędu        | Wiadomość                            |
+| --------------------------------- | -------- | ---------------- | ------------------------------------ |
+| Brak body w żądaniu               | 400      | VALIDATION_ERROR | Invalid request data                 |
+| Pusta nazwa (po trim)             | 400      | VALIDATION_ERROR | Name is required                     |
+| Nazwa > 100 znaków                | 400      | VALIDATION_ERROR | Name must be at most 100 characters  |
+| Duplikat nazwy (case-insensitive) | 400      | DUPLICATE_NAME   | A list with this name already exists |
+| Brak sesji/tokenu                 | 401      | UNAUTHORIZED     | Authentication required              |
+| Błąd bazy danych                  | 500      | INTERNAL_ERROR   | An unexpected error occurred         |
 
 ### Mapowanie błędów Supabase:
 
@@ -207,15 +212,18 @@ if (error.code === "23505") {
 ## 8. Rozważania dotyczące wydajności
 
 ### Indeksy:
+
 - `lists_user_id_idx` na `lists(user_id)` - wspiera RLS
 - Unique index na `(user_id, lower(name))` - wspiera sprawdzanie duplikatów
 
 ### Optymalizacje:
+
 - Pojedyncze zapytanie INSERT z RETURNING - brak dodatkowego SELECT
 - RLS wykonywane na poziomie bazy, nie w aplikacji
 - Brak N+1 queries - operacja atomowa
 
 ### Potencjalne wąskie gardła:
+
 - Przy bardzo dużej liczbie list per użytkownik: sprawdzenie unikalności może być wolniejsze
 - Mitygacja: indeks na `(user_id, lower(name))` zapewnia O(log n) lookup
 
@@ -390,6 +398,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 ### Krok 4: Weryfikacja middleware
 
 Upewnij się, że `src/middleware/index.ts` ustawia:
+
 - `context.locals.supabase` - klient Supabase
 - `context.locals.user` - obiekt użytkownika z sesji (lub `null`)
 

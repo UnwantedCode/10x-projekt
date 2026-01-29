@@ -39,13 +39,14 @@ interface ErrorResponseDTO {
 ```typescript
 // Zod schema dla parametru id
 const deleteTaskParamsSchema = z.object({
-  id: z.string().uuid("Invalid task ID format")
+  id: z.string().uuid("Invalid task ID format"),
 });
 ```
 
 ## 4. Szczegóły odpowiedzi
 
 ### Sukces (200 OK)
+
 ```json
 {
   "success": true
@@ -53,6 +54,7 @@ const deleteTaskParamsSchema = z.object({
 ```
 
 ### Błąd 401 Unauthorized
+
 ```json
 {
   "error": "Unauthorized",
@@ -61,6 +63,7 @@ const deleteTaskParamsSchema = z.object({
 ```
 
 ### Błąd 404 Not Found
+
 ```json
 {
   "error": "Not Found",
@@ -69,6 +72,7 @@ const deleteTaskParamsSchema = z.object({
 ```
 
 ### Błąd 400 Bad Request
+
 ```json
 {
   "error": "Bad Request",
@@ -80,6 +84,7 @@ const deleteTaskParamsSchema = z.object({
 ```
 
 ### Błąd 500 Internal Server Error
+
 ```json
 {
   "error": "Internal Server Error",
@@ -126,6 +131,7 @@ const deleteTaskParamsSchema = z.object({
 ```
 
 ### Kaskadowe operacje w bazie danych:
+
 1. `DELETE FROM tasks WHERE id = :id AND user_id = :userId`
 2. Automatycznie (przez FK CASCADE):
    - Usunięcie wszystkich `ai_interactions` gdzie `task_id = :id`
@@ -135,36 +141,41 @@ const deleteTaskParamsSchema = z.object({
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnianie
+
 - Wymaga aktywnej sesji Supabase Auth
 - Sesja weryfikowana przez `supabase.auth.getUser()` w endpoincie
 - Brak sesji → natychmiastowy zwrot 401
 
 ### Autoryzacja
+
 - Row Level Security (RLS) w Supabase zapewnia, że użytkownik może usunąć tylko własne zadania
 - Policy: `user_id = auth.uid()` na operacji DELETE
 - Próba usunięcia cudzego zadania skutkuje 0 affected rows → 404
 
 ### Walidacja danych wejściowych
+
 - UUID walidowany przez Zod przed przekazaniem do bazy danych
 - Zapobiega SQL injection i nieprawidłowym zapytaniom
 
 ### Ochrona przed IDOR (Insecure Direct Object Reference)
+
 - RLS automatycznie filtruje po `user_id`
 - Użytkownik nie może manipulować zapytaniem, aby usunąć cudze dane
 - Celowo nie rozróżniamy "nie istnieje" od "nie należy do Ciebie" (oba → 404)
 
 ## 7. Obsługa błędów
 
-| Scenariusz | Kod HTTP | Typ błędu | Komunikat |
-|------------|----------|-----------|-----------|
-| Brak sesji użytkownika | 401 | Unauthorized | User not authenticated |
-| Nieprawidłowy format UUID | 400 | Bad Request | Invalid task ID format |
-| Zadanie nie istnieje | 404 | Not Found | Task not found or doesn't belong to user |
-| Zadanie należy do innego użytkownika | 404 | Not Found | Task not found or doesn't belong to user |
-| Błąd połączenia z bazą | 500 | Internal Server Error | An unexpected error occurred |
-| Nieoczekiwany wyjątek | 500 | Internal Server Error | An unexpected error occurred |
+| Scenariusz                           | Kod HTTP | Typ błędu             | Komunikat                                |
+| ------------------------------------ | -------- | --------------------- | ---------------------------------------- |
+| Brak sesji użytkownika               | 401      | Unauthorized          | User not authenticated                   |
+| Nieprawidłowy format UUID            | 400      | Bad Request           | Invalid task ID format                   |
+| Zadanie nie istnieje                 | 404      | Not Found             | Task not found or doesn't belong to user |
+| Zadanie należy do innego użytkownika | 404      | Not Found             | Task not found or doesn't belong to user |
+| Błąd połączenia z bazą               | 500      | Internal Server Error | An unexpected error occurred             |
+| Nieoczekiwany wyjątek                | 500      | Internal Server Error | An unexpected error occurred             |
 
 ### Logowanie błędów
+
 - Błędy 500 logowane do konsoli serwera z pełnym stack trace
 - Błędy 4xx logowane z poziomem warn (opcjonalnie)
 - Nie ujawniać szczegółów wewnętrznych błędów klientowi
@@ -172,16 +183,19 @@ const deleteTaskParamsSchema = z.object({
 ## 8. Rozważania dotyczące wydajności
 
 ### Optymalizacje
+
 - Pojedyncze zapytanie DELETE (kaskady obsługiwane przez bazę danych)
 - RLS eliminuje potrzebę dodatkowego zapytania sprawdzającego własność
 - Indeks `tasks_user_id_idx` na `tasks.user_id` wspiera filtrowanie RLS
 - Indeks na `ai_interactions(task_id)` wspiera kaskadowe usuwanie
 
 ### Potencjalne wąskie gardła
+
 - Wiele `ai_interactions` na zadanie → dłuższy czas kaskadowego usuwania
 - W praktyce MVP: liczba interakcji na zadanie powinna być niewielka
 
 ### Mitygacja
+
 - Operacja DELETE jest atomowa (transakcja w PostgreSQL)
 - Timeout na poziomie Astro/Supabase zapewnia przerwanie zbyt długich operacji
 
@@ -195,7 +209,7 @@ Utworzyć plik `src/lib/schemas/task.schema.ts` (jeśli nie istnieje) z:
 import { z } from "zod";
 
 export const deleteTaskParamsSchema = z.object({
-  id: z.string().uuid("Invalid task ID format")
+  id: z.string().uuid("Invalid task ID format"),
 });
 
 export type DeleteTaskParams = z.infer<typeof deleteTaskParamsSchema>;
@@ -216,11 +230,7 @@ export class TaskService {
    * @throws TaskNotFoundError if task not found or doesn't belong to user
    * @throws Error for database errors
    */
-  static async deleteTask(
-    supabase: SupabaseClient,
-    taskId: string,
-    userId: string
-  ): Promise<void> {
+  static async deleteTask(supabase: SupabaseClient, taskId: string, userId: string): Promise<void> {
     const { error, count } = await supabase
       .from("tasks")
       .delete({ count: "exact" })
@@ -262,13 +272,16 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
   const supabase = locals.supabase;
 
   // 1. Check authentication
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
 
   if (authError || !user) {
     return new Response(
       JSON.stringify({
         error: "Unauthorized",
-        message: "User not authenticated"
+        message: "User not authenticated",
       } satisfies ErrorResponseDTO),
       { status: 401, headers: { "Content-Type": "application/json" } }
     );
@@ -282,7 +295,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
       JSON.stringify({
         error: "Bad Request",
         message: "Invalid task ID format",
-        details: { id: fieldErrors.id?.[0] ?? "Invalid format" }
+        details: { id: fieldErrors.id?.[0] ?? "Invalid format" },
       } satisfies ErrorResponseDTO),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
@@ -294,17 +307,17 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
     await TaskService.deleteTask(supabase, taskId, user.id);
 
-    return new Response(
-      JSON.stringify({ success: true } satisfies SuccessResponseDTO),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ success: true } satisfies SuccessResponseDTO), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error) {
     // 4. Handle known errors
     if (error instanceof TaskNotFoundError) {
       return new Response(
         JSON.stringify({
           error: "Not Found",
-          message: "Task not found or doesn't belong to user"
+          message: "Task not found or doesn't belong to user",
         } satisfies ErrorResponseDTO),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
@@ -315,7 +328,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     return new Response(
       JSON.stringify({
         error: "Internal Server Error",
-        message: "An unexpected error occurred"
+        message: "An unexpected error occurred",
       } satisfies ErrorResponseDTO),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
@@ -328,8 +341,8 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 Upewnić się, że `src/db/supabase.client.ts` eksportuje typ klienta:
 
 ```typescript
-import { createClient, SupabaseClient as BaseSupabaseClient } from '@supabase/supabase-js';
-import type { Database } from './database.types';
+import { createClient, SupabaseClient as BaseSupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 // ... existing code ...
 
@@ -339,6 +352,7 @@ export type SupabaseClient = BaseSupabaseClient<Database>;
 ### Krok 5: Weryfikacja konfiguracji
 
 Upewnić się, że:
+
 - Aliasy ścieżek (`@/`) skonfigurowane w `tsconfig.json`
 - Zod zainstalowany jako zależność (`npm install zod`)
 - Middleware ustawia `context.locals.supabase`
@@ -346,6 +360,7 @@ Upewnić się, że:
 ### Krok 6: Testy manualne
 
 Przetestować scenariusze:
+
 1. ✅ Usunięcie własnego zadania → 200 + `{ "success": true }`
 2. ✅ Usunięcie nieistniejącego zadania → 404
 3. ✅ Próba usunięcia cudzego zadania → 404 (nie 403, dla bezpieczeństwa)
@@ -359,7 +374,13 @@ Jeśli plik `src/pages/api/tasks/[id].ts` już istnieje z innymi metodami (GET, 
 
 ```typescript
 // Przykład rozszerzenia istniejącego pliku
-export const GET: APIRoute = async ({ params, locals }) => { /* ... */ };
-export const PATCH: APIRoute = async ({ params, locals }) => { /* ... */ };
-export const DELETE: APIRoute = async ({ params, locals }) => { /* ... */ };
+export const GET: APIRoute = async ({ params, locals }) => {
+  /* ... */
+};
+export const PATCH: APIRoute = async ({ params, locals }) => {
+  /* ... */
+};
+export const DELETE: APIRoute = async ({ params, locals }) => {
+  /* ... */
+};
 ```

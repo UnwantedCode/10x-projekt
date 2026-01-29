@@ -11,9 +11,11 @@ This endpoint allows users to record their decision on an AI-generated priority 
 ## 2. Request Details
 
 ### HTTP Method
+
 `PATCH`
 
 ### URL Structure
+
 `/api/ai-interactions/{id}`
 
 ### Parameters
@@ -24,6 +26,7 @@ This endpoint allows users to record their decision on an AI-generated priority 
 | `id` | UUID | The unique identifier of the AI interaction |
 
 **Request Body**:
+
 ```json
 {
   "decision": 1,
@@ -34,19 +37,19 @@ This endpoint allows users to record their decision on an AI-generated priority 
 
 ### Field Validation Rules
 
-| Field | Type | Required | Constraints |
-|-------|------|----------|-------------|
-| `decision` | number | Yes | Must be 1, 2, or 3 |
-| `finalPriority` | number \| null | Conditional | Required if decision=2, must be null otherwise. Values: 1-3 |
+| Field            | Type           | Required    | Constraints                                                   |
+| ---------------- | -------------- | ----------- | ------------------------------------------------------------- |
+| `decision`       | number         | Yes         | Must be 1, 2, or 3                                            |
+| `finalPriority`  | number \| null | Conditional | Required if decision=2, must be null otherwise. Values: 1-3   |
 | `rejectedReason` | string \| null | Conditional | Required if decision=3, must be null otherwise. Max 300 chars |
 
 ### Decision Field Consistency Rules
 
-| Decision Value | Meaning | finalPriority | rejectedReason |
-|----------------|---------|---------------|----------------|
-| 1 | Accepted | Must be null | Must be null |
-| 2 | Modified | Required (1-3) | Must be null |
-| 3 | Rejected | Must be null | Required (max 300 chars) |
+| Decision Value | Meaning  | finalPriority  | rejectedReason           |
+| -------------- | -------- | -------------- | ------------------------ |
+| 1              | Accepted | Must be null   | Must be null             |
+| 2              | Modified | Required (1-3) | Must be null             |
+| 3              | Rejected | Must be null   | Required (max 300 chars) |
 
 ## 3. Utilized Types
 
@@ -85,7 +88,7 @@ type TaskPriority = 1 | 2 | 3;
 ```typescript
 // Path parameter schema
 const pathParamsSchema = z.object({
-  id: z.string().uuid("Invalid interaction ID format")
+  id: z.string().uuid("Invalid interaction ID format"),
 });
 
 // Request body schema with discriminated union for decision consistency
@@ -93,18 +96,18 @@ const recordAIDecisionSchema = z.discriminatedUnion("decision", [
   z.object({
     decision: z.literal(1),
     finalPriority: z.null().optional(),
-    rejectedReason: z.null().optional()
+    rejectedReason: z.null().optional(),
   }),
   z.object({
     decision: z.literal(2),
     finalPriority: z.union([z.literal(1), z.literal(2), z.literal(3)]),
-    rejectedReason: z.null().optional()
+    rejectedReason: z.null().optional(),
   }),
   z.object({
     decision: z.literal(3),
     finalPriority: z.null().optional(),
-    rejectedReason: z.string().min(1).max(300)
-  })
+    rejectedReason: z.string().min(1).max(300),
+  }),
 ]);
 ```
 
@@ -130,12 +133,12 @@ const recordAIDecisionSchema = z.discriminatedUnion("decision", [
 
 ### Error Responses
 
-| Status Code | Condition | Response Body |
-|-------------|-----------|---------------|
-| 400 | Invalid input data | `{ "error": "Bad Request", "message": "...", "details": {...} }` |
-| 401 | User not authenticated | `{ "error": "Unauthorized", "message": "Authentication required" }` |
-| 404 | Interaction not found | `{ "error": "Not Found", "message": "AI interaction not found" }` |
-| 409 | Decision already recorded | `{ "error": "Conflict", "message": "Decision already recorded for this interaction" }` |
+| Status Code | Condition                 | Response Body                                                                          |
+| ----------- | ------------------------- | -------------------------------------------------------------------------------------- |
+| 400         | Invalid input data        | `{ "error": "Bad Request", "message": "...", "details": {...} }`                       |
+| 401         | User not authenticated    | `{ "error": "Unauthorized", "message": "Authentication required" }`                    |
+| 404         | Interaction not found     | `{ "error": "Not Found", "message": "AI interaction not found" }`                      |
+| 409         | Decision already recorded | `{ "error": "Conflict", "message": "Decision already recorded for this interaction" }` |
 
 ## 5. Data Flow
 
@@ -196,22 +199,26 @@ const recordAIDecisionSchema = z.discriminatedUnion("decision", [
 ## 6. Security Considerations
 
 ### Authentication
+
 - User must be authenticated via Supabase Auth
 - Access token validated by middleware
 - `context.locals.user` populated with authenticated user
 
 ### Authorization
+
 - RLS policy on `ai_interactions` table: `using (user_id = auth.uid())`
 - User can only access their own interactions
 - Attempting to access another user's interaction returns 404 (not 403, to prevent enumeration)
 
 ### Input Validation
+
 - UUID format validation for path parameter
 - Zod schema validation for request body
 - Decision field consistency enforcement
 - String length limits for `rejectedReason` (max 300 chars)
 
 ### Data Protection
+
 - No sensitive data exposed in error messages
 - Use parameterized queries via Supabase client (SQL injection prevention)
 - Database CHECK constraint provides additional validation layer
@@ -220,18 +227,18 @@ const recordAIDecisionSchema = z.discriminatedUnion("decision", [
 
 ### Error Scenarios and Responses
 
-| Scenario | HTTP Status | Error Type | Message |
-|----------|-------------|------------|---------|
-| Invalid UUID format | 400 | Bad Request | Invalid interaction ID format |
-| Missing decision field | 400 | Bad Request | Decision is required |
-| Invalid decision value | 400 | Bad Request | Decision must be 1, 2, or 3 |
-| Inconsistent decision fields | 400 | Bad Request | [Specific field requirement message] |
-| rejectedReason exceeds 300 chars | 400 | Bad Request | Rejected reason must not exceed 300 characters |
-| User not authenticated | 401 | Unauthorized | Authentication required |
-| Interaction not found | 404 | Not Found | AI interaction not found |
-| Interaction belongs to another user | 404 | Not Found | AI interaction not found |
-| Decision already recorded | 409 | Conflict | Decision already recorded for this interaction |
-| Database error | 500 | Internal Server Error | An unexpected error occurred |
+| Scenario                            | HTTP Status | Error Type            | Message                                        |
+| ----------------------------------- | ----------- | --------------------- | ---------------------------------------------- |
+| Invalid UUID format                 | 400         | Bad Request           | Invalid interaction ID format                  |
+| Missing decision field              | 400         | Bad Request           | Decision is required                           |
+| Invalid decision value              | 400         | Bad Request           | Decision must be 1, 2, or 3                    |
+| Inconsistent decision fields        | 400         | Bad Request           | [Specific field requirement message]           |
+| rejectedReason exceeds 300 chars    | 400         | Bad Request           | Rejected reason must not exceed 300 characters |
+| User not authenticated              | 401         | Unauthorized          | Authentication required                        |
+| Interaction not found               | 404         | Not Found             | AI interaction not found                       |
+| Interaction belongs to another user | 404         | Not Found             | AI interaction not found                       |
+| Decision already recorded           | 409         | Conflict              | Decision already recorded for this interaction |
+| Database error                      | 500         | Internal Server Error | An unexpected error occurred                   |
 
 ### Error Response Format
 
@@ -246,15 +253,18 @@ interface ErrorResponseDTO {
 ## 8. Performance Considerations
 
 ### Database Queries
+
 - Single SELECT query to fetch and verify interaction (indexed by PK)
 - Single UPDATE query to record decision
 - Both queries benefit from RLS filter on `user_id` (indexed)
 
 ### Indexes Used
+
 - Primary key index on `ai_interactions.id`
 - Index on `ai_interactions.user_id` (for RLS filtering)
 
 ### Optimization Notes
+
 - No N+1 queries - single fetch + single update pattern
 - Minimal data transfer - only update changed fields
 - Consider transaction if future requirements add related updates
@@ -264,6 +274,7 @@ interface ErrorResponseDTO {
 ### Step 1: Create Zod Validation Schemas
 
 Create `src/lib/schemas/aiInteraction.schema.ts`:
+
 - Path parameter schema for UUID validation
 - Request body schema with discriminated union for decision consistency
 - Export schemas for use in endpoint
@@ -271,6 +282,7 @@ Create `src/lib/schemas/aiInteraction.schema.ts`:
 ### Step 2: Create AI Interaction Service
 
 Create `src/lib/services/aiInteraction.service.ts`:
+
 - `recordDecision(supabase, interactionId, command)` method
 - Handle finding interaction (with null check for 404)
 - Check if decision already exists (for 409)
@@ -280,6 +292,7 @@ Create `src/lib/services/aiInteraction.service.ts`:
 ### Step 3: Create DTO Mapper
 
 Add to service or create `src/lib/mappers/aiInteraction.mapper.ts`:
+
 - `toAIInteractionDTO(entity)` function
 - Handle camelCase transformation
 - Parse `justification_tags` JSONB to string array
@@ -287,6 +300,7 @@ Add to service or create `src/lib/mappers/aiInteraction.mapper.ts`:
 ### Step 4: Create API Endpoint
 
 Create `src/pages/api/ai-interactions/[id].ts`:
+
 - Export `PATCH` handler function
 - Export `prerender = false`
 - Implement authentication check
@@ -298,6 +312,7 @@ Create `src/pages/api/ai-interactions/[id].ts`:
 ### Step 5: Implement Error Handling
 
 In the endpoint handler:
+
 - Use try-catch for unexpected errors
 - Return proper status codes based on service results
 - Format error responses consistently
@@ -305,6 +320,7 @@ In the endpoint handler:
 ### Step 6: Testing Checklist
 
 Manual testing scenarios:
+
 - [ ] Valid accepted decision (decision=1)
 - [ ] Valid modified decision (decision=2, finalPriority set)
 - [ ] Valid rejected decision (decision=3, rejectedReason set)

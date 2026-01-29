@@ -10,22 +10,26 @@ This endpoint retrieves all task lists belonging to the authenticated user with 
 ## 2. Request Details
 
 ### HTTP Method
+
 `GET`
 
 ### URL Structure
+
 `/api/lists?limit={limit}&offset={offset}`
 
 ### Query Parameters
 
-| Parameter | Type    | Required | Default | Constraints        | Description                    |
-|-----------|---------|----------|---------|-------------------|--------------------------------|
-| `limit`   | integer | No       | 50      | 1-100             | Maximum items to return        |
-| `offset`  | integer | No       | 0       | >= 0              | Number of items to skip        |
+| Parameter | Type    | Required | Default | Constraints | Description             |
+| --------- | ------- | -------- | ------- | ----------- | ----------------------- |
+| `limit`   | integer | No       | 50      | 1-100       | Maximum items to return |
+| `offset`  | integer | No       | 0       | >= 0        | Number of items to skip |
 
 ### Request Body
+
 None (GET request)
 
 ### Headers
+
 - `Authorization`: Bearer token (handled by Supabase auth)
 - `Cookie`: Session cookie (alternative auth method)
 
@@ -99,11 +103,11 @@ export type ListsQueryInput = z.infer<typeof listsQuerySchema>;
 
 ### Error Responses
 
-| Status Code | Condition                  | Response Body                                        |
-|-------------|---------------------------|-----------------------------------------------------|
-| 400         | Invalid query parameters  | `{ "error": "Bad Request", "message": "..." }`      |
-| 401         | User not authenticated    | `{ "error": "Unauthorized", "message": "..." }`     |
-| 500         | Server/database error     | `{ "error": "Internal Server Error", "message": "..." }` |
+| Status Code | Condition                | Response Body                                            |
+| ----------- | ------------------------ | -------------------------------------------------------- |
+| 400         | Invalid query parameters | `{ "error": "Bad Request", "message": "..." }`           |
+| 401         | User not authenticated   | `{ "error": "Unauthorized", "message": "..." }`          |
+| 500         | Server/database error    | `{ "error": "Internal Server Error", "message": "..." }` |
 
 ## 5. Data Flow
 
@@ -163,22 +167,26 @@ WHERE user_id = auth.uid();  -- RLS handles this automatically
 ## 6. Security Considerations
 
 ### Authentication
+
 - Verify user is authenticated via `context.locals.user`
 - Return 401 immediately if no authenticated user
 - Use Supabase client from `context.locals.supabase` (never import directly)
 
 ### Authorization
+
 - RLS policy on `public.lists` ensures users only see their own lists
 - Policy: `user_id = auth.uid()` for SELECT operations
 - No additional authorization logic needed in application code
 
 ### Input Validation
+
 - Validate all query parameters with Zod schema
 - Coerce string query params to integers
 - Apply min/max constraints to prevent abuse
 - Reject invalid input with 400 Bad Request
 
 ### Data Exposure
+
 - `user_id` is excluded from `ListDTO` (not exposed to client)
 - Only necessary fields returned in response
 
@@ -186,14 +194,14 @@ WHERE user_id = auth.uid();  -- RLS handles this automatically
 
 ### Error Scenarios and Responses
 
-| Scenario                        | Status | Error Type           | Message Example                           |
-|---------------------------------|--------|---------------------|-------------------------------------------|
-| Missing/invalid auth session    | 401    | Unauthorized        | "Authentication required"                 |
-| Invalid limit (not a number)    | 400    | Bad Request         | "limit must be a valid integer"           |
-| limit out of range              | 400    | Bad Request         | "limit must be between 1 and 100"         |
-| Invalid offset (negative)       | 400    | Bad Request         | "offset must be a non-negative integer"   |
-| Database connection error       | 500    | Internal Error      | "Failed to retrieve lists"                |
-| Unexpected error                | 500    | Internal Error      | "An unexpected error occurred"            |
+| Scenario                     | Status | Error Type     | Message Example                         |
+| ---------------------------- | ------ | -------------- | --------------------------------------- |
+| Missing/invalid auth session | 401    | Unauthorized   | "Authentication required"               |
+| Invalid limit (not a number) | 400    | Bad Request    | "limit must be a valid integer"         |
+| limit out of range           | 400    | Bad Request    | "limit must be between 1 and 100"       |
+| Invalid offset (negative)    | 400    | Bad Request    | "offset must be a non-negative integer" |
+| Database connection error    | 500    | Internal Error | "Failed to retrieve lists"              |
+| Unexpected error             | 500    | Internal Error | "An unexpected error occurred"          |
 
 ### Error Response Format
 
@@ -206,6 +214,7 @@ interface ErrorResponseDTO {
 ```
 
 ### Error Handling Strategy
+
 1. Check authentication first (early return with 401)
 2. Validate input with Zod (early return with 400 on failure)
 3. Wrap database operations in try-catch
@@ -215,19 +224,23 @@ interface ErrorResponseDTO {
 ## 8. Performance Considerations
 
 ### Database Optimization
+
 - Index `lists_user_id_idx` on `public.lists(user_id)` supports the query
 - Pagination limits result set size
 - Default limit of 50 balances UX and performance
 
 ### Query Optimization
+
 - Use single query with `.range()` for data + count via Supabase
 - Supabase returns count in headers when using `{ count: 'exact' }`
 
 ### Caching Considerations
+
 - No caching in MVP (data changes frequently)
 - Future: Consider short TTL cache if needed
 
 ### Pagination Strategy
+
 - Offset-based pagination (simple, sufficient for MVP)
 - Max limit of 100 prevents excessive data transfer
 - Future: Consider cursor-based pagination for large datasets
@@ -367,18 +380,21 @@ export const GET: APIRoute = async ({ locals, url }) => {
 ### Step 4: Verify Middleware Configuration
 
 Ensure `src/middleware/index.ts` properly attaches:
+
 - `locals.supabase`: Supabase client instance
 - `locals.user`: Authenticated user object (or null)
 
 ### Step 5: Testing Checklist
 
 #### Unit Tests
+
 - [ ] Zod schema validates correct inputs
 - [ ] Zod schema rejects invalid limit values
 - [ ] Zod schema rejects invalid offset values
 - [ ] Service maps database entities to DTOs correctly
 
 #### Integration Tests
+
 - [ ] Returns 401 when not authenticated
 - [ ] Returns 400 for invalid query params
 - [ ] Returns 200 with empty array when no lists exist
@@ -388,6 +404,7 @@ Ensure `src/middleware/index.ts` properly attaches:
 - [ ] Only returns lists owned by authenticated user
 
 #### Manual Testing
+
 - [ ] Test with Postman/curl without auth token
 - [ ] Test with valid auth token
 - [ ] Test pagination with multiple lists

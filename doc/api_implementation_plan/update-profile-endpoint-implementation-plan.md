@@ -19,9 +19,9 @@ Endpoint służy do aktualizacji profilu bieżącego uwierzytelnionego użytkown
 }
 ```
 
-| Pole | Typ | Wymagane | Opis |
-|------|-----|----------|------|
-| `activeListId` | `string \| null` | Tak | UUID aktywnej listy lub null do wyczyszczenia |
+| Pole           | Typ              | Wymagane | Opis                                          |
+| -------------- | ---------------- | -------- | --------------------------------------------- |
+| `activeListId` | `string \| null` | Tak      | UUID aktywnej listy lub null do wyczyszczenia |
 
 ## 3. Wykorzystywane typy
 
@@ -68,12 +68,12 @@ interface ErrorResponseDTO {
 
 ### Błędy
 
-| Kod | Scenariusz | Przykładowa odpowiedź |
-|-----|------------|----------------------|
-| 400 | Nieprawidłowy format UUID | `{ "error": "VALIDATION_ERROR", "message": "Invalid request body", "details": { "activeListId": "Invalid UUID format" } }` |
-| 400 | Lista nie istnieje lub nie należy do użytkownika | `{ "error": "INVALID_LIST", "message": "List not found or doesn't belong to user" }` |
-| 401 | Brak uwierzytelnienia | `{ "error": "UNAUTHORIZED", "message": "User not authenticated" }` |
-| 500 | Błąd serwera | `{ "error": "INTERNAL_ERROR", "message": "Internal server error" }` |
+| Kod | Scenariusz                                       | Przykładowa odpowiedź                                                                                                      |
+| --- | ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| 400 | Nieprawidłowy format UUID                        | `{ "error": "VALIDATION_ERROR", "message": "Invalid request body", "details": { "activeListId": "Invalid UUID format" } }` |
+| 400 | Lista nie istnieje lub nie należy do użytkownika | `{ "error": "INVALID_LIST", "message": "List not found or doesn't belong to user" }`                                       |
+| 401 | Brak uwierzytelnienia                            | `{ "error": "UNAUTHORIZED", "message": "User not authenticated" }`                                                         |
+| 500 | Błąd serwera                                     | `{ "error": "INTERNAL_ERROR", "message": "Internal server error" }`                                                        |
 
 ## 5. Przepływ danych
 
@@ -101,20 +101,24 @@ interface ErrorResponseDTO {
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnienie
+
 - Wymagana aktywna sesja Supabase Auth
 - Sesja weryfikowana w middleware przed dotarciem do handlera
 - Użytkownik dostępny przez `context.locals.user`
 
 ### Autoryzacja
+
 - RLS (Row Level Security) w Supabase zapewnia, że użytkownik może modyfikować tylko swój profil
 - Policy: `using (id = auth.uid())` na tabeli `profiles`
 - FK constraint `(active_list_id, id) → lists(id, user_id)` zapobiega ustawieniu listy innego użytkownika
 
 ### Walidacja danych
+
 - Zod schema waliduje format UUID
 - Dodatkowe sprawdzenie istnienia listy przed UPDATE (dla lepszego UX i komunikatów błędów)
 
 ### Ochrona przed atakami
+
 - **IDOR:** Zabezpieczone przez RLS i FK constraint
 - **SQL Injection:** Zabezpieczone przez Supabase SDK (parameterized queries)
 - **Mass Assignment:** Tylko `activeListId` jest akceptowane w command
@@ -123,35 +127,38 @@ interface ErrorResponseDTO {
 
 ### Tabela błędów
 
-| Błąd | Kod HTTP | Error Code | Logowanie |
-|------|----------|------------|-----------|
-| Brak sesji | 401 | UNAUTHORIZED | Nie (normalne zachowanie) |
-| Błąd walidacji Zod | 400 | VALIDATION_ERROR | Nie |
-| Lista nie istnieje | 400 | INVALID_LIST | Nie |
-| Lista nie należy do użytkownika | 400 | INVALID_LIST | Tak (potencjalna próba IDOR) |
-| Błąd bazy danych | 500 | INTERNAL_ERROR | Tak |
-| FK constraint violation | 400 | INVALID_LIST | Nie |
+| Błąd                            | Kod HTTP | Error Code       | Logowanie                    |
+| ------------------------------- | -------- | ---------------- | ---------------------------- |
+| Brak sesji                      | 401      | UNAUTHORIZED     | Nie (normalne zachowanie)    |
+| Błąd walidacji Zod              | 400      | VALIDATION_ERROR | Nie                          |
+| Lista nie istnieje              | 400      | INVALID_LIST     | Nie                          |
+| Lista nie należy do użytkownika | 400      | INVALID_LIST     | Tak (potencjalna próba IDOR) |
+| Błąd bazy danych                | 500      | INTERNAL_ERROR   | Tak                          |
+| FK constraint violation         | 400      | INVALID_LIST     | Nie                          |
 
 ### Mapowanie błędów Supabase
 
 ```typescript
 // Błąd FK constraint (23503) → 400 INVALID_LIST
-if (error.code === '23503') {
-  return { error: 'INVALID_LIST', message: 'List not found or doesn\'t belong to user' };
+if (error.code === "23503") {
+  return { error: "INVALID_LIST", message: "List not found or doesn't belong to user" };
 }
 ```
 
 ## 8. Rozważania dotyczące wydajności
 
 ### Optymalizacje
+
 - **Pojedynczy UPDATE:** Aktualizacja profilu w jednym zapytaniu SQL
 - **Walidacja listy:** Można pominąć osobne SELECT jeśli polegamy na FK constraint (mniej zapytań)
 - **RLS:** Wykorzystanie wbudowanych mechanizmów Supabase zamiast dodatkowych zapytań
 
 ### Potencjalne wąskie gardła
+
 - Brak - endpoint operuje na pojedynczym wierszu z PK lookup
 
 ### Indeksy wykorzystywane
+
 - `profiles.id` (PK) - lookup profilu użytkownika
 - `lists(id, user_id)` (UNIQUE) - walidacja FK
 
@@ -162,7 +169,7 @@ if (error.code === '23503') {
 **Plik:** `src/lib/schemas/profileSchemas.ts`
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 export const updateProfileSchema = z.object({
   activeListId: z.string().uuid().nullable(),
@@ -176,8 +183,8 @@ export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 **Plik:** `src/lib/services/profileService.ts`
 
 ```typescript
-import type { SupabaseClient } from '@/db/supabase.client';
-import type { ProfileDTO, UpdateProfileCommand } from '@/types';
+import type { SupabaseClient } from "@/db/supabase.client";
+import type { ProfileDTO, UpdateProfileCommand } from "@/types";
 
 export class ProfileService {
   constructor(private supabase: SupabaseClient) {}
@@ -186,22 +193,22 @@ export class ProfileService {
     // 1. Jeśli activeListId nie jest null, sprawdź czy lista istnieje i należy do użytkownika
     if (command.activeListId !== null) {
       const { data: list, error: listError } = await this.supabase
-        .from('lists')
-        .select('id')
-        .eq('id', command.activeListId)
-        .eq('user_id', userId)
+        .from("lists")
+        .select("id")
+        .eq("id", command.activeListId)
+        .eq("user_id", userId)
         .single();
 
       if (listError || !list) {
-        throw new InvalidListError('List not found or doesn\'t belong to user');
+        throw new InvalidListError("List not found or doesn't belong to user");
       }
     }
 
     // 2. Aktualizuj profil
     const { data, error } = await this.supabase
-      .from('profiles')
+      .from("profiles")
       .update({ active_list_id: command.activeListId })
-      .eq('id', userId)
+      .eq("id", userId)
       .select()
       .single();
 
@@ -234,14 +241,17 @@ export class ProfileService {
 export class InvalidListError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'InvalidListError';
+    this.name = "InvalidListError";
   }
 }
 
 export class DatabaseError extends Error {
-  constructor(message: string, public code?: string) {
+  constructor(
+    message: string,
+    public code?: string
+  ) {
     super(message);
-    this.name = 'DatabaseError';
+    this.name = "DatabaseError";
   }
 }
 ```
@@ -251,11 +261,11 @@ export class DatabaseError extends Error {
 **Plik:** `src/pages/api/profile.ts`
 
 ```typescript
-import type { APIRoute } from 'astro';
-import { updateProfileSchema } from '@/lib/schemas/profileSchemas';
-import { ProfileService } from '@/lib/services/profileService';
-import { InvalidListError, DatabaseError } from '@/lib/errors';
-import type { ErrorResponseDTO } from '@/types';
+import type { APIRoute } from "astro";
+import { updateProfileSchema } from "@/lib/schemas/profileSchemas";
+import { ProfileService } from "@/lib/services/profileService";
+import { InvalidListError, DatabaseError } from "@/lib/errors";
+import type { ErrorResponseDTO } from "@/types";
 
 export const prerender = false;
 
@@ -265,10 +275,10 @@ export const PATCH: APIRoute = async ({ locals, request }) => {
   if (!user) {
     return new Response(
       JSON.stringify({
-        error: 'UNAUTHORIZED',
-        message: 'User not authenticated',
+        error: "UNAUTHORIZED",
+        message: "User not authenticated",
       } satisfies ErrorResponseDTO),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
+      { status: 401, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -279,10 +289,10 @@ export const PATCH: APIRoute = async ({ locals, request }) => {
   } catch {
     return new Response(
       JSON.stringify({
-        error: 'VALIDATION_ERROR',
-        message: 'Invalid JSON body',
+        error: "VALIDATION_ERROR",
+        message: "Invalid JSON body",
       } satisfies ErrorResponseDTO),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -291,13 +301,11 @@ export const PATCH: APIRoute = async ({ locals, request }) => {
     const details = parseResult.error.flatten().fieldErrors;
     return new Response(
       JSON.stringify({
-        error: 'VALIDATION_ERROR',
-        message: 'Invalid request body',
-        details: Object.fromEntries(
-          Object.entries(details).map(([key, value]) => [key, value?.join(', ') ?? ''])
-        ),
+        error: "VALIDATION_ERROR",
+        message: "Invalid request body",
+        details: Object.fromEntries(Object.entries(details).map(([key, value]) => [key, value?.join(", ") ?? ""])),
       } satisfies ErrorResponseDTO),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
 
@@ -308,26 +316,26 @@ export const PATCH: APIRoute = async ({ locals, request }) => {
 
     return new Response(JSON.stringify(profile), {
       status: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     if (error instanceof InvalidListError) {
       return new Response(
         JSON.stringify({
-          error: 'INVALID_LIST',
+          error: "INVALID_LIST",
           message: error.message,
         } satisfies ErrorResponseDTO),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    console.error('Profile update error:', error);
+    console.error("Profile update error:", error);
     return new Response(
       JSON.stringify({
-        error: 'INTERNAL_ERROR',
-        message: 'Internal server error',
+        error: "INTERNAL_ERROR",
+        message: "Internal server error",
       } satisfies ErrorResponseDTO),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 };

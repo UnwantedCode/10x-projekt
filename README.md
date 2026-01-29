@@ -34,8 +34,8 @@ Core concepts:
 - **Done tasks are hidden by default** and can be shown via a filter
 - **Manual ordering** of tasks within the same priority (e.g., drag & drop)
 - Optional **AI priority suggestion** (never automatic):
-    - suggests priority + one-sentence reasoning
-    - user can **accept**, **modify**, or **reject with a required reason**
+  - suggests priority + one-sentence reasoning
+  - user can **accept**, **modify**, or **reject with a required reason**
 - **AI interaction analytics** is part of the MVP (to measure usefulness and guide future personalization)
 
 > See: [`doc/prd.md`](./doc/prd.md) for the full Product Requirements Document.
@@ -132,10 +132,10 @@ From [`package.json`](./package.json):
 - User authentication (register/login/logout) and resource authorization
 - Multiple task lists per user (CRUD)
 - Task CRUD:
-    - title (required)
-    - description (optional but recommended)
-    - priority (required: Low/Medium/High)
-    - status (To do / Done)
+  - title (required)
+  - description (optional but recommended)
+  - priority (required: Low/Medium/High)
+  - status (To do / Done)
 - Default view shows **only To do** tasks
 - Filter to include/show **Done** tasks
 - Sorting by priority (High → Medium → Low)

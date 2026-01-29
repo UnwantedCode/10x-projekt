@@ -96,12 +96,12 @@ type AIInteractionEntity = Database["public"]["Tables"]["ai_interactions"]["Row"
 
 ### Błędy:
 
-| Kod | Opis | Przykład odpowiedzi |
-|-----|------|---------------------|
-| 400 | Nieprawidłowe dane wejściowe | `{ "error": "Bad Request", "message": "Invalid taskId format" }` |
-| 401 | Brak autentykacji | `{ "error": "Unauthorized", "message": "User not authenticated" }` |
-| 404 | Task nie znaleziony | `{ "error": "Not Found", "message": "Task not found" }` |
-| 500 | Błąd serwera | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }` |
+| Kod | Opis                         | Przykład odpowiedzi                                                               |
+| --- | ---------------------------- | --------------------------------------------------------------------------------- |
+| 400 | Nieprawidłowe dane wejściowe | `{ "error": "Bad Request", "message": "Invalid taskId format" }`                  |
+| 401 | Brak autentykacji            | `{ "error": "Unauthorized", "message": "User not authenticated" }`                |
+| 404 | Task nie znaleziony          | `{ "error": "Not Found", "message": "Task not found" }`                           |
+| 500 | Błąd serwera                 | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }` |
 
 ## 5. Przepływ danych
 
@@ -131,21 +131,25 @@ type AIInteractionEntity = Database["public"]["Tables"]["ai_interactions"]["Row"
 ## 6. Względy bezpieczeństwa
 
 ### Autentykacja:
+
 - Endpoint wymaga autentykacji użytkownika
 - Wykorzystanie `context.locals.supabase` do dostępu do sesji użytkownika
 - Sprawdzenie `context.locals.user` przed przetwarzaniem żądania
 
 ### Autoryzacja:
+
 - RLS (Row Level Security) na tabeli `ai_interactions` zapewnia dostęp tylko do własnych danych
 - Policy: `using (user_id = auth.uid())`
 - Dodatkowa weryfikacja istnienia taska przed pobraniem interakcji
 
 ### Walidacja danych:
+
 - `taskId` musi być prawidłowym UUID (walidacja Zod)
 - `limit` i `offset` muszą być liczbami całkowitymi w dozwolonym zakresie
 - Parametry są sanityzowane przed użyciem w zapytaniu
 
 ### Ochrona przed atakami:
+
 - Ograniczenie `limit` do max 50 zapobiega nadmiernemu obciążeniu
 - Parametryzowane zapytania zapobiegają SQL injection (Supabase SDK)
 - RLS zapobiega nieautoryzowanemu dostępowi do danych innych użytkowników
@@ -154,16 +158,17 @@ type AIInteractionEntity = Database["public"]["Tables"]["ai_interactions"]["Row"
 
 ### Scenariusze błędów:
 
-| Scenariusz | Kod HTTP | Komunikat | Logowanie |
-|------------|----------|-----------|-----------|
-| Brak sesji użytkownika | 401 | "User not authenticated" | Info |
-| Nieprawidłowy format taskId | 400 | "Invalid taskId format" | Warn |
-| Nieprawidłowe parametry paginacji | 400 | "Invalid query parameters" | Warn |
-| Task nie istnieje | 404 | "Task not found" | Info |
-| Task należy do innego użytkownika | 404 | "Task not found" | Warn |
-| Błąd bazy danych | 500 | "An unexpected error occurred" | Error |
+| Scenariusz                        | Kod HTTP | Komunikat                      | Logowanie |
+| --------------------------------- | -------- | ------------------------------ | --------- |
+| Brak sesji użytkownika            | 401      | "User not authenticated"       | Info      |
+| Nieprawidłowy format taskId       | 400      | "Invalid taskId format"        | Warn      |
+| Nieprawidłowe parametry paginacji | 400      | "Invalid query parameters"     | Warn      |
+| Task nie istnieje                 | 404      | "Task not found"               | Info      |
+| Task należy do innego użytkownika | 404      | "Task not found"               | Warn      |
+| Błąd bazy danych                  | 500      | "An unexpected error occurred" | Error     |
 
 ### Strategia obsługi błędów:
+
 - Użycie early returns dla warunków błędów
 - Konsekwentny format odpowiedzi błędów (`ErrorResponseDTO`)
 - Logowanie błędów z odpowiednim poziomem severity
@@ -172,15 +177,18 @@ type AIInteractionEntity = Database["public"]["Tables"]["ai_interactions"]["Row"
 ## 8. Rozważania dotyczące wydajności
 
 ### Indeksy bazy danych:
+
 - `ai_interactions_task_id_idx` na `task_id` - wspiera filtrowanie po tasku
 - `ai_interactions_user_id_idx` na `user_id` - wspiera RLS
 
 ### Optymalizacje:
+
 - Paginacja ogranicza ilość danych pobieranych w jednym żądaniu
 - Limit max 50 rekordów zapobiega nadmiernemu transferowi danych
 - Wykorzystanie COUNT z osobnego zapytania lub window function dla total
 
 ### Potencjalne wąskie gardła:
+
 - Dla tasków z dużą liczbą interakcji AI - rozwiązane przez paginację
 - Zapytanie COUNT może być kosztowne - można rozważyć cache'owanie lub estymację
 
@@ -216,6 +224,7 @@ export const taskIdParamSchema = z.object({
 **Plik:** `src/lib/services/aiInteractions.service.ts`
 
 Funkcje do zaimplementowania:
+
 - `getAIInteractionsForTask(supabase, taskId, userId, params)` - pobiera interakcje z paginacją
 - `verifyTaskOwnership(supabase, taskId, userId)` - weryfikuje istnienie i własność taska
 - `mapEntityToDTO(entity)` - mapuje encję bazy danych na DTO
@@ -235,10 +244,7 @@ export async function getAIInteractionsForTask(
   // 4. Zwróć odpowiedź z paginacją
 }
 
-export async function verifyTaskExists(
-  supabase: SupabaseClient,
-  taskId: string
-): Promise<boolean> {
+export async function verifyTaskExists(supabase: SupabaseClient, taskId: string): Promise<boolean> {
   // Sprawdź czy task istnieje (RLS automatycznie filtruje po user_id)
 }
 
@@ -274,19 +280,19 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
   // 1. Sprawdź autentykację
   const user = locals.user;
   if (!user) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized", message: "User not authenticated" }),
-      { status: 401, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Unauthorized", message: "User not authenticated" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   // 2. Waliduj taskId
   const pathValidation = taskIdParamSchema.safeParse(params);
   if (!pathValidation.success) {
-    return new Response(
-      JSON.stringify({ error: "Bad Request", message: "Invalid taskId format" }),
-      { status: 400, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Bad Request", message: "Invalid taskId format" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
   }
   const { taskId } = pathValidation.data;
 
@@ -299,7 +305,7 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
       JSON.stringify({
         error: "Bad Request",
         message: "Invalid query parameters",
-        details: queryValidation.error.flatten().fieldErrors
+        details: queryValidation.error.flatten().fieldErrors,
       }),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
@@ -309,19 +315,15 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
   const supabase = locals.supabase;
   const taskExists = await verifyTaskExists(supabase, taskId);
   if (!taskExists) {
-    return new Response(
-      JSON.stringify({ error: "Not Found", message: "Task not found" }),
-      { status: 404, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Not Found", message: "Task not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   // 5. Pobierz interakcje
   try {
-    const result = await getAIInteractionsForTask(
-      supabase,
-      taskId,
-      queryValidation.data
-    );
+    const result = await getAIInteractionsForTask(supabase, taskId, queryValidation.data);
 
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -329,10 +331,10 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
     });
   } catch (error) {
     console.error("Error fetching AI interactions:", error);
-    return new Response(
-      JSON.stringify({ error: "Internal Server Error", message: "An unexpected error occurred" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal Server Error", message: "An unexpected error occurred" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 };
 ```
@@ -340,6 +342,7 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
 ### Krok 4: Testy manualne
 
 Scenariusze do przetestowania:
+
 1. ✅ Poprawne żądanie z istniejącym taskiem - zwraca 200 z danymi
 2. ✅ Żądanie bez autentykacji - zwraca 401
 3. ✅ Żądanie z nieistniejącym taskId - zwraca 404

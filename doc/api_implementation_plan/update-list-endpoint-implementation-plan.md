@@ -51,16 +51,12 @@ interface ErrorResponseDTO {
 ```typescript
 // Zod schema dla walidacji path parametru (src/lib/schemas/list.schema.ts)
 const listIdParamSchema = z.object({
-  id: z.string().uuid("Invalid list ID format")
+  id: z.string().uuid("Invalid list ID format"),
 });
 
 // Zod schema dla walidacji body
 const updateListSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .max(100, "Name must be at most 100 characters")
-    .trim()
+  name: z.string().min(1, "Name is required").max(100, "Name must be at most 100 characters").trim(),
 });
 ```
 
@@ -79,12 +75,12 @@ const updateListSchema = z.object({
 
 ### Błędy
 
-| Kod | Typ błędu | Opis |
-|-----|-----------|------|
-| 400 | Bad Request | Błąd walidacji (niepoprawny UUID, pusta nazwa, nazwa za długa, duplikat nazwy) |
-| 401 | Unauthorized | Użytkownik niezalogowany |
-| 404 | Not Found | Lista nie istnieje lub nie należy do użytkownika |
-| 500 | Internal Server Error | Nieoczekiwany błąd serwera |
+| Kod | Typ błędu             | Opis                                                                           |
+| --- | --------------------- | ------------------------------------------------------------------------------ |
+| 400 | Bad Request           | Błąd walidacji (niepoprawny UUID, pusta nazwa, nazwa za długa, duplikat nazwy) |
+| 401 | Unauthorized          | Użytkownik niezalogowany                                                       |
+| 404 | Not Found             | Lista nie istnieje lub nie należy do użytkownika                               |
+| 500 | Internal Server Error | Nieoczekiwany błąd serwera                                                     |
 
 ### Przykładowa odpowiedź błędu (400)
 
@@ -157,54 +153,62 @@ const updateListSchema = z.object({
 ## 6. Względy bezpieczeństwa
 
 ### Autentykacja
+
 - Endpoint wymaga zalogowanego użytkownika
 - Weryfikacja przez `context.locals.user` (ustawiane w middleware)
 - Brak użytkownika → 401 Unauthorized
 
 ### Autoryzacja
+
 - Model owner-only: użytkownik może modyfikować tylko swoje listy
 - Wymuszenie przez Supabase RLS policy: `user_id = auth.uid()`
 - Próba modyfikacji cudzej listy → brak wyniku → 404 Not Found
 
 ### Walidacja danych wejściowych
+
 - UUID format dla `id` - ochrona przed injection
 - Sanityzacja `name` - trim whitespace
 - Limit długości `name` (1-100) - zgodność z constraint w DB
 - Supabase SDK automatycznie escapuje wartości (ochrona przed SQL injection)
 
 ### Ochrona przed duplikatami
+
 - Constraint UNIQUE(user_id, lower(name)) w bazie danych
 - Obsługa błędu constraint violation → 400 Bad Request
 
 ## 7. Obsługa błędów
 
-| Scenariusz | Wykrycie | Kod HTTP | Odpowiedź |
-|------------|----------|----------|-----------|
-| Brak użytkownika w sesji | `!context.locals.user` | 401 | `{ error: "Unauthorized", message: "Authentication required" }` |
-| Niepoprawny format UUID | Zod validation fail | 400 | `{ error: "Bad Request", message: "Invalid list ID format" }` |
-| Pusta nazwa | Zod validation fail | 400 | `{ error: "Bad Request", message: "Validation failed", details: { name: "Name is required" } }` |
-| Nazwa za długa (>100) | Zod validation fail | 400 | `{ error: "Bad Request", message: "Validation failed", details: { name: "Name must be at most 100 characters" } }` |
-| Duplikat nazwy | DB unique constraint (code: 23505) | 400 | `{ error: "Bad Request", message: "A list with this name already exists" }` |
-| Lista nie istnieje | Supabase returns null/empty | 404 | `{ error: "Not Found", message: "List not found" }` |
-| Lista należy do innego użytkownika | RLS blocks, returns null | 404 | `{ error: "Not Found", message: "List not found" }` |
-| Nieoczekiwany błąd DB | Supabase error | 500 | `{ error: "Internal Server Error", message: "An unexpected error occurred" }` |
+| Scenariusz                         | Wykrycie                           | Kod HTTP | Odpowiedź                                                                                                          |
+| ---------------------------------- | ---------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------ |
+| Brak użytkownika w sesji           | `!context.locals.user`             | 401      | `{ error: "Unauthorized", message: "Authentication required" }`                                                    |
+| Niepoprawny format UUID            | Zod validation fail                | 400      | `{ error: "Bad Request", message: "Invalid list ID format" }`                                                      |
+| Pusta nazwa                        | Zod validation fail                | 400      | `{ error: "Bad Request", message: "Validation failed", details: { name: "Name is required" } }`                    |
+| Nazwa za długa (>100)              | Zod validation fail                | 400      | `{ error: "Bad Request", message: "Validation failed", details: { name: "Name must be at most 100 characters" } }` |
+| Duplikat nazwy                     | DB unique constraint (code: 23505) | 400      | `{ error: "Bad Request", message: "A list with this name already exists" }`                                        |
+| Lista nie istnieje                 | Supabase returns null/empty        | 404      | `{ error: "Not Found", message: "List not found" }`                                                                |
+| Lista należy do innego użytkownika | RLS blocks, returns null           | 404      | `{ error: "Not Found", message: "List not found" }`                                                                |
+| Nieoczekiwany błąd DB              | Supabase error                     | 500      | `{ error: "Internal Server Error", message: "An unexpected error occurred" }`                                      |
 
 ### Logowanie błędów
+
 - Poziom WARN: błędy walidacji (400)
 - Poziom ERROR: błędy bazy danych (500), z pełnym stack trace
 
 ## 8. Rozważania dotyczące wydajności
 
 ### Optymalizacje
+
 - **Single query** - UPDATE z RETURNING eliminuje potrzebę dodatkowego SELECT
 - **Indeks** - `lists_user_id_idx` wspiera RLS check
 - **Unique constraint index** - Szybkie sprawdzanie duplikatów nazw
 
 ### Potencjalne wąskie gardła
+
 - Brak - operacja UPDATE na pojedynczym rekordzie jest bardzo szybka
 - RLS nie powoduje dodatkowego overhead dzięki indeksowi na `user_id`
 
 ### Trigger updated_at
+
 - Automatyczna aktualizacja `updated_at` przez trigger `trg_lists_updated_at`
 - Nie wymaga jawnego ustawienia w aplikacji
 
@@ -218,15 +222,11 @@ const updateListSchema = z.object({
 import { z } from "zod";
 
 export const listIdParamSchema = z.object({
-  id: z.string().uuid("Invalid list ID format")
+  id: z.string().uuid("Invalid list ID format"),
 });
 
 export const updateListSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .max(100, "Name must be at most 100 characters")
-    .trim()
+  name: z.string().min(1, "Name is required").max(100, "Name must be at most 100 characters").trim(),
 });
 
 export type UpdateListInput = z.infer<typeof updateListSchema>;
@@ -243,11 +243,7 @@ import type { ListDTO, UpdateListCommand } from "../../types";
 export class ListService {
   constructor(private supabase: SupabaseClient) {}
 
-  async updateList(
-    listId: string,
-    userId: string,
-    command: UpdateListCommand
-  ): Promise<ListDTO | null> {
+  async updateList(listId: string, userId: string, command: UpdateListCommand): Promise<ListDTO | null> {
     const { data, error } = await this.supabase
       .from("lists")
       .update({ name: command.name })
@@ -269,7 +265,7 @@ export class ListService {
       id: data.id,
       name: data.name,
       createdAt: data.created_at,
-      updatedAt: data.updated_at
+      updatedAt: data.updated_at,
     };
   }
 }
@@ -294,7 +290,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     return new Response(
       JSON.stringify({
         error: "Unauthorized",
-        message: "Authentication required"
+        message: "Authentication required",
       } satisfies ErrorResponseDTO),
       { status: 401, headers: { "Content-Type": "application/json" } }
     );
@@ -306,7 +302,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     return new Response(
       JSON.stringify({
         error: "Bad Request",
-        message: "Invalid list ID format"
+        message: "Invalid list ID format",
       } satisfies ErrorResponseDTO),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
@@ -321,7 +317,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     return new Response(
       JSON.stringify({
         error: "Bad Request",
-        message: "Invalid JSON body"
+        message: "Invalid JSON body",
       } satisfies ErrorResponseDTO),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
@@ -338,7 +334,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
       JSON.stringify({
         error: "Bad Request",
         message: "Validation failed",
-        details: fieldErrors
+        details: fieldErrors,
       } satisfies ErrorResponseDTO),
       { status: 400, headers: { "Content-Type": "application/json" } }
     );
@@ -348,41 +344,31 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
   const listService = new ListService(locals.supabase);
 
   try {
-    const updatedList = await listService.updateList(
-      listId,
-      user.id,
-      bodyValidation.data
-    );
+    const updatedList = await listService.updateList(listId, user.id, bodyValidation.data);
 
     // 5. Obsługa przypadku gdy lista nie istnieje
     if (!updatedList) {
       return new Response(
         JSON.stringify({
           error: "Not Found",
-          message: "List not found"
+          message: "List not found",
         } satisfies ErrorResponseDTO),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
 
     // 6. Sukces - zwrot zaktualizowanej listy
-    return new Response(
-      JSON.stringify(updatedList satisfies ListDTO),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-
+    return new Response(JSON.stringify(updatedList satisfies ListDTO), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (error: unknown) {
     // 7. Obsługa błędu duplikatu nazwy
-    if (
-      error &&
-      typeof error === "object" &&
-      "code" in error &&
-      error.code === "23505"
-    ) {
+    if (error && typeof error === "object" && "code" in error && error.code === "23505") {
       return new Response(
         JSON.stringify({
           error: "Bad Request",
-          message: "A list with this name already exists"
+          message: "A list with this name already exists",
         } satisfies ErrorResponseDTO),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
@@ -394,7 +380,7 @@ export const PATCH: APIRoute = async ({ params, request, locals }) => {
     return new Response(
       JSON.stringify({
         error: "Internal Server Error",
-        message: "An unexpected error occurred"
+        message: "An unexpected error occurred",
       } satisfies ErrorResponseDTO),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );

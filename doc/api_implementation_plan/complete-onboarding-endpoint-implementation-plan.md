@@ -25,9 +25,9 @@ Jest to endpoint wymagający uwierzytelnienia, który przyjmuje numer wersji onb
 
 ### Walidacja Request Body:
 
-| Pole | Typ | Wymagane | Walidacja |
-|------|-----|----------|-----------|
-| `version` | number | Tak | Musi być liczbą całkowitą > 0 i <= 32767 (smallint) |
+| Pole      | Typ    | Wymagane | Walidacja                                           |
+| --------- | ------ | -------- | --------------------------------------------------- |
+| `version` | number | Tak      | Musi być liczbą całkowitą > 0 i <= 32767 (smallint) |
 
 ## 3. Wykorzystywane typy
 
@@ -41,12 +41,12 @@ interface CompleteOnboardingCommand {
 
 // DTO odpowiedzi
 interface ProfileDTO {
-  id: string;                              // UUID użytkownika
-  activeListId: string | null;             // UUID aktywnej listy lub null
-  onboardingCompletedAt: string | null;    // ISO8601 timestamp (zostanie ustawiony)
-  onboardingVersion: number;               // Wersja onboardingu (z requestu)
-  createdAt: string;                       // ISO8601 timestamp
-  updatedAt: string;                       // ISO8601 timestamp
+  id: string; // UUID użytkownika
+  activeListId: string | null; // UUID aktywnej listy lub null
+  onboardingCompletedAt: string | null; // ISO8601 timestamp (zostanie ustawiony)
+  onboardingVersion: number; // Wersja onboardingu (z requestu)
+  createdAt: string; // ISO8601 timestamp
+  updatedAt: string; // ISO8601 timestamp
 }
 
 // Standardowa odpowiedź błędu
@@ -88,12 +88,12 @@ const completeOnboardingSchema = z.object({
 
 ### Błędy
 
-| Kod | Typ błędu | Opis |
-|-----|-----------|------|
-| 400 | Bad Request | Nieprawidłowe dane wejściowe (version <= 0, brak pola, zły typ) |
-| 401 | Unauthorized | Użytkownik nie jest zalogowany |
-| 404 | Not Found | Profil nie istnieje (edge case) |
-| 500 | Internal Server Error | Błąd serwera/bazy danych |
+| Kod | Typ błędu             | Opis                                                            |
+| --- | --------------------- | --------------------------------------------------------------- |
+| 400 | Bad Request           | Nieprawidłowe dane wejściowe (version <= 0, brak pola, zły typ) |
+| 401 | Unauthorized          | Użytkownik nie jest zalogowany                                  |
+| 404 | Not Found             | Profil nie istnieje (edge case)                                 |
+| 500 | Internal Server Error | Błąd serwera/bazy danych                                        |
 
 ## 5. Przepływ danych
 
@@ -141,27 +141,32 @@ const completeOnboardingSchema = z.object({
 ## 6. Względy bezpieczeństwa
 
 ### Uwierzytelnianie
+
 - Wymagana aktywna sesja Supabase Auth
 - Token weryfikowany przez Supabase SDK
 - Sesja dostępna przez `context.locals.supabase.auth.getUser()`
 
 ### Autoryzacja
+
 - RLS (Row Level Security) na tabeli `profiles` zapewnia dostęp tylko do własnego profilu
 - Policy dla UPDATE: `using (id = auth.uid())`
 - Brak możliwości modyfikacji profilu innego użytkownika
 
 ### Walidacja danych wejściowych
+
 - Zod schema waliduje strukturę i typy danych
 - `version` musi być liczbą całkowitą > 0 (zgodnie z CHECK constraint w bazie)
 - `version` musi być <= 32767 (zakres smallint)
 - Odrzucenie dodatkowych pól z request body (`.strict()` lub ignorowanie)
 
 ### Ochrona przed atakami
+
 - Walidacja zapobiega SQL injection (parametryzowane zapytania Supabase)
 - Limit rozmiaru `version` zapobiega integer overflow
 - RLS zapobiega IDOR (Insecure Direct Object Reference)
 
 ### Ochrona danych
+
 - Nie ujawniać szczegółów wewnętrznych błędów w odpowiedzi
 - Nie logować wrażliwych danych użytkownika
 - Używać HTTPS (konfiguracja serwera)
@@ -170,21 +175,22 @@ const completeOnboardingSchema = z.object({
 
 ### Scenariusze błędów i odpowiedzi:
 
-| Scenariusz | Kod | Response Body |
-|------------|-----|---------------|
-| Brak body lub nieprawidłowy JSON | 400 | `{ "error": "Bad Request", "message": "Invalid JSON body" }` |
-| Brak pola `version` | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version is required" } }` |
-| `version` nie jest liczbą | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version must be a number" } }` |
-| `version` <= 0 | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version must be greater than 0" } }` |
-| `version` > 32767 | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version must be at most 32767" } }` |
-| `version` nie jest integer | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version must be an integer" } }` |
-| Brak nagłówka Authorization | 401 | `{ "error": "Unauthorized", "message": "Authentication required" }` |
-| Nieprawidłowy/wygasły token | 401 | `{ "error": "Unauthorized", "message": "Invalid or expired session" }` |
-| Profil nie istnieje | 404 | `{ "error": "Not Found", "message": "Profile not found" }` |
-| Błąd połączenia z bazą | 500 | `{ "error": "Internal Server Error", "message": "Unable to update profile" }` |
-| Nieoczekiwany błąd | 500 | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }` |
+| Scenariusz                       | Kod | Response Body                                                                                                            |
+| -------------------------------- | --- | ------------------------------------------------------------------------------------------------------------------------ |
+| Brak body lub nieprawidłowy JSON | 400 | `{ "error": "Bad Request", "message": "Invalid JSON body" }`                                                             |
+| Brak pola `version`              | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version is required" } }`            |
+| `version` nie jest liczbą        | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version must be a number" } }`       |
+| `version` <= 0                   | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version must be greater than 0" } }` |
+| `version` > 32767                | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version must be at most 32767" } }`  |
+| `version` nie jest integer       | 400 | `{ "error": "Bad Request", "message": "Validation failed", "details": { "version": "Version must be an integer" } }`     |
+| Brak nagłówka Authorization      | 401 | `{ "error": "Unauthorized", "message": "Authentication required" }`                                                      |
+| Nieprawidłowy/wygasły token      | 401 | `{ "error": "Unauthorized", "message": "Invalid or expired session" }`                                                   |
+| Profil nie istnieje              | 404 | `{ "error": "Not Found", "message": "Profile not found" }`                                                               |
+| Błąd połączenia z bazą           | 500 | `{ "error": "Internal Server Error", "message": "Unable to update profile" }`                                            |
+| Nieoczekiwany błąd               | 500 | `{ "error": "Internal Server Error", "message": "An unexpected error occurred" }`                                        |
 
 ### Logowanie błędów:
+
 - Błędy 500: logować pełny stack trace do konsoli serwera
 - Błędy 400: logować na poziomie debug (opcjonalnie)
 - Błędy 401: logować na poziomie info (bez wrażliwych danych)
@@ -192,16 +198,19 @@ const completeOnboardingSchema = z.object({
 ## 8. Rozważania dotyczące wydajności
 
 ### Optymalizacje:
+
 - **Pojedyncze zapytanie**: UPDATE z RETURNING eliminuje potrzebę dodatkowego SELECT
 - **RLS**: Minimalne narzuty dzięki prostej policy `id = auth.uid()`
 - **Brak JOIN-ów**: Endpoint modyfikuje tylko tabelę profiles
 - **Trigger**: `updated_at` aktualizowany automatycznie przez trigger `trg_profiles_updated_at`
 
 ### Potencjalne wąskie gardła:
+
 - Weryfikacja sesji przez Supabase Auth (minimalne opóźnienie)
 - Połączenie z bazą danych (connection pooling w Supabase)
 
 ### Rekomendacje:
+
 - Brak potrzeby cache'owania (operacja mutująca)
 - Endpoint nie wymaga dodatkowych optymalizacji dla MVP
 
@@ -222,9 +231,7 @@ type CompleteOnboardingResult =
   | { success: false; error: "not_found" | "database_error"; message: string };
 
 // Mapper Entity → DTO (jeśli nie istnieje, dodać)
-function mapProfileEntityToDTO(
-  entity: Database["public"]["Tables"]["profiles"]["Row"]
-): ProfileDTO {
+function mapProfileEntityToDTO(entity: Database["public"]["Tables"]["profiles"]["Row"]): ProfileDTO {
   return {
     id: entity.id,
     activeListId: entity.active_list_id,
@@ -397,6 +404,7 @@ export type SupabaseClient = BaseSupabaseClient<Database>;
 ### Krok 5: Struktura katalogów
 
 Upewnić się, że istnieją następujące katalogi:
+
 - `src/lib/services/` - dla service layer
 - `src/lib/schemas/` - dla Zod schemas
 - `src/pages/api/profile/onboarding/` - dla endpointu
