@@ -5,6 +5,7 @@
 Modal potwierdzenia usunięcia to reużywalny komponent typu overlay (AlertDialog) służący do potwierdzania destrukcyjnych akcji w aplikacji. Jego głównym celem jest ochrona użytkownika przed przypadkowym usunięciem danych poprzez wymaganie jawnego potwierdzenia. Modal obsługuje dwa scenariusze: usunięcie zadania oraz usunięcie listy (wraz z kaskadowym usunięciem wszystkich zadań na tej liście).
 
 Komponent zapewnia:
+
 - Jasny komunikat o konsekwencjach usunięcia
 - Bezpieczną opcję anulowania (domyślny focus)
 - Przycisk destrukcyjnej akcji wyraźnie oznaczony
@@ -13,6 +14,7 @@ Komponent zapewnia:
 ## 2. Routing widoku
 
 Modal nie posiada własnej ścieżki routingu - jest komponentem nakładkowym (overlay) wywoływanym z innych widoków:
+
 - Z widoku listy zadań przy usuwaniu pojedynczego zadania
 - Z panelu bocznego lub widoku list przy usuwaniu całej listy
 
@@ -82,7 +84,7 @@ DeleteConfirmationDialog (React)
 
 - **Opis komponentu**: Bazowy komponent z biblioteki Shadcn/ui oparty na @radix-ui/react-alert-dialog. Wymaga instalacji jako zależność projektu.
 
-- **Główne elementy**: Zestaw prymitywów AlertDialog*, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel
+- **Główne elementy**: Zestaw prymitywów AlertDialog\*, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel
 
 - **Obsługiwane interakcje**: Wbudowana obsługa klawiatury (Escape, Tab, Enter), fokus trap, kliknięcie poza modalem
 
@@ -98,7 +100,7 @@ DeleteConfirmationDialog (React)
 /**
  * Typ elementu do usunięcia
  */
-export type DeleteItemType = 'task' | 'list';
+export type DeleteItemType = "task" | "list";
 
 /**
  * Props dla komponentu DeleteConfirmationDialog
@@ -180,25 +182,18 @@ Hook zarządza całym stanem modala oraz komunikacją z API. Zapewnia enkapsulac
 ```typescript
 // src/components/hooks/useDeleteConfirmation.ts
 
-import { useState, useCallback } from 'react';
-import type {
-  DeleteItemType,
-  UseDeleteConfirmationReturn
-} from '../DeleteConfirmationDialog/types';
+import { useState, useCallback } from "react";
+import type { DeleteItemType, UseDeleteConfirmationReturn } from "../DeleteConfirmationDialog/types";
 
 export function useDeleteConfirmation(): UseDeleteConfirmationReturn {
   const [isOpen, setIsOpen] = useState(false);
   const [itemType, setItemType] = useState<DeleteItemType | null>(null);
   const [itemId, setItemId] = useState<string | null>(null);
-  const [itemName, setItemName] = useState('');
+  const [itemName, setItemName] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const openDialog = useCallback((
-    type: DeleteItemType,
-    id: string,
-    name: string
-  ) => {
+  const openDialog = useCallback((type: DeleteItemType, id: string, name: string) => {
     setItemType(type);
     setItemId(id);
     setItemName(name);
@@ -213,7 +208,7 @@ export function useDeleteConfirmation(): UseDeleteConfirmationReturn {
       setTimeout(() => {
         setItemType(null);
         setItemId(null);
-        setItemName('');
+        setItemName("");
         setError(null);
       }, 150);
     }
@@ -226,34 +221,32 @@ export function useDeleteConfirmation(): UseDeleteConfirmationReturn {
     setError(null);
 
     try {
-      const endpoint = itemType === 'task'
-        ? `/api/tasks/${itemId}`
-        : `/api/lists/${itemId}`;
+      const endpoint = itemType === "task" ? `/api/tasks/${itemId}` : `/api/lists/${itemId}`;
 
-      const response = await fetch(endpoint, { method: 'DELETE' });
+      const response = await fetch(endpoint, { method: "DELETE" });
 
       if (!response.ok) {
         const errorData = await response.json();
 
         if (response.status === 401) {
           // Session expired - redirect to login
-          window.location.href = '/login';
+          window.location.href = "/login";
           return false;
         }
 
         if (response.status === 404) {
-          setError('Element nie został znaleziony. Mógł zostać już usunięty.');
+          setError("Element nie został znaleziony. Mógł zostać już usunięty.");
           return false;
         }
 
-        setError(errorData.message || 'Wystąpił błąd podczas usuwania.');
+        setError(errorData.message || "Wystąpił błąd podczas usuwania.");
         return false;
       }
 
       setIsOpen(false);
       return true;
     } catch {
-      setError('Błąd połączenia. Sprawdź połączenie internetowe i spróbuj ponownie.');
+      setError("Błąd połączenia. Sprawdź połączenie internetowe i spróbuj ponownie.");
       return false;
     } finally {
       setIsDeleting(false);
@@ -286,7 +279,7 @@ export function useDeleteConfirmation(): UseDeleteConfirmationReturn {
 const deleteConfirmation = useDeleteConfirmation();
 
 const handleDeleteTask = (task: TaskDTO) => {
-  deleteConfirmation.openDialog('task', task.id, task.title);
+  deleteConfirmation.openDialog("task", task.id, task.title);
 };
 
 const handleConfirmDelete = async () => {
@@ -302,32 +295,34 @@ const handleConfirmDelete = async () => {
 
 ### Endpoint usuwania zadania
 
-| Właściwość | Wartość |
-|------------|---------|
-| Metoda | DELETE |
-| URL | `/api/tasks/:id` |
-| Parametry ścieżki | `id` - UUID zadania |
-| Ciało żądania | Brak |
+| Właściwość             | Wartość              |
+| ---------------------- | -------------------- |
+| Metoda                 | DELETE               |
+| URL                    | `/api/tasks/:id`     |
+| Parametry ścieżki      | `id` - UUID zadania  |
+| Ciało żądania          | Brak                 |
 | Typ odpowiedzi sukcesu | `SuccessResponseDTO` |
-| Typ odpowiedzi błędu | `ErrorResponseDTO` |
+| Typ odpowiedzi błędu   | `ErrorResponseDTO`   |
 
 **Kody odpowiedzi**:
+
 - `200 OK` - Zadanie usunięte pomyślnie
 - `401 Unauthorized` - Użytkownik niezalogowany
 - `404 Not Found` - Zadanie nie istnieje lub nie należy do użytkownika
 
 ### Endpoint usuwania listy
 
-| Właściwość | Wartość |
-|------------|---------|
-| Metoda | DELETE |
-| URL | `/api/lists/:id` |
-| Parametry ścieżki | `id` - UUID listy |
-| Ciało żądania | Brak |
+| Właściwość             | Wartość              |
+| ---------------------- | -------------------- |
+| Metoda                 | DELETE               |
+| URL                    | `/api/lists/:id`     |
+| Parametry ścieżki      | `id` - UUID listy    |
+| Ciało żądania          | Brak                 |
 | Typ odpowiedzi sukcesu | `SuccessResponseDTO` |
-| Typ odpowiedzi błędu | `ErrorResponseDTO` |
+| Typ odpowiedzi błędu   | `ErrorResponseDTO`   |
 
 **Kody odpowiedzi**:
+
 - `200 OK` - Lista usunięta pomyślnie (kaskadowo usuwa wszystkie zadania)
 - `401 Unauthorized` - Użytkownik niezalogowany
 - `404 Not Found` - Lista nie istnieje lub nie należy do użytkownika
@@ -337,7 +332,7 @@ const handleConfirmDelete = async () => {
 ```typescript
 // Usunięcie zadania
 const response = await fetch(`/api/tasks/${taskId}`, {
-  method: 'DELETE',
+  method: "DELETE",
 });
 
 if (response.ok) {
@@ -347,7 +342,7 @@ if (response.ok) {
 
 // Usunięcie listy
 const response = await fetch(`/api/lists/${listId}`, {
-  method: 'DELETE',
+  method: "DELETE",
 });
 
 if (response.ok) {
@@ -385,41 +380,41 @@ if (response.ok) {
 
 ### Interakcje klawiaturowe
 
-| Klawisz | Akcja |
-|---------|-------|
-| Escape | Zamknięcie modala (jeśli nie trwa usuwanie) |
-| Tab | Nawigacja między przyciskami |
-| Shift+Tab | Nawigacja wsteczna |
-| Enter | Aktywacja zaznaczonego przycisku |
-| Space | Aktywacja zaznaczonego przycisku |
+| Klawisz   | Akcja                                       |
+| --------- | ------------------------------------------- |
+| Escape    | Zamknięcie modala (jeśli nie trwa usuwanie) |
+| Tab       | Nawigacja między przyciskami                |
+| Shift+Tab | Nawigacja wsteczna                          |
+| Enter     | Aktywacja zaznaczonego przycisku            |
+| Space     | Aktywacja zaznaczonego przycisku            |
 
 ## 9. Warunki i walidacja
 
 ### Warunki wyświetlania modala
 
-| Warunek | Weryfikacja | Efekt |
-|---------|-------------|-------|
-| `open === true` | Stan w rodzicu | Modal jest widoczny |
-| `itemType` jest zdefiniowany | Props | Wyświetlany odpowiedni komunikat |
-| `itemName` jest niepusty | Props | Nazwa elementu w komunikacie |
+| Warunek                      | Weryfikacja    | Efekt                            |
+| ---------------------------- | -------------- | -------------------------------- |
+| `open === true`              | Stan w rodzicu | Modal jest widoczny              |
+| `itemType` jest zdefiniowany | Props          | Wyświetlany odpowiedni komunikat |
+| `itemName` jest niepusty     | Props          | Nazwa elementu w komunikacie     |
 
 ### Warunki blokowania interakcji
 
-| Warunek | Komponent | Efekt |
-|---------|-----------|-------|
-| `isDeleting === true` | AlertDialogCancel | Przycisk zablokowany (disabled) |
-| `isDeleting === true` | AlertDialogAction | Przycisk zablokowany, tekst "Usuwanie..." |
-| `isDeleting === true` | Kliknięcie poza modalem | Ignorowane |
-| `isDeleting === true` | Klawisz Escape | Ignorowany |
+| Warunek               | Komponent               | Efekt                                     |
+| --------------------- | ----------------------- | ----------------------------------------- |
+| `isDeleting === true` | AlertDialogCancel       | Przycisk zablokowany (disabled)           |
+| `isDeleting === true` | AlertDialogAction       | Przycisk zablokowany, tekst "Usuwanie..." |
+| `isDeleting === true` | Kliknięcie poza modalem | Ignorowane                                |
+| `isDeleting === true` | Klawisz Escape          | Ignorowany                                |
 
 ### Warunki walidacji API (server-side)
 
-| Warunek | Kod błędu | Komunikat dla użytkownika |
-|---------|-----------|---------------------------|
-| Brak sesji | 401 | Przekierowanie na /login |
-| Nieprawidłowy format ID | 400 | "Nieprawidłowy format identyfikatora" |
-| Element nie istnieje | 404 | "Element nie został znaleziony" |
-| Element należy do innego użytkownika | 404 | "Element nie został znaleziony" |
+| Warunek                              | Kod błędu | Komunikat dla użytkownika             |
+| ------------------------------------ | --------- | ------------------------------------- |
+| Brak sesji                           | 401       | Przekierowanie na /login              |
+| Nieprawidłowy format ID              | 400       | "Nieprawidłowy format identyfikatora" |
+| Element nie istnieje                 | 404       | "Element nie został znaleziony"       |
+| Element należy do innego użytkownika | 404       | "Element nie został znaleziony"       |
 
 ## 10. Obsługa błędów
 
@@ -428,13 +423,14 @@ if (response.ok) {
 **Przyczyna**: Sesja użytkownika wygasła lub użytkownik nie jest zalogowany.
 
 **Obsługa**:
+
 1. Wykrycie kodu 401 w odpowiedzi
 2. Automatyczne przekierowanie na stronę logowania (`/login`)
 3. Po zalogowaniu użytkownik wraca do poprzedniego widoku
 
 ```typescript
 if (response.status === 401) {
-  window.location.href = '/login';
+  window.location.href = "/login";
   return false;
 }
 ```
@@ -444,13 +440,14 @@ if (response.status === 401) {
 **Przyczyna**: Element został już usunięty lub nie należy do użytkownika.
 
 **Obsługa**:
+
 1. Wyświetlenie komunikatu: "Element nie został znaleziony. Mógł zostać już usunięty."
 2. Modal pozostaje otwarty, użytkownik może kliknąć "Anuluj"
 3. Po zamknięciu modala rodzic powinien odświeżyć widok
 
 ```typescript
 if (response.status === 404) {
-  setError('Element nie został znaleziony. Mógł zostać już usunięty.');
+  setError("Element nie został znaleziony. Mógł zostać już usunięty.");
   return false;
 }
 ```
@@ -460,6 +457,7 @@ if (response.status === 404) {
 **Przyczyna**: Brak połączenia internetowego lub timeout.
 
 **Obsługa**:
+
 1. Przechwycenie wyjątku w bloku catch
 2. Wyświetlenie komunikatu: "Błąd połączenia. Sprawdź połączenie internetowe i spróbuj ponownie."
 3. Modal pozostaje otwarty, użytkownik może spróbować ponownie
@@ -476,6 +474,7 @@ catch {
 **Przyczyna**: Nieoczekiwany błąd po stronie serwera.
 
 **Obsługa**:
+
 1. Wyświetlenie komunikatu z API lub domyślnego: "Wystąpił błąd podczas usuwania."
 2. Modal pozostaje otwarty
 3. Użytkownik może spróbować ponownie lub anulować
@@ -485,14 +484,16 @@ catch {
 Błędy są wyświetlane wewnątrz modala, poniżej opisu, w formie alertu:
 
 ```tsx
-{error && (
-  <div
-    role="alert"
-    className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm"
-  >
-    {error}
-  </div>
-)}
+{
+  error && (
+    <div
+      role="alert"
+      className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md text-destructive text-sm"
+    >
+      {error}
+    </div>
+  );
+}
 ```
 
 ## 11. Kroki implementacji
@@ -518,6 +519,7 @@ Utworzenie pliku `src/components/ui/alert-dialog.tsx` z konfiguracją Shadcn/ui:
 ### Krok 3: Utworzenie typów
 
 Utworzenie pliku `src/components/DeleteConfirmationDialog/types.ts`:
+
 - `DeleteItemType`
 - `DeleteDialogProps`
 - `DeleteConfirmationState`
@@ -527,6 +529,7 @@ Utworzenie pliku `src/components/DeleteConfirmationDialog/types.ts`:
 ### Krok 4: Utworzenie custom hooka
 
 Utworzenie pliku `src/components/hooks/useDeleteConfirmation.ts`:
+
 - Implementacja zarządzania stanem modala
 - Implementacja logiki wywołań API
 - Obsługa błędów i stanów ładowania
@@ -534,6 +537,7 @@ Utworzenie pliku `src/components/hooks/useDeleteConfirmation.ts`:
 ### Krok 5: Utworzenie komponentu DeleteConfirmationDialog
 
 Utworzenie pliku `src/components/DeleteConfirmationDialog/DeleteConfirmationDialog.tsx`:
+
 - Wykorzystanie AlertDialog z Shadcn/ui
 - Dynamiczny komunikat zależny od `itemType`
 - Obsługa stanu ładowania
@@ -543,6 +547,7 @@ Utworzenie pliku `src/components/DeleteConfirmationDialog/DeleteConfirmationDial
 ### Krok 6: Utworzenie pliku eksportującego
 
 Utworzenie pliku `src/components/DeleteConfirmationDialog/index.ts`:
+
 - Eksport komponentu
 - Eksport typów
 - Eksport hooka
@@ -550,6 +555,7 @@ Utworzenie pliku `src/components/DeleteConfirmationDialog/index.ts`:
 ### Krok 7: Integracja z komponentami rodzicielskimi
 
 Aktualizacja komponentów wywołujących modal:
+
 - Widok listy zadań - usuwanie zadań
 - Panel boczny/widok list - usuwanie list
 - Podłączenie hooka `useDeleteConfirmation`
@@ -558,6 +564,7 @@ Aktualizacja komponentów wywołujących modal:
 ### Krok 8: Testy manualne
 
 Weryfikacja scenariuszy:
+
 - Usunięcie zadania - sukces
 - Usunięcie zadania - błąd 404
 - Usunięcie listy - sukces
@@ -571,6 +578,7 @@ Weryfikacja scenariuszy:
 ### Krok 9: Testy dostępności
 
 Weryfikacja z narzędziami:
+
 - Sprawdzenie `role="alertdialog"`
 - Sprawdzenie `aria-labelledby` i `aria-describedby`
 - Weryfikacja fokus trap

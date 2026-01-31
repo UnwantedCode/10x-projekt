@@ -95,6 +95,7 @@ RegisterPage (src/pages/register.astro)
 ### 4.4 Komponenty Shadcn/ui do dodania
 
 Przed implementacją należy dodać następujące komponenty z biblioteki shadcn/ui:
+
 - `Input` - pole tekstowe
 - `Checkbox` - pole wyboru
 - `Label` - etykieta pola
@@ -129,7 +130,7 @@ interface RegisterFormErrors {
 ### 5.3 PasswordStrength (ViewModel)
 
 ```typescript
-type PasswordStrength = 'weak' | 'fair' | 'good' | 'strong';
+type PasswordStrength = "weak" | "fair" | "good" | "strong";
 
 interface PasswordStrengthResult {
   strength: PasswordStrength;
@@ -157,9 +158,9 @@ Stan formularza będzie zarządzany lokalnie w komponencie `RegisterForm` przy u
 
 ```typescript
 const [formData, setFormData] = useState<RegisterFormData>({
-  email: '',
-  password: '',
-  confirmPassword: '',
+  email: "",
+  password: "",
+  confirmPassword: "",
   acceptedTerms: false,
 });
 
@@ -201,12 +202,9 @@ function useRegisterForm() {
 Rejestracja wykorzystuje metodę `signUp()` z Supabase Auth SDK:
 
 ```typescript
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
 // W komponencie RegisterForm
 const handleSubmit = async (e: React.FormEvent) => {
@@ -230,9 +228,9 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
 
     // Sukces - przekierowanie do logowania
-    window.location.href = '/login?registered=true';
+    window.location.href = "/login?registered=true";
   } catch (err) {
-    setErrors({ general: 'Wystąpił nieoczekiwany błąd. Spróbuj ponownie.' });
+    setErrors({ general: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie." });
   } finally {
     setIsSubmitting(false);
   }
@@ -245,8 +243,8 @@ Należy utworzyć osobny klient Supabase dla komponentów React działających p
 
 ```typescript
 // src/db/supabase.browser.ts
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './database.types';
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 export const supabaseBrowser = createClient<Database>(
   import.meta.env.PUBLIC_SUPABASE_URL,
@@ -257,6 +255,7 @@ export const supabaseBrowser = createClient<Database>(
 ### 7.3 Typy żądania i odpowiedzi
 
 **Żądanie (signUp)**:
+
 ```typescript
 {
   email: string;
@@ -265,66 +264,71 @@ export const supabaseBrowser = createClient<Database>(
 ```
 
 **Odpowiedź sukcesu**:
+
 ```typescript
 {
   data: {
     user: User | null;
     session: Session | null;
-  };
+  }
   error: null;
 }
 ```
 
 **Odpowiedź błędu**:
+
 ```typescript
 {
-  data: { user: null; session: null };
+  data: {
+    user: null;
+    session: null;
+  }
   error: AuthError;
 }
 ```
 
 ## 8. Interakcje użytkownika
 
-| Interakcja | Element | Oczekiwany rezultat |
-|------------|---------|---------------------|
-| Wpisanie email | Input email | Aktualizacja stanu, walidacja formatu przy blur |
-| Wpisanie hasła | Input password | Aktualizacja stanu, aktualizacja wskaźnika siły |
-| Wpisanie potwierdzenia | Input confirmPassword | Aktualizacja stanu, walidacja zgodności w czasie rzeczywistym |
-| Zaznaczenie checkbox | Checkbox terms | Aktualizacja stanu acceptedTerms |
-| Kliknięcie "Zarejestruj" | Button submit | Walidacja formularza, wywołanie API, obsługa wyniku |
-| Kliknięcie linku logowania | Link | Przekierowanie do /login |
-| Kliknięcie linku regulaminu | Link | Otwarcie regulaminu (nowa karta lub modal) |
+| Interakcja                  | Element               | Oczekiwany rezultat                                           |
+| --------------------------- | --------------------- | ------------------------------------------------------------- |
+| Wpisanie email              | Input email           | Aktualizacja stanu, walidacja formatu przy blur               |
+| Wpisanie hasła              | Input password        | Aktualizacja stanu, aktualizacja wskaźnika siły               |
+| Wpisanie potwierdzenia      | Input confirmPassword | Aktualizacja stanu, walidacja zgodności w czasie rzeczywistym |
+| Zaznaczenie checkbox        | Checkbox terms        | Aktualizacja stanu acceptedTerms                              |
+| Kliknięcie "Zarejestruj"    | Button submit         | Walidacja formularza, wywołanie API, obsługa wyniku           |
+| Kliknięcie linku logowania  | Link                  | Przekierowanie do /login                                      |
+| Kliknięcie linku regulaminu | Link                  | Otwarcie regulaminu (nowa karta lub modal)                    |
 
 ## 9. Warunki i walidacja
 
 ### 9.1 Walidacja email
 
-| Warunek | Komunikat błędu | Moment walidacji |
-|---------|-----------------|------------------|
-| Pole puste | "Email jest wymagany" | onBlur, onSubmit |
+| Warunek            | Komunikat błędu              | Moment walidacji |
+| ------------------ | ---------------------------- | ---------------- |
+| Pole puste         | "Email jest wymagany"        | onBlur, onSubmit |
 | Niepoprawny format | "Podaj poprawny adres email" | onBlur, onSubmit |
 
 **Regex walidacji**: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
 
 ### 9.2 Walidacja hasła
 
-| Warunek | Komunikat błędu | Moment walidacji |
-|---------|-----------------|------------------|
-| Pole puste | "Hasło jest wymagane" | onBlur, onSubmit |
+| Warunek            | Komunikat błędu                    | Moment walidacji   |
+| ------------------ | ---------------------------------- | ------------------ |
+| Pole puste         | "Hasło jest wymagane"              | onBlur, onSubmit   |
 | Mniej niż 8 znaków | "Hasło musi mieć minimum 8 znaków" | onChange, onSubmit |
 
 ### 9.3 Walidacja potwierdzenia hasła
 
-| Warunek | Komunikat błędu | Moment walidacji |
-|---------|-----------------|------------------|
-| Pole puste | "Potwierdzenie hasła jest wymagane" | onBlur, onSubmit |
-| Niezgodność z hasłem | "Hasła muszą być identyczne" | onChange (real-time), onSubmit |
+| Warunek              | Komunikat błędu                     | Moment walidacji               |
+| -------------------- | ----------------------------------- | ------------------------------ |
+| Pole puste           | "Potwierdzenie hasła jest wymagane" | onBlur, onSubmit               |
+| Niezgodność z hasłem | "Hasła muszą być identyczne"        | onChange (real-time), onSubmit |
 
 ### 9.4 Walidacja akceptacji regulaminu
 
-| Warunek | Komunikat błędu | Moment walidacji |
-|---------|-----------------|------------------|
-| Niezaznaczony | "Musisz zaakceptować regulamin" | onSubmit |
+| Warunek       | Komunikat błędu                 | Moment walidacji |
+| ------------- | ------------------------------- | ---------------- |
+| Niezaznaczony | "Musisz zaakceptować regulamin" | onSubmit         |
 
 ### 9.5 Funkcja walidacji
 
@@ -334,28 +338,28 @@ function validateForm(formData: RegisterFormData): RegisterFormErrors {
 
   // Email
   if (!formData.email.trim()) {
-    errors.email = 'Email jest wymagany';
+    errors.email = "Email jest wymagany";
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-    errors.email = 'Podaj poprawny adres email';
+    errors.email = "Podaj poprawny adres email";
   }
 
   // Password
   if (!formData.password) {
-    errors.password = 'Hasło jest wymagane';
+    errors.password = "Hasło jest wymagane";
   } else if (formData.password.length < 8) {
-    errors.password = 'Hasło musi mieć minimum 8 znaków';
+    errors.password = "Hasło musi mieć minimum 8 znaków";
   }
 
   // Confirm password
   if (!formData.confirmPassword) {
-    errors.confirmPassword = 'Potwierdzenie hasła jest wymagane';
+    errors.confirmPassword = "Potwierdzenie hasła jest wymagane";
   } else if (formData.password !== formData.confirmPassword) {
-    errors.confirmPassword = 'Hasła muszą być identyczne';
+    errors.confirmPassword = "Hasła muszą być identyczne";
   }
 
   // Terms
   if (!formData.acceptedTerms) {
-    errors.acceptedTerms = 'Musisz zaakceptować regulamin';
+    errors.acceptedTerms = "Musisz zaakceptować regulamin";
   }
 
   return errors;
@@ -373,27 +377,27 @@ function validateForm(formData: RegisterFormData): RegisterFormErrors {
 
 ### 10.2 Błędy Supabase Auth
 
-| Kod błędu Supabase | Komunikat dla użytkownika |
-|--------------------|---------------------------|
-| `user_already_exists` | "Konto z tym adresem email już istnieje" |
-| `invalid_email` | "Podany adres email jest nieprawidłowy" |
-| `weak_password` | "Hasło jest zbyt słabe" |
-| `signup_disabled` | "Rejestracja jest obecnie wyłączona" |
-| (inne) | "Wystąpił błąd podczas rejestracji. Spróbuj ponownie." |
+| Kod błędu Supabase    | Komunikat dla użytkownika                              |
+| --------------------- | ------------------------------------------------------ |
+| `user_already_exists` | "Konto z tym adresem email już istnieje"               |
+| `invalid_email`       | "Podany adres email jest nieprawidłowy"                |
+| `weak_password`       | "Hasło jest zbyt słabe"                                |
+| `signup_disabled`     | "Rejestracja jest obecnie wyłączona"                   |
+| (inne)                | "Wystąpił błąd podczas rejestracji. Spróbuj ponownie." |
 
 ```typescript
 function mapSupabaseError(error: AuthError): string {
   switch (error.message) {
-    case 'User already registered':
-      return 'Konto z tym adresem email już istnieje';
-    case 'Invalid email':
-      return 'Podany adres email jest nieprawidłowy';
-    case 'Password should be at least 6 characters':
-      return 'Hasło jest zbyt słabe';
-    case 'Signups not allowed for this instance':
-      return 'Rejestracja jest obecnie wyłączona';
+    case "User already registered":
+      return "Konto z tym adresem email już istnieje";
+    case "Invalid email":
+      return "Podany adres email jest nieprawidłowy";
+    case "Password should be at least 6 characters":
+      return "Hasło jest zbyt słabe";
+    case "Signups not allowed for this instance":
+      return "Rejestracja jest obecnie wyłączona";
     default:
-      return 'Wystąpił błąd podczas rejestracji. Spróbuj ponownie.';
+      return "Wystąpił błąd podczas rejestracji. Spróbuj ponownie.";
   }
 }
 ```
@@ -427,8 +431,8 @@ npx shadcn@latest add alert
 Utworzyć plik `src/db/supabase.browser.ts` z klientem Supabase używającym zmiennych `PUBLIC_*`:
 
 ```typescript
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './database.types';
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./database.types";
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
@@ -451,6 +455,7 @@ Utworzyć plik `src/components/auth/PasswordStrengthIndicator.tsx` z wizualnym w
 ### Krok 6: Utworzenie komponentu RegisterForm
 
 Utworzyć plik `src/components/auth/RegisterForm.tsx` z pełną implementacją formularza rejestracji:
+
 - Stan formularza
 - Walidacja
 - Integracja z Supabase

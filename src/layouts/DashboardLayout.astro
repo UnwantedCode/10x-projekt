@@ -44,12 +44,7 @@ const { title = "Dashboard | AI Task Manager" } = Astro.props;
         </aside>
 
         <!-- Main content area -->
-        <main
-          id="main-content"
-          role="main"
-          aria-label="Zawartość główna"
-          class="flex-1 overflow-y-auto bg-background"
-        >
+        <main id="main-content" role="main" aria-label="Zawartość główna" class="flex-1 overflow-y-auto bg-background">
           <slot name="content" />
         </main>
       </div>

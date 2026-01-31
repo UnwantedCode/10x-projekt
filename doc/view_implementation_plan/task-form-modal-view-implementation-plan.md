@@ -5,6 +5,7 @@
 Modal tworzenia/edycji zadania to kluczowy komponent interfejsu użytkownika, który umożliwia pełną obsługę zadań w aplikacji AI Task Manager. Widok ten łączy funkcjonalność formularza CRUD z integracją AI do sugerowania priorytetów.
 
 Modal obsługuje dwa tryby:
+
 - **Tryb tworzenia**: Dodawanie nowego zadania do aktywnej listy
 - **Tryb edycji**: Modyfikacja istniejącego zadania
 
@@ -13,6 +14,7 @@ Główną wartością dodaną jest opcjonalna integracja z AI, która analizuje 
 ## 2. Routing widoku
 
 Modal nie posiada dedykowanej ścieżki routingu. Jest wywoływany jako overlay z poziomu widoku listy zadań:
+
 - Otwierany przez przycisk "Dodaj zadanie" (tryb tworzenia)
 - Otwierany przez kliknięcie/przycisk edycji przy zadaniu (tryb edycji)
 
@@ -81,8 +83,8 @@ TaskFormDialog
     isOpen: boolean;
     onClose: () => void;
     onSuccess?: (task: TaskDTO) => void;
-    task?: TaskDTO;          // undefined = tryb tworzenia
-    listId: string;          // wymagane dla tworzenia
+    task?: TaskDTO; // undefined = tryb tworzenia
+    listId: string; // wymagane dla tworzenia
   }
   ```
 
@@ -288,13 +290,13 @@ TaskFormDialog
 
 ```typescript
 // Priorytety zadania
-type TaskPriority = 1 | 2 | 3;  // 1=Niski, 2=Średni, 3=Wysoki
+type TaskPriority = 1 | 2 | 3; // 1=Niski, 2=Średni, 3=Wysoki
 
 // Status zadania
-type TaskStatus = 1 | 2;  // 1=Do zrobienia, 2=Zrobione
+type TaskStatus = 1 | 2; // 1=Do zrobienia, 2=Zrobione
 
 // Decyzja AI
-type AIDecision = 1 | 2 | 3;  // 1=Akceptacja, 2=Modyfikacja, 3=Odrzucenie
+type AIDecision = 1 | 2 | 3; // 1=Akceptacja, 2=Modyfikacja, 3=Odrzucenie
 
 // DTO zadania
 interface TaskDTO {
@@ -413,7 +415,7 @@ interface TaskFormDialogProps {
 }
 
 // Tryb formularza
-type FormMode = 'create' | 'edit';
+type FormMode = "create" | "edit";
 ```
 
 ## 6. Zarządzanie stanem
@@ -451,6 +453,7 @@ interface UseTaskFormReturn {
 ```
 
 **Odpowiedzialności:**
+
 - Przechowuje stan formularza (`title`, `description`, `priority`)
 - Śledzi błędy walidacji dla każdego pola
 - Obsługuje walidację on-blur i on-submit
@@ -485,6 +488,7 @@ interface UseAISuggestionReturn {
 ```
 
 **Odpowiedzialności:**
+
 - Wysyła żądanie do `POST /api/ai/suggest`
 - Przechowuje otrzymaną sugestię
 - Obsługuje błędy API (503 - serwis niedostępny)
@@ -532,20 +536,23 @@ interface UseAISuggestionReturn {
 ### POST /api/lists/:listId/tasks (tworzenie zadania)
 
 **Żądanie:**
+
 ```typescript
 interface CreateTaskCommand {
-  title: string;            // wymagany, 1-500 znaków
+  title: string; // wymagany, 1-500 znaków
   description?: string | null;
-  priority: TaskPriority;   // wymagany, 1-3
+  priority: TaskPriority; // wymagany, 1-3
 }
 ```
 
 **Odpowiedź (201 Created):**
+
 ```typescript
-TaskDTO
+TaskDTO;
 ```
 
 **Błędy:**
+
 - `400 Bad Request`: Błąd walidacji (szczegóły w `details`)
 - `401 Unauthorized`: Niezalogowany użytkownik
 - `404 Not Found`: Lista nie istnieje
@@ -553,9 +560,10 @@ TaskDTO
 ### PATCH /api/tasks/:id (edycja zadania)
 
 **Żądanie:**
+
 ```typescript
 interface UpdateTaskCommand {
-  title?: string;           // 1-200 znaków jeśli podany
+  title?: string; // 1-200 znaków jeśli podany
   description?: string | null;
   priority?: TaskPriority;
   status?: TaskStatus;
@@ -564,11 +572,13 @@ interface UpdateTaskCommand {
 ```
 
 **Odpowiedź (200 OK):**
+
 ```typescript
-TaskDTO
+TaskDTO;
 ```
 
 **Błędy:**
+
 - `400 Bad Request`: Błąd walidacji
 - `401 Unauthorized`: Niezalogowany
 - `404 Not Found`: Zadanie nie istnieje
@@ -577,15 +587,17 @@ TaskDTO
 ### POST /api/ai/suggest (sugestia AI)
 
 **Żądanie:**
+
 ```typescript
 interface AISuggestCommand {
-  taskId: string | null;    // null dla nowego zadania
-  title: string;            // wymagany, 1-200 znaków
+  taskId: string | null; // null dla nowego zadania
+  title: string; // wymagany, 1-200 znaków
   description?: string | null;
 }
 ```
 
 **Odpowiedź (200 OK):**
+
 ```typescript
 interface AISuggestionDTO {
   interactionId: string;
@@ -598,6 +610,7 @@ interface AISuggestionDTO {
 ```
 
 **Błędy:**
+
 - `400 Bad Request`: Brak tytułu
 - `401 Unauthorized`: Niezalogowany
 - `404 Not Found`: Zadanie nie istnieje (gdy taskId podany)
@@ -606,6 +619,7 @@ interface AISuggestionDTO {
 ### PATCH /api/ai-interactions/:id (rejestracja decyzji)
 
 **Żądanie:**
+
 ```typescript
 // Akceptacja
 { decision: 1 }
@@ -618,11 +632,13 @@ interface AISuggestionDTO {
 ```
 
 **Odpowiedź (200 OK):**
+
 ```typescript
-AIInteractionDTO
+AIInteractionDTO;
 ```
 
 **Błędy:**
+
 - `400 Bad Request`: Niespójne pola decyzji
 - `401 Unauthorized`: Niezalogowany
 - `404 Not Found`: Interakcja nie istnieje
@@ -699,40 +715,40 @@ AIInteractionDTO
 
 ### Walidacja pola Title:
 
-| Warunek | Komunikat | Moment walidacji |
-|---------|-----------|------------------|
-| Pusty | "Tytuł jest wymagany" | on-blur, on-submit |
+| Warunek      | Komunikat                                | Moment walidacji     |
+| ------------ | ---------------------------------------- | -------------------- |
+| Pusty        | "Tytuł jest wymagany"                    | on-blur, on-submit   |
 | > 500 znaków | "Tytuł może mieć maksymalnie 500 znaków" | on-change, on-submit |
 
 ### Walidacja pola Description:
 
-| Warunek | Komunikat | Moment walidacji |
-|---------|-----------|------------------|
+| Warunek       | Komunikat                                | Moment walidacji     |
+| ------------- | ---------------------------------------- | -------------------- |
 | > 5000 znaków | "Opis może mieć maksymalnie 5000 znaków" | on-change, on-submit |
 
 ### Walidacja pola Priority:
 
-| Warunek | Komunikat | Moment walidacji |
-|---------|-----------|------------------|
-| Nie wybrano | "Priorytet jest wymagany" | on-submit |
+| Warunek     | Komunikat                 | Moment walidacji |
+| ----------- | ------------------------- | ---------------- |
+| Nie wybrano | "Priorytet jest wymagany" | on-submit        |
 
 ### Walidacja powodu odrzucenia:
 
-| Warunek | Komunikat | Moment walidacji |
-|---------|-----------|------------------|
-| Pusty | "Podaj powód odrzucenia sugestii" | on-confirm |
+| Warunek      | Komunikat                                | Moment walidacji      |
+| ------------ | ---------------------------------------- | --------------------- |
+| Pusty        | "Podaj powód odrzucenia sugestii"        | on-confirm            |
 | > 300 znaków | "Powód może mieć maksymalnie 300 znaków" | on-change, on-confirm |
 
 ### Warunki aktywności przycisków:
 
-| Przycisk | Warunek aktywności |
-|----------|-------------------|
-| "Zasugeruj priorytet" | title.trim().length > 0 && !isLoading && !suggestion |
-| "Zapisz" | Zawsze aktywny (walidacja przy submit) |
-| "Akceptuj" | !isProcessingDecision |
-| "Modyfikuj" | !isProcessingDecision |
-| "Odrzuć" | !isProcessingDecision |
-| "Potwierdź odrzucenie" | reason.trim().length > 0 && reason.length <= 300 |
+| Przycisk               | Warunek aktywności                                   |
+| ---------------------- | ---------------------------------------------------- |
+| "Zasugeruj priorytet"  | title.trim().length > 0 && !isLoading && !suggestion |
+| "Zapisz"               | Zawsze aktywny (walidacja przy submit)               |
+| "Akceptuj"             | !isProcessingDecision                                |
+| "Modyfikuj"            | !isProcessingDecision                                |
+| "Odrzuć"               | !isProcessingDecision                                |
+| "Potwierdź odrzucenie" | reason.trim().length > 0 && reason.length <= 300     |
 
 ## 10. Obsługa błędów
 
@@ -793,12 +809,14 @@ npx shadcn@latest add alert
 ### Krok 2: Utworzenie typów ViewModels
 
 Plik: `src/components/tasks/types.ts`
+
 - Zdefiniuj `TaskFormState`, `TaskFormErrors`, `AISuggestionState`
 - Zdefiniuj propsy komponentów
 
 ### Krok 3: Implementacja hooka `useTaskForm`
 
 Plik: `src/components/hooks/useTaskForm.ts`
+
 - Stan formularza z useState
 - Funkcje walidacji
 - Logika submit z rozróżnieniem create/edit
@@ -807,6 +825,7 @@ Plik: `src/components/hooks/useTaskForm.ts`
 ### Krok 4: Implementacja hooka `useAISuggestion`
 
 Plik: `src/components/hooks/useAISuggestion.ts`
+
 - Stan sugestii
 - Funkcja `requestSuggestion`
 - Funkcje decyzji (accept, modify, reject)
@@ -815,6 +834,7 @@ Plik: `src/components/hooks/useAISuggestion.ts`
 ### Krok 5: Implementacja `TextareaWithCounter`
 
 Plik: `src/components/ui/textarea-with-counter.tsx`
+
 - Wrapper nad Textarea z Shadcn
 - Licznik znaków
 - Stylowanie ostrzeżenia przy zbliżaniu do limitu
@@ -822,6 +842,7 @@ Plik: `src/components/ui/textarea-with-counter.tsx`
 ### Krok 6: Implementacja `PrioritySelector`
 
 Plik: `src/components/tasks/PrioritySelector.tsx`
+
 - RadioGroup z trzema opcjami
 - Kolorystyczne oznaczenie priorytetów
 - Obsługa błędu walidacji
@@ -829,6 +850,7 @@ Plik: `src/components/tasks/PrioritySelector.tsx`
 ### Krok 7: Implementacja `AISuggestionButton`
 
 Plik: `src/components/tasks/AISuggestionButton.tsx`
+
 - Button z ikoną AI
 - Stan ładowania ze spinnerem
 - Disabled gdy brak tytułu lub ładowanie
@@ -836,6 +858,7 @@ Plik: `src/components/tasks/AISuggestionButton.tsx`
 ### Krok 8: Implementacja `RejectionReasonInput`
 
 Plik: `src/components/tasks/RejectionReasonInput.tsx`
+
 - Input z licznikiem
 - Przyciski potwierdzenia/anulowania
 - Walidacja inline
@@ -843,6 +866,7 @@ Plik: `src/components/tasks/RejectionReasonInput.tsx`
 ### Krok 9: Implementacja `AISuggestionPanel`
 
 Plik: `src/components/tasks/AISuggestionPanel.tsx`
+
 - Layout panelu z wynikiem
 - Trzy przyciski akcji
 - Warunkowe wyświetlanie RejectionReasonInput
@@ -851,6 +875,7 @@ Plik: `src/components/tasks/AISuggestionPanel.tsx`
 ### Krok 10: Implementacja `TaskForm`
 
 Plik: `src/components/tasks/TaskForm.tsx`
+
 - Kompozycja wszystkich pól
 - Integracja hooków
 - Walidacja on-blur i on-submit
@@ -859,6 +884,7 @@ Plik: `src/components/tasks/TaskForm.tsx`
 ### Krok 11: Implementacja `TaskFormDialog`
 
 Plik: `src/components/tasks/TaskFormDialog.tsx`
+
 - Dialog wrapper
 - Zarządzanie focus
 - Obsługa zamknięcia

@@ -142,9 +142,7 @@ export function TaskCard({ task, onStatusChange }: TaskCardProps) {
             </time>
 
             {isDone && task.doneAt && (
-              <span className="text-xs text-muted-foreground">
-                • Zrobione {formatRelativeTime(task.doneAt)}
-              </span>
+              <span className="text-xs text-muted-foreground">• Zrobione {formatRelativeTime(task.doneAt)}</span>
             )}
           </div>
         </div>

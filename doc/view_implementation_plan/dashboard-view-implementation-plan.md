@@ -282,7 +282,7 @@ src/pages/app.astro (Astro page)
 - **Propsy**:
   ```typescript
   interface EmptyStateProps {
-    type: 'no-lists' | 'no-tasks';
+    type: "no-lists" | "no-tasks";
     onAction: () => void;
   }
   ```
@@ -410,8 +410,8 @@ interface TaskFilterState {
   status: TaskStatus | null; // null = wszystkie, 1 = todo, 2 = done
   priority: TaskPriority | null; // null = wszystkie priorytety
   search: string;
-  sort: 'priority' | 'sort_order' | 'created_at';
-  order: 'asc' | 'desc';
+  sort: "priority" | "sort_order" | "created_at";
+  order: "asc" | "desc";
 }
 
 /**
@@ -420,18 +420,18 @@ interface TaskFilterState {
 const DEFAULT_FILTER_STATE: TaskFilterState = {
   status: 1, // domyślnie tylko todo
   priority: null,
-  search: '',
-  sort: 'priority',
-  order: 'desc',
+  search: "",
+  sort: "priority",
+  order: "desc",
 };
 
 /**
  * Zadania pogrupowane według priorytetu
  */
 interface TasksByPriority {
-  high: TaskDTO[];   // priority = 3
+  high: TaskDTO[]; // priority = 3
   medium: TaskDTO[]; // priority = 2
-  low: TaskDTO[];    // priority = 1
+  low: TaskDTO[]; // priority = 1
 }
 
 /**
@@ -446,7 +446,7 @@ interface ListItemViewModel extends ListDTO {
 /**
  * Typ stanu pustego
  */
-type EmptyStateType = 'no-lists' | 'no-tasks';
+type EmptyStateType = "no-lists" | "no-tasks";
 
 /**
  * Konfiguracja stanu pustego
@@ -564,11 +564,7 @@ interface UseInfiniteScrollReturn {
   isIntersecting: boolean;
 }
 
-function useInfiniteScroll(
-  onLoadMore: () => void,
-  hasMore: boolean,
-  isLoading: boolean
-): UseInfiniteScrollReturn {
+function useInfiniteScroll(onLoadMore: () => void, hasMore: boolean, isLoading: boolean): UseInfiniteScrollReturn {
   // Implementacja z useRef, useEffect, IntersectionObserver
 }
 ```
@@ -637,37 +633,37 @@ function useInfiniteScroll(
 // src/lib/api/dashboard.api.ts
 
 export async function fetchProfile(): Promise<ProfileDTO> {
-  const response = await fetch('/api/profile');
+  const response = await fetch("/api/profile");
   if (!response.ok) {
     if (response.status === 401) throw new UnauthorizedError();
-    throw new ApiError('Failed to fetch profile');
+    throw new ApiError("Failed to fetch profile");
   }
   return response.json();
 }
 
 export async function updateActiveList(listId: string | null): Promise<ProfileDTO> {
-  const response = await fetch('/api/profile', {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+  const response = await fetch("/api/profile", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ activeListId: listId }),
   });
   if (!response.ok) {
     if (response.status === 401) throw new UnauthorizedError();
-    if (response.status === 400) throw new ValidationError('Invalid list');
-    throw new ApiError('Failed to update profile');
+    if (response.status === 400) throw new ValidationError("Invalid list");
+    throw new ApiError("Failed to update profile");
   }
   return response.json();
 }
 
 export async function fetchLists(params?: { limit?: number; offset?: number }): Promise<ListsResponseDTO> {
   const searchParams = new URLSearchParams();
-  if (params?.limit) searchParams.set('limit', String(params.limit));
-  if (params?.offset) searchParams.set('offset', String(params.offset));
+  if (params?.limit) searchParams.set("limit", String(params.limit));
+  if (params?.offset) searchParams.set("offset", String(params.offset));
 
   const response = await fetch(`/api/lists?${searchParams}`);
   if (!response.ok) {
     if (response.status === 401) throw new UnauthorizedError();
-    throw new ApiError('Failed to fetch lists');
+    throw new ApiError("Failed to fetch lists");
   }
   return response.json();
 }
@@ -677,19 +673,19 @@ export async function fetchTasks(
   params: TaskFilterState & { limit: number; offset: number }
 ): Promise<TasksResponseDTO> {
   const searchParams = new URLSearchParams();
-  if (params.status !== null) searchParams.set('status', String(params.status));
-  if (params.priority !== null) searchParams.set('priority', String(params.priority));
-  if (params.search) searchParams.set('search', params.search);
-  searchParams.set('sort', params.sort);
-  searchParams.set('order', params.order);
-  searchParams.set('limit', String(params.limit));
-  searchParams.set('offset', String(params.offset));
+  if (params.status !== null) searchParams.set("status", String(params.status));
+  if (params.priority !== null) searchParams.set("priority", String(params.priority));
+  if (params.search) searchParams.set("search", params.search);
+  searchParams.set("sort", params.sort);
+  searchParams.set("order", params.order);
+  searchParams.set("limit", String(params.limit));
+  searchParams.set("offset", String(params.offset));
 
   const response = await fetch(`/api/lists/${listId}/tasks?${searchParams}`);
   if (!response.ok) {
     if (response.status === 401) throw new UnauthorizedError();
-    if (response.status === 404) throw new NotFoundError('List not found');
-    throw new ApiError('Failed to fetch tasks');
+    if (response.status === 404) throw new NotFoundError("List not found");
+    throw new ApiError("Failed to fetch tasks");
   }
   return response.json();
 }
@@ -751,6 +747,7 @@ export async function fetchTasks(
 ### 8.7. CRUD listy
 
 **Tworzenie:**
+
 1. Kliknięcie "+" w sidebar header
 2. Pojawia się inline input
 3. Wpisanie nazwy + Enter lub blur
@@ -759,12 +756,14 @@ export async function fetchTasks(
 6. Automatyczne ustawienie jako aktywna
 
 **Edycja:**
+
 1. Kliknięcie ikony edycji przy liście
 2. Input z aktualną nazwą
 3. Zmiana + Enter/blur
 4. `PATCH /api/lists/:id`
 
 **Usuwanie:**
+
 1. Kliknięcie ikony usuwania
 2. Dialog potwierdzenia
 3. `DELETE /api/lists/:id`
@@ -774,36 +773,35 @@ export async function fetchTasks(
 
 ### 9.1. Walidacja formularza dodawania zadania (InlineTaskInput)
 
-| Pole | Warunek | Komunikat błędu | Wpływ na UI |
-|------|---------|-----------------|-------------|
-| title | Wymagane | "Tytuł jest wymagany" | Czerwona ramka, tekst pod inputem |
-| title | Min 1 znak | "Tytuł jest wymagany" | j.w. |
-| title | Max 200 znaków | "Tytuł może mieć max 200 znaków" | j.w. |
-| priority | Wymagane | "Wybierz priorytet" | Podświetlenie selectora |
-| description | Max 2000 znaków | "Opis może mieć max 2000 znaków" | Czerwona ramka textarea |
+| Pole        | Warunek         | Komunikat błędu                  | Wpływ na UI                       |
+| ----------- | --------------- | -------------------------------- | --------------------------------- |
+| title       | Wymagane        | "Tytuł jest wymagany"            | Czerwona ramka, tekst pod inputem |
+| title       | Min 1 znak      | "Tytuł jest wymagany"            | j.w.                              |
+| title       | Max 200 znaków  | "Tytuł może mieć max 200 znaków" | j.w.                              |
+| priority    | Wymagane        | "Wybierz priorytet"              | Podświetlenie selectora           |
+| description | Max 2000 znaków | "Opis może mieć max 2000 znaków" | Czerwona ramka textarea           |
 
 ### 9.2. Walidacja formularza listy (Sidebar)
 
-| Pole | Warunek | Komunikat błędu | Wpływ na UI |
-|------|---------|-----------------|-------------|
-| name | Wymagane | "Nazwa listy jest wymagana" | Input z czerwoną ramką |
-| name | Min 1 znak | "Nazwa listy jest wymagana" | j.w. |
-| name | Max 100 znaków | "Nazwa może mieć max 100 znaków" | j.w. |
-| name | Unikalna (z API) | "Lista o tej nazwie już istnieje" | Toast + input error |
+| Pole | Warunek          | Komunikat błędu                   | Wpływ na UI            |
+| ---- | ---------------- | --------------------------------- | ---------------------- |
+| name | Wymagane         | "Nazwa listy jest wymagana"       | Input z czerwoną ramką |
+| name | Min 1 znak       | "Nazwa listy jest wymagana"       | j.w.                   |
+| name | Max 100 znaków   | "Nazwa może mieć max 100 znaków"  | j.w.                   |
+| name | Unikalna (z API) | "Lista o tej nazwie już istnieje" | Toast + input error    |
 
 ### 9.3. Warunki wyświetlania stanów pustych
 
-| Warunek | Wyświetlany komponent | Akcja |
-|---------|----------------------|-------|
-| `lists.length === 0` | EmptyState (no-lists) | "Utwórz pierwszą listę" |
-| `activeListId && tasks.length === 0` | EmptyState (no-tasks) | "Dodaj zadanie" |
-| `!activeListId && lists.length > 0` | Instrukcja wyboru | "Wybierz listę z menu" |
+| Warunek                              | Wyświetlany komponent | Akcja                   |
+| ------------------------------------ | --------------------- | ----------------------- |
+| `lists.length === 0`                 | EmptyState (no-lists) | "Utwórz pierwszą listę" |
+| `activeListId && tasks.length === 0` | EmptyState (no-tasks) | "Dodaj zadanie"         |
+| `!activeListId && lists.length > 0`  | Instrukcja wyboru     | "Wybierz listę z menu"  |
 
 ### 9.4. Warunki wyświetlania onboardingu
 
 ```typescript
-const showOnboarding = profile !== null
-  && profile.onboardingCompletedAt === null;
+const showOnboarding = profile !== null && profile.onboardingCompletedAt === null;
 ```
 
 ## 10. Obsługa błędów

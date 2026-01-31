@@ -13,11 +13,7 @@ type RegisterFormField = keyof Omit<RegisterFormValues, "acceptedTerms">;
 /**
  * Validates a single form field
  */
-function validateField(
-  name: RegisterFormField,
-  value: string,
-  allValues?: RegisterFormValues
-): string | undefined {
+function validateField(name: RegisterFormField, value: string, allValues?: RegisterFormValues): string | undefined {
   if (name === "email") {
     if (!value.trim()) {
       return "Email jest wymagany";
@@ -153,21 +149,18 @@ export function useRegisterForm(): UseRegisterFormReturn {
     setErrors((prev) => ({ ...prev, acceptedTerms: undefined, form: undefined }));
   }, []);
 
-  const handleBlur = useCallback(
-    (e: React.FocusEvent<HTMLInputElement>) => {
-      const { name, value } = e.target;
-      const fieldName = name as RegisterFormField;
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    const fieldName = name as RegisterFormField;
 
-      setTouchedFields((prev) => new Set(prev).add(fieldName));
+    setTouchedFields((prev) => new Set(prev).add(fieldName));
 
-      setValues((currentValues) => {
-        const fieldError = validateField(fieldName, value, currentValues);
-        setErrors((prev) => ({ ...prev, [fieldName]: fieldError }));
-        return currentValues;
-      });
-    },
-    []
-  );
+    setValues((currentValues) => {
+      const fieldError = validateField(fieldName, value, currentValues);
+      setErrors((prev) => ({ ...prev, [fieldName]: fieldError }));
+      return currentValues;
+    });
+  }, []);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -182,12 +175,7 @@ export function useRegisterForm(): UseRegisterFormReturn {
       if (Object.keys(formErrors).length > 0) {
         setErrors(formErrors);
         // Focus first field with error
-        const errorOrder: (keyof RegisterFormErrors)[] = [
-          "email",
-          "password",
-          "confirmPassword",
-          "acceptedTerms",
-        ];
+        const errorOrder: (keyof RegisterFormErrors)[] = ["email", "password", "confirmPassword", "acceptedTerms"];
         const firstErrorField = errorOrder.find((field) => formErrors[field]);
         if (firstErrorField && firstErrorField !== "acceptedTerms") {
           const element = document.querySelector<HTMLInputElement>(`input[name="${firstErrorField}"]`);

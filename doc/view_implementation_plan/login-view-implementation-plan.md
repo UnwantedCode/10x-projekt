@@ -211,8 +211,8 @@ Komponent `LoginForm` zarządza następującym stanem lokalnym:
 ```typescript
 // Wartości pól formularza
 const [values, setValues] = useState<LoginFormValues>({
-  email: '',
-  password: ''
+  email: "",
+  password: "",
 });
 
 // Błędy walidacji
@@ -272,13 +272,14 @@ Widok wykorzystuje Supabase Auth SDK do logowania użytkownika:
 // Wywołanie API
 const { data, error } = await supabase.auth.signInWithPassword({
   email: values.email,
-  password: values.password
+  password: values.password,
 });
 ```
 
 ### 7.2. Typy żądania i odpowiedzi
 
 **Żądanie (SignInWithPasswordCredentials):**
+
 ```typescript
 {
   email: string;
@@ -287,23 +288,25 @@ const { data, error } = await supabase.auth.signInWithPassword({
 ```
 
 **Odpowiedź sukcesu (AuthResponse):**
+
 ```typescript
 {
   data: {
-    user: User;      // Obiekt użytkownika Supabase
+    user: User; // Obiekt użytkownika Supabase
     session: Session; // Sesja z tokenami JWT
-  };
+  }
   error: null;
 }
 ```
 
 **Odpowiedź błędu (AuthResponse):**
+
 ```typescript
 {
   data: {
     user: null;
     session: null;
-  };
+  }
   error: AuthError; // { message: string; status: number; }
 }
 ```
@@ -313,62 +316,61 @@ const { data, error } = await supabase.auth.signInWithPassword({
 W komponencie React należy utworzyć klienta Supabase dla przeglądarki:
 
 ```typescript
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
-const supabase = createClient(
-  import.meta.env.PUBLIC_SUPABASE_URL,
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-);
+const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 ```
 
 ### 7.4. Przekierowanie po zalogowaniu
 
 Po pomyślnym zalogowaniu:
+
 ```typescript
 if (data.session) {
   // Sprawdź czy jest parametr redirectTo
   const params = new URLSearchParams(window.location.search);
-  const redirectTo = params.get('redirectTo') || '/dashboard';
+  const redirectTo = params.get("redirectTo") || "/dashboard";
   window.location.href = redirectTo;
 }
 ```
 
 ## 8. Interakcje użytkownika
 
-| Interakcja | Element | Oczekiwany rezultat |
-|------------|---------|---------------------|
-| Wejście na stronę | Strona | Autofocus na polu email |
-| Wpisanie tekstu w pole email | Input email | Aktualizacja stanu `values.email` |
-| Opuszczenie pola email | Input email | Walidacja formatu, wyświetlenie błędu jeśli nieprawidłowy |
-| Wpisanie tekstu w pole hasła | Input password | Aktualizacja stanu `values.password` |
-| Opuszczenie pola hasła | Input password | Walidacja długości, wyświetlenie błędu jeśli za krótkie |
-| Kliknięcie "Zaloguj" (poprawne dane) | Button | Loader, wywołanie API, przekierowanie do `/dashboard` |
-| Kliknięcie "Zaloguj" (błędne dane) | Button | Loader, wywołanie API, wyświetlenie komunikatu błędu |
-| Kliknięcie "Zaloguj" (błędy walidacji) | Button | Wyświetlenie wszystkich błędów walidacji |
-| Kliknięcie "Zarejestruj się" | Link | Nawigacja do `/register` |
-| Kliknięcie "Zapomniałem hasła" | Link | Nawigacja do `/forgot-password` |
-| Naciśnięcie Enter w formularzu | Form | Wysłanie formularza (jak kliknięcie "Zaloguj") |
+| Interakcja                             | Element        | Oczekiwany rezultat                                       |
+| -------------------------------------- | -------------- | --------------------------------------------------------- |
+| Wejście na stronę                      | Strona         | Autofocus na polu email                                   |
+| Wpisanie tekstu w pole email           | Input email    | Aktualizacja stanu `values.email`                         |
+| Opuszczenie pola email                 | Input email    | Walidacja formatu, wyświetlenie błędu jeśli nieprawidłowy |
+| Wpisanie tekstu w pole hasła           | Input password | Aktualizacja stanu `values.password`                      |
+| Opuszczenie pola hasła                 | Input password | Walidacja długości, wyświetlenie błędu jeśli za krótkie   |
+| Kliknięcie "Zaloguj" (poprawne dane)   | Button         | Loader, wywołanie API, przekierowanie do `/dashboard`     |
+| Kliknięcie "Zaloguj" (błędne dane)     | Button         | Loader, wywołanie API, wyświetlenie komunikatu błędu      |
+| Kliknięcie "Zaloguj" (błędy walidacji) | Button         | Wyświetlenie wszystkich błędów walidacji                  |
+| Kliknięcie "Zarejestruj się"           | Link           | Nawigacja do `/register`                                  |
+| Kliknięcie "Zapomniałem hasła"         | Link           | Nawigacja do `/forgot-password`                           |
+| Naciśnięcie Enter w formularzu         | Form           | Wysłanie formularza (jak kliknięcie "Zaloguj")            |
 
 ## 9. Warunki i walidacja
 
 ### 9.1. Walidacja pola email
 
-| Warunek | Komunikat błędu | Moment sprawdzenia |
-|---------|-----------------|-------------------|
-| Pole nie może być puste | "Adres email jest wymagany" | on-blur, on-submit |
+| Warunek                           | Komunikat błędu                     | Moment sprawdzenia |
+| --------------------------------- | ----------------------------------- | ------------------ |
+| Pole nie może być puste           | "Adres email jest wymagany"         | on-blur, on-submit |
 | Musi być poprawnym formatem email | "Nieprawidłowy format adresu email" | on-blur, on-submit |
 
 **Regex dla walidacji email:**
+
 ```typescript
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 ```
 
 ### 9.2. Walidacja pola hasła
 
-| Warunek | Komunikat błędu | Moment sprawdzenia |
-|---------|-----------------|-------------------|
-| Pole nie może być puste | "Hasło jest wymagane" | on-blur, on-submit |
-| Minimum 6 znaków | "Hasło musi mieć co najmniej 6 znaków" | on-blur, on-submit |
+| Warunek                 | Komunikat błędu                        | Moment sprawdzenia |
+| ----------------------- | -------------------------------------- | ------------------ |
+| Pole nie może być puste | "Hasło jest wymagane"                  | on-blur, on-submit |
+| Minimum 6 znaków        | "Hasło musi mieć co najmniej 6 znaków" | on-blur, on-submit |
 
 ### 9.3. Walidacja formularza
 
@@ -381,13 +383,13 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 ### 9.4. Wpływ walidacji na UI
 
-| Stan | Email Input | Password Input | Button | Alert |
-|------|-------------|----------------|--------|-------|
-| Początkowy | Normalny | Normalny | Aktywny | Ukryty |
-| Błąd walidacji email | aria-invalid, czerwona obwódka | Normalny | Aktywny | Ukryty |
-| Błąd walidacji hasła | Normalny | aria-invalid, czerwona obwódka | Aktywny | Ukryty |
-| Wysyłanie | Disabled | Disabled | Loading | Ukryty |
-| Błąd serwera | Normalny | Normalny | Aktywny | Widoczny z komunikatem |
+| Stan                 | Email Input                    | Password Input                 | Button  | Alert                  |
+| -------------------- | ------------------------------ | ------------------------------ | ------- | ---------------------- |
+| Początkowy           | Normalny                       | Normalny                       | Aktywny | Ukryty                 |
+| Błąd walidacji email | aria-invalid, czerwona obwódka | Normalny                       | Aktywny | Ukryty                 |
+| Błąd walidacji hasła | Normalny                       | aria-invalid, czerwona obwódka | Aktywny | Ukryty                 |
+| Wysyłanie            | Disabled                       | Disabled                       | Loading | Ukryty                 |
+| Błąd serwera         | Normalny                       | Normalny                       | Aktywny | Widoczny z komunikatem |
 
 ## 10. Obsługa błędów
 
@@ -400,21 +402,21 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 ### 10.2. Błędy uwierzytelniania (Supabase Auth)
 
-| Błąd Supabase | Komunikat dla użytkownika |
-|---------------|---------------------------|
-| `Invalid login credentials` | "Nieprawidłowy email lub hasło" |
-| `Email not confirmed` | "Adres email nie został potwierdzony. Sprawdź swoją skrzynkę." |
-| Dowolny inny błąd auth | "Nieprawidłowy email lub hasło" |
+| Błąd Supabase               | Komunikat dla użytkownika                                      |
+| --------------------------- | -------------------------------------------------------------- |
+| `Invalid login credentials` | "Nieprawidłowy email lub hasło"                                |
+| `Email not confirmed`       | "Adres email nie został potwierdzony. Sprawdź swoją skrzynkę." |
+| Dowolny inny błąd auth      | "Nieprawidłowy email lub hasło"                                |
 
 **Ważne**: Wszystkie błędy związane z nieistniejącym kontem lub błędnym hasłem muszą zwracać **ten sam** generyczny komunikat, aby zapobiec enumeracji użytkowników.
 
 ### 10.3. Błędy sieciowe
 
-| Błąd | Komunikat dla użytkownika |
-|------|---------------------------|
+| Błąd            | Komunikat dla użytkownika                                                        |
+| --------------- | -------------------------------------------------------------------------------- |
 | Brak połączenia | "Błąd połączenia z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie." |
-| Timeout | "Serwer nie odpowiada. Spróbuj ponownie za chwilę." |
-| Błąd 5xx | "Wystąpił błąd serwera. Spróbuj ponownie później." |
+| Timeout         | "Serwer nie odpowiada. Spróbuj ponownie za chwilę."                              |
+| Błąd 5xx        | "Wystąpił błąd serwera. Spróbuj ponownie później."                               |
 
 ### 10.4. Implementacja obsługi błędów
 
@@ -422,26 +424,25 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 try {
   const { data, error } = await supabase.auth.signInWithPassword({
     email: values.email,
-    password: values.password
+    password: values.password,
   });
 
   if (error) {
     // Mapowanie błędów Supabase na generyczny komunikat
-    if (error.message.includes('Email not confirmed')) {
-      setErrors({ form: 'Adres email nie został potwierdzony. Sprawdź swoją skrzynkę.' });
+    if (error.message.includes("Email not confirmed")) {
+      setErrors({ form: "Adres email nie został potwierdzony. Sprawdź swoją skrzynkę." });
     } else {
       // Generyczny komunikat dla błędów auth (zapobiega enumeracji)
-      setErrors({ form: 'Nieprawidłowy email lub hasło' });
+      setErrors({ form: "Nieprawidłowy email lub hasło" });
     }
     return;
   }
 
   // Sukces - przekierowanie
-  window.location.href = '/dashboard';
-
+  window.location.href = "/dashboard";
 } catch (e) {
   // Błędy sieciowe
-  setErrors({ form: 'Błąd połączenia z serwerem. Spróbuj ponownie.' });
+  setErrors({ form: "Błąd połączenia z serwerem. Spróbuj ponownie." });
 } finally {
   setIsSubmitting(false);
 }
@@ -465,6 +466,7 @@ npx shadcn@latest add alert
 ### Krok 2: Utworzenie layoutu AuthLayout
 
 Utworzyć plik `src/layouts/AuthLayout.astro`:
+
 - Minimalny HTML z meta tagami
 - Flexbox centrujący zawartość (min-h-screen)
 - Slot dla zawartości
@@ -473,6 +475,7 @@ Utworzyć plik `src/layouts/AuthLayout.astro`:
 ### Krok 3: Utworzenie typów dla formularza
 
 Utworzyć plik `src/components/auth/types.ts`:
+
 - Zdefiniować `LoginFormValues`
 - Zdefiniować `LoginFormErrors`
 - Zdefiniować `UseLoginFormReturn`
@@ -480,6 +483,7 @@ Utworzyć plik `src/components/auth/types.ts`:
 ### Krok 4: Utworzenie hooka useLoginForm
 
 Utworzyć plik `src/components/auth/useLoginForm.ts`:
+
 - Implementacja stanu formularza
 - Funkcje walidacji pól
 - Handlery onChange, onBlur, onSubmit
@@ -489,6 +493,7 @@ Utworzyć plik `src/components/auth/useLoginForm.ts`:
 ### Krok 5: Utworzenie komponentu LoginForm
 
 Utworzyć plik `src/components/auth/LoginForm.tsx`:
+
 - Użycie hooka `useLoginForm`
 - Struktura formularza z komponentami shadcn/ui
 - Autofocus na polu email
@@ -499,6 +504,7 @@ Utworzyć plik `src/components/auth/LoginForm.tsx`:
 ### Krok 6: Utworzenie strony login.astro
 
 Utworzyć plik `src/pages/login.astro`:
+
 - Sprawdzenie sesji w frontmatter (przekierowanie jeśli zalogowany)
 - Import AuthLayout
 - Renderowanie LoginForm z `client:load`
@@ -506,6 +512,7 @@ Utworzyć plik `src/pages/login.astro`:
 ### Krok 7: Konfiguracja middleware dla sesji
 
 Upewnić się, że middleware (`src/middleware/index.ts`):
+
 - Tworzy klienta Supabase SSR
 - Sprawdza sesję
 - Ustawia `context.locals.supabase`

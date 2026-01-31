@@ -115,10 +115,10 @@ interface ForgotPasswordFormState {
 }
 ```
 
-| Pole | Typ | Opis |
-|------|-----|------|
-| `email` | `string` | Wartość pola email |
-| `isLoading` | `boolean` | Flaga wskazująca trwające żądanie API |
+| Pole          | Typ       | Opis                                                                    |
+| ------------- | --------- | ----------------------------------------------------------------------- |
+| `email`       | `string`  | Wartość pola email                                                      |
+| `isLoading`   | `boolean` | Flaga wskazująca trwające żądanie API                                   |
 | `isSubmitted` | `boolean` | Flaga wskazująca, że formularz został wysłany (pokazuje SuccessMessage) |
 
 ### 5.2. ForgotPasswordFormErrors
@@ -131,8 +131,8 @@ interface ForgotPasswordFormErrors {
 }
 ```
 
-| Pole | Typ | Opis |
-|------|-----|------|
+| Pole    | Typ                   | Opis                                     |
+| ------- | --------------------- | ---------------------------------------- |
 | `email` | `string \| undefined` | Komunikat błędu walidacji dla pola email |
 
 ### 5.3. ForgotPasswordFormProps
@@ -146,9 +146,9 @@ interface ForgotPasswordFormProps {
 }
 ```
 
-| Pole | Typ | Opis |
-|------|-----|------|
-| `supabaseUrl` | `string` | URL instancji Supabase |
+| Pole              | Typ      | Opis                     |
+| ----------------- | -------- | ------------------------ |
+| `supabaseUrl`     | `string` | URL instancji Supabase   |
 | `supabaseAnonKey` | `string` | Klucz anonimowy Supabase |
 
 ## 6. Zarządzanie stanem
@@ -159,7 +159,7 @@ Widok wykorzystuje lokalny stan komponentu React bez potrzeby tworzenia customow
 
 ```typescript
 const [formState, setFormState] = useState<ForgotPasswordFormState>({
-  email: '',
+  email: "",
   isLoading: false,
   isSubmitted: false,
 });
@@ -195,10 +195,10 @@ const { error } = await supabase.auth.resetPasswordForEmail(email, {
 
 ### Parametry żądania
 
-| Parametr | Typ | Wymagany | Opis |
-|----------|-----|----------|------|
-| `email` | `string` | Tak | Adres email użytkownika |
-| `options.redirectTo` | `string` | Nie | URL do strony ustawiania nowego hasła |
+| Parametr             | Typ      | Wymagany | Opis                                  |
+| -------------------- | -------- | -------- | ------------------------------------- |
+| `email`              | `string` | Tak      | Adres email użytkownika               |
+| `options.redirectTo` | `string` | Nie      | URL do strony ustawiania nowego hasła |
 
 ### Obsługa odpowiedzi
 
@@ -210,7 +210,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
   if (!validateEmail()) return;
 
-  setFormState(prev => ({ ...prev, isLoading: true }));
+  setFormState((prev) => ({ ...prev, isLoading: true }));
 
   try {
     await supabase.auth.resetPasswordForEmail(formState.email, {
@@ -218,12 +218,12 @@ const handleSubmit = async (e: React.FormEvent) => {
     });
   } catch (error) {
     // Ignorujemy błędy - zawsze pokazujemy sukces
-    console.error('Password reset error:', error);
+    console.error("Password reset error:", error);
   } finally {
-    setFormState(prev => ({
+    setFormState((prev) => ({
       ...prev,
       isLoading: false,
-      isSubmitted: true
+      isSubmitted: true,
     }));
   }
 };
@@ -233,49 +233,49 @@ const handleSubmit = async (e: React.FormEvent) => {
 
 ### 8.1. Wpisywanie adresu email
 
-| Zdarzenie | Akcja |
-|-----------|-------|
+| Zdarzenie                | Akcja                          |
+| ------------------------ | ------------------------------ |
 | Użytkownik wpisuje tekst | Aktualizacja `formState.email` |
-| Zmiana wartości | Czyszczenie `errors.email` |
+| Zmiana wartości          | Czyszczenie `errors.email`     |
 
 ### 8.2. Opuszczenie pola email (blur)
 
-| Zdarzenie | Akcja |
-|-----------|-------|
-| Pole puste | Ustawienie `errors.email = "Adres email jest wymagany"` |
+| Zdarzenie          | Akcja                                                    |
+| ------------------ | -------------------------------------------------------- |
+| Pole puste         | Ustawienie `errors.email = "Adres email jest wymagany"`  |
 | Niepoprawny format | Ustawienie `errors.email = "Podaj poprawny adres email"` |
-| Poprawny email | Czyszczenie `errors.email` |
+| Poprawny email     | Czyszczenie `errors.email`                               |
 
 ### 8.3. Kliknięcie przycisku "Wyślij link resetujący"
 
-| Zdarzenie | Akcja |
-|-----------|-------|
-| Walidacja nieudana | Wyświetlenie błędów, brak wywołania API |
-| Walidacja udana | Wywołanie API, pokazanie loadera na przycisku |
-| Odpowiedź (sukces/błąd) | Pokazanie `SuccessMessage` |
+| Zdarzenie               | Akcja                                         |
+| ----------------------- | --------------------------------------------- |
+| Walidacja nieudana      | Wyświetlenie błędów, brak wywołania API       |
+| Walidacja udana         | Wywołanie API, pokazanie loadera na przycisku |
+| Odpowiedź (sukces/błąd) | Pokazanie `SuccessMessage`                    |
 
 ### 8.4. Kliknięcie "Wróć do logowania"
 
-| Zdarzenie | Akcja |
-|-----------|-------|
+| Zdarzenie        | Akcja                 |
+| ---------------- | --------------------- |
 | Kliknięcie linku | Nawigacja do `/login` |
 
 ### 8.5. Nawigacja klawiaturą
 
-| Klawisz | Akcja |
-|---------|-------|
-| Tab | Przejście między polami i przyciskami |
-| Enter (na polu email) | Submit formularza |
-| Enter (na przycisku) | Submit formularza |
+| Klawisz               | Akcja                                 |
+| --------------------- | ------------------------------------- |
+| Tab                   | Przejście między polami i przyciskami |
+| Enter (na polu email) | Submit formularza                     |
+| Enter (na przycisku)  | Submit formularza                     |
 
 ## 9. Warunki i walidacja
 
 ### 9.1. Walidacja pola email
 
-| Warunek | Reguła | Komunikat błędu |
-|---------|--------|-----------------|
-| Wymagane | `email.trim().length > 0` | "Adres email jest wymagany" |
-| Format | `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` | "Podaj poprawny adres email" |
+| Warunek  | Reguła                         | Komunikat błędu              |
+| -------- | ------------------------------ | ---------------------------- |
+| Wymagane | `email.trim().length > 0`      | "Adres email jest wymagany"  |
+| Format   | `/^[^\s@]+@[^\s@]+\.[^\s@]+$/` | "Podaj poprawny adres email" |
 
 ### 9.2. Walidacja formularza przed wysłaniem
 
@@ -284,13 +284,13 @@ const validateEmail = (): boolean => {
   const email = formState.email.trim();
 
   if (!email) {
-    setErrors({ email: 'Adres email jest wymagany' });
+    setErrors({ email: "Adres email jest wymagany" });
     return false;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    setErrors({ email: 'Podaj poprawny adres email' });
+    setErrors({ email: "Podaj poprawny adres email" });
     return false;
   }
 
@@ -301,40 +301,40 @@ const validateEmail = (): boolean => {
 
 ### 9.3. Wpływ walidacji na UI
 
-| Stan | Wpływ na UI |
-|------|-------------|
+| Stan                 | Wpływ na UI                                                      |
+| -------------------- | ---------------------------------------------------------------- |
 | Błąd walidacji email | Czerwona ramka na polu, komunikat błędu pod polem, focus na polu |
-| Brak błędów | Normalny styl pola |
-| `isLoading: true` | Przycisk nieaktywny z spinnerem, pole zablokowane |
-| `isSubmitted: true` | Ukrycie formularza, pokazanie `SuccessMessage` |
+| Brak błędów          | Normalny styl pola                                               |
+| `isLoading: true`    | Przycisk nieaktywny z spinnerem, pole zablokowane                |
+| `isSubmitted: true`  | Ukrycie formularza, pokazanie `SuccessMessage`                   |
 
 ## 10. Obsługa błędów
 
 ### 10.1. Błędy walidacji klienta
 
-| Błąd | Obsługa |
-|------|---------|
-| Pusty email | Komunikat inline "Adres email jest wymagany" |
+| Błąd               | Obsługa                                       |
+| ------------------ | --------------------------------------------- |
+| Pusty email        | Komunikat inline "Adres email jest wymagany"  |
 | Niepoprawny format | Komunikat inline "Podaj poprawny adres email" |
 
 ### 10.2. Błędy API
 
-| Błąd | Obsługa |
-|------|---------|
-| Błąd sieci | Logowanie do konsoli, pokazanie sukcesu użytkownikowi |
-| Rate limiting | Logowanie do konsoli, pokazanie sukcesu użytkownikowi |
-| Nieistniejący email | Celowo ignorowany - pokazanie sukcesu |
+| Błąd                  | Obsługa                                               |
+| --------------------- | ----------------------------------------------------- |
+| Błąd sieci            | Logowanie do konsoli, pokazanie sukcesu użytkownikowi |
+| Rate limiting         | Logowanie do konsoli, pokazanie sukcesu użytkownikowi |
+| Nieistniejący email   | Celowo ignorowany - pokazanie sukcesu                 |
 | Błąd serwera Supabase | Logowanie do konsoli, pokazanie sukcesu użytkownikowi |
 
 **Uzasadnienie**: Wszystkie błędy API są celowo ignorowane z perspektywy użytkownika. Jest to standardowa praktyka bezpieczeństwa zapobiegająca enumeracji kont. Użytkownik zawsze widzi komunikat sukcesu, niezależnie od tego, czy email istnieje w systemie czy nie.
 
 ### 10.3. Przypadki brzegowe
 
-| Przypadek | Obsługa |
-|-----------|---------|
-| Podwójne kliknięcie submit | Przycisk zablokowany podczas `isLoading` |
-| Odświeżenie strony po submicie | Reset do stanu początkowego (formularz) |
-| JavaScript wyłączony | Formularz nie zadziała - wymaga React |
+| Przypadek                      | Obsługa                                  |
+| ------------------------------ | ---------------------------------------- |
+| Podwójne kliknięcie submit     | Przycisk zablokowany podczas `isLoading` |
+| Odświeżenie strony po submicie | Reset do stanu początkowego (formularz)  |
+| JavaScript wyłączony           | Formularz nie zadziała - wymaga React    |
 
 ## 11. Kroki implementacji
 

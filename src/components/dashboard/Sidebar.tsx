@@ -198,9 +198,7 @@ export function Sidebar({
         {isLoading && <ListSkeleton />}
 
         {/* Empty state */}
-        {!isLoading && lists.length === 0 && !isCreating && (
-          <EmptyState type="no-lists" onAction={handleStartCreate} />
-        )}
+        {!isLoading && lists.length === 0 && !isCreating && <EmptyState type="no-lists" onAction={handleStartCreate} />}
 
         {/* Create new list form */}
         {isCreating && (

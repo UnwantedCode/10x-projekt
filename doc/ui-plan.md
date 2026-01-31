@@ -51,11 +51,11 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 ### 2.1. Strona logowania
 
-| Atrybut | Wartość |
-|---------|---------|
-| **Ścieżka** | `/login` |
-| **Cel** | Umożliwienie użytkownikowi zalogowania się do aplikacji |
-| **Publiczny** | Tak |
+| Atrybut       | Wartość                                                 |
+| ------------- | ------------------------------------------------------- |
+| **Ścieżka**   | `/login`                                                |
+| **Cel**       | Umożliwienie użytkownikowi zalogowania się do aplikacji |
+| **Publiczny** | Tak                                                     |
 
 #### Kluczowe informacje do wyświetlenia
 
@@ -67,13 +67,13 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 #### Kluczowe komponenty
 
-| Komponent | Opis |
-|-----------|------|
+| Komponent    | Opis                                         |
+| ------------ | -------------------------------------------- |
 | `AuthLayout` | Minimalny layout z wycentrowanym formularzem |
-| `LoginForm` | Formularz z polami email i password |
-| `Button` | Przycisk "Zaloguj" (primary) |
-| `Input` | Pola tekstowe z walidacją |
-| `Alert` | Komunikaty błędów |
+| `LoginForm`  | Formularz z polami email i password          |
+| `Button`     | Przycisk "Zaloguj" (primary)                 |
+| `Input`      | Pola tekstowe z walidacją                    |
+| `Alert`      | Komunikaty błędów                            |
 
 #### Względy UX, dostępności i bezpieczeństwa
 
@@ -93,11 +93,11 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 ### 2.2. Strona rejestracji
 
-| Atrybut | Wartość |
-|---------|---------|
-| **Ścieżka** | `/register` |
-| **Cel** | Utworzenie nowego konta użytkownika |
-| **Publiczny** | Tak |
+| Atrybut       | Wartość                             |
+| ------------- | ----------------------------------- |
+| **Ścieżka**   | `/register`                         |
+| **Cel**       | Utworzenie nowego konta użytkownika |
+| **Publiczny** | Tak                                 |
 
 #### Kluczowe informacje do wyświetlenia
 
@@ -108,12 +108,12 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 #### Kluczowe komponenty
 
-| Komponent | Opis |
-|-----------|------|
-| `AuthLayout` | Minimalny layout z wycentrowanym formularzem |
+| Komponent      | Opis                                                |
+| -------------- | --------------------------------------------------- |
+| `AuthLayout`   | Minimalny layout z wycentrowanym formularzem        |
 | `RegisterForm` | Formularz z polami email, password, confirmPassword |
-| `Checkbox` | Akceptacja warunków |
-| `Button` | Przycisk "Zarejestruj" (primary) |
+| `Checkbox`     | Akceptacja warunków                                 |
+| `Button`       | Przycisk "Zarejestruj" (primary)                    |
 
 #### Względy UX, dostępności i bezpieczeństwa
 
@@ -134,11 +134,11 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 ### 2.3. Strona resetowania hasła
 
-| Atrybut | Wartość |
-|---------|---------|
-| **Ścieżka** | `/forgot-password` |
-| **Cel** | Umożliwienie odzyskania dostępu do konta |
-| **Publiczny** | Tak |
+| Atrybut       | Wartość                                  |
+| ------------- | ---------------------------------------- |
+| **Ścieżka**   | `/forgot-password`                       |
+| **Cel**       | Umożliwienie odzyskania dostępu do konta |
+| **Publiczny** | Tak                                      |
 
 #### Kluczowe informacje do wyświetlenia
 
@@ -149,11 +149,11 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 #### Kluczowe komponenty
 
-| Komponent | Opis |
-|-----------|------|
-| `AuthLayout` | Minimalny layout |
-| `ForgotPasswordForm` | Formularz z polem email |
-| `SuccessMessage` | Potwierdzenie wysłania emaila |
+| Komponent            | Opis                          |
+| -------------------- | ----------------------------- |
+| `AuthLayout`         | Minimalny layout              |
+| `ForgotPasswordForm` | Formularz z polem email       |
+| `SuccessMessage`     | Potwierdzenie wysłania emaila |
 
 #### Względy UX, dostępności i bezpieczeństwa
 
@@ -168,11 +168,11 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 ### 2.4. Dashboard (widok główny)
 
-| Atrybut | Wartość |
-|---------|---------|
-| **Ścieżka** | `/app` |
-| **Cel** | Główny interfejs zarządzania listami i zadaniami |
-| **Publiczny** | Nie (wymaga autentykacji) |
+| Atrybut       | Wartość                                          |
+| ------------- | ------------------------------------------------ |
+| **Ścieżka**   | `/app`                                           |
+| **Cel**       | Główny interfejs zarządzania listami i zadaniami |
+| **Publiczny** | Nie (wymaga autentykacji)                        |
 
 #### Kluczowe informacje do wyświetlenia
 
@@ -184,41 +184,41 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 #### Kluczowe komponenty
 
-| Komponent | Opis |
-|-----------|------|
-| `DashboardLayout` | Layout master-detail z Header, Sidebar, Main |
-| `Header` | Nawigacja główna z logo i user menu |
-| `Sidebar` | Lista list z CRUD inline |
-| `TaskList` | Lista zadań z grupowaniem |
-| `FilterToolbar` | Wyszukiwarka, filtry, sortowanie |
-| `TaskCard` | Karta pojedynczego zadania |
-| `InlineTaskInput` | Szybkie dodawanie zadania |
-| `EmptyState` | Komponenty stanów pustych |
-| `OnboardingWizard` | Overlay z 3-krokowym onboardingiem |
+| Komponent          | Opis                                         |
+| ------------------ | -------------------------------------------- |
+| `DashboardLayout`  | Layout master-detail z Header, Sidebar, Main |
+| `Header`           | Nawigacja główna z logo i user menu          |
+| `Sidebar`          | Lista list z CRUD inline                     |
+| `TaskList`         | Lista zadań z grupowaniem                    |
+| `FilterToolbar`    | Wyszukiwarka, filtry, sortowanie             |
+| `TaskCard`         | Karta pojedynczego zadania                   |
+| `InlineTaskInput`  | Szybkie dodawanie zadania                    |
+| `EmptyState`       | Komponenty stanów pustych                    |
+| `OnboardingWizard` | Overlay z 3-krokowym onboardingiem           |
 
 #### Względy UX, dostępności i bezpieczeństwa
 
-- **UX**: 
+- **UX**:
   - Aktywna lista wizualnie wyróżniona w sidebar
   - Infinite scroll (50 zadań per porcja)
   - Optimistic updates przy drag & drop
   - Skeleton loaders podczas ładowania
-- **Dostępność**: 
+- **Dostępność**:
   - Landmarks (nav, main, aside)
   - Nagłówki sekcji dla screen readers
   - Skip links do głównej treści
-- **Bezpieczeństwo**: 
+- **Bezpieczeństwo**:
   - Przekierowanie do /login przy 401
   - RLS zapewnia izolację danych
 
 #### Mapowanie do API
 
-| Akcja | Endpoint |
-|-------|----------|
-| Pobranie profilu | `GET /api/profile` |
-| Pobranie list | `GET /api/lists` |
-| Pobranie zadań | `GET /api/lists/:listId/tasks` |
-| Zmiana aktywnej listy | `PATCH /api/profile` |
+| Akcja                 | Endpoint                       |
+| --------------------- | ------------------------------ |
+| Pobranie profilu      | `GET /api/profile`             |
+| Pobranie list         | `GET /api/lists`               |
+| Pobranie zadań        | `GET /api/lists/:listId/tasks` |
+| Zmiana aktywnej listy | `PATCH /api/profile`           |
 
 #### Mapowanie do User Stories
 
@@ -232,9 +232,9 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 ### 2.5. Modal tworzenia/edycji zadania
 
-| Atrybut | Wartość |
-|---------|---------|
-| **Typ** | Overlay (Dialog) |
+| Atrybut | Wartość                              |
+| ------- | ------------------------------------ |
+| **Typ** | Overlay (Dialog)                     |
 | **Cel** | Pełna edycja zadania z integracją AI |
 
 #### Kluczowe informacje do wyświetlenia
@@ -246,37 +246,37 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 #### Kluczowe komponenty
 
-| Komponent | Opis |
-|-----------|------|
-| `Dialog` | Kontener modalny z Shadcn/ui |
-| `TaskForm` | Formularz z walidacją |
-| `PrioritySelector` | Wybór priorytetu (3 opcje) |
-| `AISuggestionButton` | Przycisk uruchamiający AI |
-| `AISuggestionPanel` | Panel z wynikiem i akcjami |
-| `TextareaWithCounter` | Opis z licznikiem znaków |
+| Komponent             | Opis                         |
+| --------------------- | ---------------------------- |
+| `Dialog`              | Kontener modalny z Shadcn/ui |
+| `TaskForm`            | Formularz z walidacją        |
+| `PrioritySelector`    | Wybór priorytetu (3 opcje)   |
+| `AISuggestionButton`  | Przycisk uruchamiający AI    |
+| `AISuggestionPanel`   | Panel z wynikiem i akcjami   |
+| `TextareaWithCounter` | Opis z licznikiem znaków     |
 
 #### Względy UX, dostępności i bezpieczeństwa
 
-- **UX**: 
+- **UX**:
   - Focus trap wewnątrz modala
   - Zamknięcie przez Escape lub klik poza modalem
   - Walidacja on-blur dla tytułu
   - Przycisk "Zapisz" zawsze aktywny, błędy przy submit
-- **Dostępność**: 
+- **Dostępność**:
   - `role="dialog"`, `aria-modal="true"`
   - `aria-labelledby` wskazujący na tytuł
   - Powrót focus po zamknięciu
-- **Bezpieczeństwo**: 
+- **Bezpieczeństwo**:
   - Sanityzacja inputów przed wysłaniem
 
 #### Mapowanie do API
 
-| Akcja | Endpoint |
-|-------|----------|
-| Tworzenie zadania | `POST /api/lists/:listId/tasks` |
-| Edycja zadania | `PATCH /api/tasks/:id` |
-| Sugestia AI | `POST /api/ai/suggest` |
-| Decyzja AI | `PATCH /api/ai-interactions/:id` |
+| Akcja             | Endpoint                         |
+| ----------------- | -------------------------------- |
+| Tworzenie zadania | `POST /api/lists/:listId/tasks`  |
+| Edycja zadania    | `PATCH /api/tasks/:id`           |
+| Sugestia AI       | `POST /api/ai/suggest`           |
+| Decyzja AI        | `PATCH /api/ai-interactions/:id` |
 
 #### Mapowanie do User Stories
 
@@ -293,9 +293,9 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 ### 2.6. Modal potwierdzenia usunięcia
 
-| Atrybut | Wartość |
-|---------|---------|
-| **Typ** | Overlay (AlertDialog) |
+| Atrybut | Wartość                            |
+| ------- | ---------------------------------- |
+| **Typ** | Overlay (AlertDialog)              |
 | **Cel** | Potwierdzenie destrukcyjnych akcji |
 
 #### Kluczowe informacje do wyświetlenia
@@ -306,10 +306,10 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 #### Kluczowe komponenty
 
-| Komponent | Opis |
-|-----------|------|
-| `AlertDialog` | Kontener z Shadcn/ui |
-| `Button` | Anuluj (secondary), Usuń (danger) |
+| Komponent     | Opis                              |
+| ------------- | --------------------------------- |
+| `AlertDialog` | Kontener z Shadcn/ui              |
+| `Button`      | Anuluj (secondary), Usuń (danger) |
 
 #### Względy UX i dostępności
 
@@ -318,10 +318,10 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 #### Mapowanie do API
 
-| Akcja | Endpoint |
-|-------|----------|
+| Akcja             | Endpoint                |
+| ----------------- | ----------------------- |
 | Usunięcie zadania | `DELETE /api/tasks/:id` |
-| Usunięcie listy | `DELETE /api/lists/:id` |
+| Usunięcie listy   | `DELETE /api/lists/:id` |
 
 #### Mapowanie do User Stories
 
@@ -332,41 +332,44 @@ AI Task Manager to webowa aplikacja do zarządzania zadaniami z opcjonalnym wspa
 
 ### 2.7. Onboarding Wizard
 
-| Atrybut | Wartość |
-|---------|---------|
-| **Typ** | Overlay (wielokrokowy) |
+| Atrybut | Wartość                     |
+| ------- | --------------------------- |
+| **Typ** | Overlay (wielokrokowy)      |
 | **Cel** | Edukacja nowego użytkownika |
 
 #### Kluczowe informacje do wyświetlenia
 
 **Krok 1: Model priorytetów**
+
 - Wizualizacja trzech poziomów (Niski/Średni/Wysoki)
 - Wyjaśnienie systemu sortowania
 
 **Krok 2: Rola AI**
+
 - Informacja że AI to sugestia, nie automat
 - Zachęta do korzystania z funkcji
 
 **Krok 3: Pierwsza lista**
+
 - Zachęta do utworzenia listy
 - Opcjonalnie: przykładowe zadanie
 
 #### Kluczowe komponenty
 
-| Komponent | Opis |
-|-----------|------|
-| `OnboardingWizard` | Kontener z nawigacją kroków |
-| `OnboardingStep` | Pojedynczy krok z treścią |
-| `StepIndicator` | Wskaźnik postępu (1/3, 2/3, 3/3) |
-| `Button` | Dalej, Pomiń, Zakończ |
+| Komponent          | Opis                             |
+| ------------------ | -------------------------------- |
+| `OnboardingWizard` | Kontener z nawigacją kroków      |
+| `OnboardingStep`   | Pojedynczy krok z treścią        |
+| `StepIndicator`    | Wskaźnik postępu (1/3, 2/3, 3/3) |
+| `Button`           | Dalej, Pomiń, Zakończ            |
 
 #### Względy UX i dostępności
 
-- **UX**: 
+- **UX**:
   - Możliwość pominięcia w każdym momencie
   - Animacje przejść między krokami
   - Progres wizualny
-- **Dostępność**: 
+- **Dostępność**:
   - `aria-live` dla zmian kroków
   - Jasne etykiety przycisków
 
@@ -583,31 +586,31 @@ Aplikacja
 
 #### Header
 
-| Element | Pozycja | Funkcja |
-|---------|---------|---------|
-| Logo/Nazwa | Lewo | Link do głównego widoku (/app) |
-| Nazwa listy | Środek | Informacja kontekstowa |
-| UserMenu | Prawo | Dropdown z opcjami konta |
+| Element     | Pozycja | Funkcja                        |
+| ----------- | ------- | ------------------------------ |
+| Logo/Nazwa  | Lewo    | Link do głównego widoku (/app) |
+| Nazwa listy | Środek  | Informacja kontekstowa         |
+| UserMenu    | Prawo   | Dropdown z opcjami konta       |
 
 #### Sidebar
 
-| Element | Funkcja |
-|---------|---------|
-| Nagłówek "Moje listy" | Tytuł sekcji |
-| Lista list | Nawigacja między listami |
-| Wyróżnienie aktywnej | Kolor tła dla aktywnej listy |
-| Przycisk "+" | Tworzenie nowej listy (inline input) |
-| Hover actions | Ikona edycji, usuwania |
+| Element               | Funkcja                              |
+| --------------------- | ------------------------------------ |
+| Nagłówek "Moje listy" | Tytuł sekcji                         |
+| Lista list            | Nawigacja między listami             |
+| Wyróżnienie aktywnej  | Kolor tła dla aktywnej listy         |
+| Przycisk "+"          | Tworzenie nowej listy (inline input) |
+| Hover actions         | Ikona edycji, usuwania               |
 
 #### FilterToolbar
 
-| Element | Funkcja | Domyślna wartość |
-|---------|---------|------------------|
-| Pole wyszukiwania | Filtrowanie po tytule/opisie | Puste |
-| Toggle "Pokaż ukończone" | Włączenie/wyłączenie zadań done | Off (ukryte) |
-| Dropdown sortowania | Zmiana kolejności | Priorytet (malejąco) |
-| Badge aktywnych filtrów | Liczba niestandardowych filtrów | 0 |
-| "Wyczyść filtry" | Reset do domyślnych | Ukryty gdy 0 filtrów |
+| Element                  | Funkcja                         | Domyślna wartość     |
+| ------------------------ | ------------------------------- | -------------------- |
+| Pole wyszukiwania        | Filtrowanie po tytule/opisie    | Puste                |
+| Toggle "Pokaż ukończone" | Włączenie/wyłączenie zadań done | Off (ukryte)         |
+| Dropdown sortowania      | Zmiana kolejności               | Priorytet (malejąco) |
+| Badge aktywnych filtrów  | Liczba niestandardowych filtrów | 0                    |
+| "Wyczyść filtry"         | Reset do domyślnych             | Ukryty gdy 0 filtrów |
 
 ### 4.3. Przepływy nawigacyjne
 
@@ -635,14 +638,15 @@ Sidebar (klik na listę)
 
 ### 4.4. Stany URL i query parameters
 
-| Parametr | Typ | Opis | Domyślna wartość |
-|----------|-----|------|------------------|
-| `status` | number | Filtr statusu (1=todo, 2=done) | 1 |
-| `search` | string | Fraza wyszukiwania | - |
-| `sort` | string | Pole sortowania | priority |
-| `order` | string | Kierunek (asc/desc) | desc |
+| Parametr | Typ    | Opis                           | Domyślna wartość |
+| -------- | ------ | ------------------------------ | ---------------- |
+| `status` | number | Filtr statusu (1=todo, 2=done) | 1                |
+| `search` | string | Fraza wyszukiwania             | -                |
+| `sort`   | string | Pole sortowania                | priority         |
+| `order`  | string | Kierunek (asc/desc)            | desc             |
 
 **Przykład URL:**
+
 ```
 /app?status=1&search=raport&sort=priority&order=desc
 ```
@@ -734,7 +738,7 @@ Sidebar (klik na listę)
 
 - **Opis**: Badge wizualizujący priorytet
 - **Zawiera**: Kolor, ikona, opcjonalnie tekst
-- **Warianty**: 
+- **Warianty**:
   - Low (green-500, strzałka w dół)
   - Medium (yellow-500, kreska)
   - High (red-500, strzałka w górę)
@@ -750,7 +754,7 @@ Sidebar (klik na listę)
 
 - **Opis**: Komponent stanów pustych
 - **Zawiera**: Ilustracja, nagłówek, tekst, CTA button
-- **Warianty**: 
+- **Warianty**:
   - `noLists`: "Utwórz swoją pierwszą listę"
   - `emptyList`: "Dodaj pierwsze zadanie"
   - `noResults`: "Brak wyników wyszukiwania"
@@ -804,24 +808,24 @@ Sidebar (klik na listę)
 
 ### 5.7. Tabela mapowania komponentów do User Stories
 
-| Komponent | User Stories |
-|-----------|-------------|
-| `LoginForm` | US-002 |
-| `RegisterForm` | US-001 |
-| `DashboardLayout` | US-003, US-006 |
-| `Sidebar` | US-005, US-006, US-007, US-008 |
-| `TaskList` | US-014, US-016, US-017 |
-| `TaskCard` | US-011, US-012, US-013, US-018 |
-| `TaskModal` | US-009, US-010, US-027 |
-| `InlineTaskInput` | US-009 |
-| `AISuggestionButton` | US-019 |
-| `AISuggestionPanel` | US-020, US-021, US-022 |
-| `OnboardingWizard` | US-024, US-025 |
-| `EmptyState` | US-026 |
-| `Toast` | US-028 |
-| `ConfirmationModal` | US-008, US-011 |
-| `PriorityBadge` | US-016, US-018 |
-| `FilterToolbar` | US-015, US-016 |
+| Komponent            | User Stories                   |
+| -------------------- | ------------------------------ |
+| `LoginForm`          | US-002                         |
+| `RegisterForm`       | US-001                         |
+| `DashboardLayout`    | US-003, US-006                 |
+| `Sidebar`            | US-005, US-006, US-007, US-008 |
+| `TaskList`           | US-014, US-016, US-017         |
+| `TaskCard`           | US-011, US-012, US-013, US-018 |
+| `TaskModal`          | US-009, US-010, US-027         |
+| `InlineTaskInput`    | US-009                         |
+| `AISuggestionButton` | US-019                         |
+| `AISuggestionPanel`  | US-020, US-021, US-022         |
+| `OnboardingWizard`   | US-024, US-025                 |
+| `EmptyState`         | US-026                         |
+| `Toast`              | US-028                         |
+| `ConfirmationModal`  | US-008, US-011                 |
+| `PriorityBadge`      | US-016, US-018                 |
+| `FilterToolbar`      | US-015, US-016                 |
 
 ---
 
@@ -829,41 +833,41 @@ Sidebar (klik na listę)
 
 ### 6.1. Mapowanie kodów HTTP na akcje UI
 
-| Kod | Typ błędu | Akcja UI | Komponent |
-|-----|-----------|----------|-----------|
-| 400 | Walidacja | Komunikat inline pod polem | `Input` / `Textarea` |
-| 401 | Brak autoryzacji | Redirect do `/login` + toast "Sesja wygasła" | `Toast` + redirect |
-| 403 | Brak uprawnień | Redirect do `/login` + toast "Brak uprawnień" | `Toast` + redirect |
-| 404 | Nie znaleziono | Strona "Nie znaleziono" + przycisk powrotu | `NotFoundState` |
-| 409 | Konflikt | Toast z opcją odświeżenia | `Toast` z akcją |
-| 500 | Błąd serwera | Toast "Błąd serwera" + opcja ponowienia | `Toast` z akcją |
-| 503 | AI niedostępne | Fallback do manual priority + info | `AISuggestionPanel` |
+| Kod | Typ błędu        | Akcja UI                                      | Komponent            |
+| --- | ---------------- | --------------------------------------------- | -------------------- |
+| 400 | Walidacja        | Komunikat inline pod polem                    | `Input` / `Textarea` |
+| 401 | Brak autoryzacji | Redirect do `/login` + toast "Sesja wygasła"  | `Toast` + redirect   |
+| 403 | Brak uprawnień   | Redirect do `/login` + toast "Brak uprawnień" | `Toast` + redirect   |
+| 404 | Nie znaleziono   | Strona "Nie znaleziono" + przycisk powrotu    | `NotFoundState`      |
+| 409 | Konflikt         | Toast z opcją odświeżenia                     | `Toast` z akcją      |
+| 500 | Błąd serwera     | Toast "Błąd serwera" + opcja ponowienia       | `Toast` z akcją      |
+| 503 | AI niedostępne   | Fallback do manual priority + info            | `AISuggestionPanel`  |
 
 ### 6.2. Stany ładowania
 
-| Kontekst | Komponent | Zachowanie |
-|----------|-----------|------------|
-| Lista list | `Sidebar` | Skeleton × 3 |
-| Lista zadań | `TaskList` | Skeleton × 5 |
-| Ładowanie kolejnych | `TaskList` | Spinner na dole |
-| Sugestia AI | `AISuggestionPanel` | Placeholder z animacją + tekst "AI analizuje..." |
-| Zapisywanie | `Button` | Loading state (spinner) |
+| Kontekst            | Komponent           | Zachowanie                                       |
+| ------------------- | ------------------- | ------------------------------------------------ |
+| Lista list          | `Sidebar`           | Skeleton × 3                                     |
+| Lista zadań         | `TaskList`          | Skeleton × 5                                     |
+| Ładowanie kolejnych | `TaskList`          | Spinner na dole                                  |
+| Sugestia AI         | `AISuggestionPanel` | Placeholder z animacją + tekst "AI analizuje..." |
+| Zapisywanie         | `Button`            | Loading state (spinner)                          |
 
 ### 6.3. Timeouty
 
-| Operacja | Timeout | Akcja po przekroczeniu |
-|----------|---------|------------------------|
+| Operacja    | Timeout   | Akcja po przekroczeniu                                                    |
+| ----------- | --------- | ------------------------------------------------------------------------- |
 | Sugestia AI | 15 sekund | Komunikat "Sugestia AI niedostępna" + opcje: "Ponów" / "Kontynuuj bez AI" |
-| Żądania API | 30 sekund | Toast "Przekroczono czas oczekiwania" + opcja ponowienia |
+| Żądania API | 30 sekund | Toast "Przekroczono czas oczekiwania" + opcja ponowienia                  |
 
 ### 6.4. Walidacja formularzy
 
-| Pole | Reguła | Moment walidacji | Komunikat |
-|------|--------|------------------|-----------|
-| Tytuł zadania | Wymagane, 1-200 znaków | On-blur | "Tytuł jest wymagany" / "Tytuł max 200 znaków" |
-| Priorytet | Wymagane | On-submit | Wizualne wyróżnienie braku wyboru |
-| Nazwa listy | Wymagane, 1-100 znaków, unikalna | On-blur | "Nazwa jest wymagana" / "Lista o tej nazwie już istnieje" |
-| Powód odrzucenia AI | Wymagane, max 300 znaków | On-submit | "Podaj powód odrzucenia" |
+| Pole                | Reguła                           | Moment walidacji | Komunikat                                                 |
+| ------------------- | -------------------------------- | ---------------- | --------------------------------------------------------- |
+| Tytuł zadania       | Wymagane, 1-200 znaków           | On-blur          | "Tytuł jest wymagany" / "Tytuł max 200 znaków"            |
+| Priorytet           | Wymagane                         | On-submit        | Wizualne wyróżnienie braku wyboru                         |
+| Nazwa listy         | Wymagane, 1-100 znaków, unikalna | On-blur          | "Nazwa jest wymagana" / "Lista o tej nazwie już istnieje" |
+| Powód odrzucenia AI | Wymagane, max 300 znaków         | On-submit        | "Podaj powód odrzucenia"                                  |
 
 ---
 
@@ -871,11 +875,11 @@ Sidebar (klik na listę)
 
 ### 7.1. Breakpointy (desktop-only MVP)
 
-| Breakpoint | Szerokość | Zachowanie |
-|------------|-----------|------------|
-| Minimum | 1024px | Pełny layout master-detail |
-| Optymalne | 1280px+ | Komfortowy widok |
-| Poniżej 1024px | - | Brak wsparcia w MVP (opcjonalnie: komunikat o wymaganiu większego ekranu) |
+| Breakpoint     | Szerokość | Zachowanie                                                                |
+| -------------- | --------- | ------------------------------------------------------------------------- |
+| Minimum        | 1024px    | Pełny layout master-detail                                                |
+| Optymalne      | 1280px+   | Komfortowy widok                                                          |
+| Poniżej 1024px | -         | Brak wsparcia w MVP (opcjonalnie: komunikat o wymaganiu większego ekranu) |
 
 ### 7.2. Dostępność (WCAG 2.1 AA)
 
@@ -898,7 +902,7 @@ Sidebar (klik na listę)
 - **Keyboard**: Pełna obsługa Tab, Enter, Escape, Arrow keys
 - **Focus trap**: W modalach i wizardzie
 - **Skip links**: Pominięcie nawigacji do głównej treści
-- **ARIA**: 
+- **ARIA**:
   - `aria-label` dla ikon bez tekstu
   - `aria-invalid` + `aria-describedby` dla błędów
   - `aria-live` dla dynamicznych komunikatów
@@ -906,19 +910,19 @@ Sidebar (klik na listę)
 
 ### 7.3. Paleta kolorów
 
-| Element | Kolor | Użycie |
-|---------|-------|--------|
-| Tło główne | `gray-50` | Tło aplikacji |
-| Tło kart | `white` | Karty, modale |
-| Akcent główny | `blue-600` | Przyciski primary, linki |
-| Priorytet Niski | `green-500` | Badge, ikona |
-| Priorytet Średni | `yellow-500` | Badge, ikona |
-| Priorytet Wysoki | `red-500` | Badge, ikona |
-| Status Done | `green-600` | Checkbox zaznaczony |
-| Tekst główny | `gray-900` | Nagłówki, tytuły |
-| Tekst pomocniczy | `gray-600` | Opisy, secondary text |
-| Błąd | `red-600` | Komunikaty błędów |
-| Hover | `gray-100` | Tło elementów przy hover |
+| Element          | Kolor        | Użycie                   |
+| ---------------- | ------------ | ------------------------ |
+| Tło główne       | `gray-50`    | Tło aplikacji            |
+| Tło kart         | `white`      | Karty, modale            |
+| Akcent główny    | `blue-600`   | Przyciski primary, linki |
+| Priorytet Niski  | `green-500`  | Badge, ikona             |
+| Priorytet Średni | `yellow-500` | Badge, ikona             |
+| Priorytet Wysoki | `red-500`    | Badge, ikona             |
+| Status Done      | `green-600`  | Checkbox zaznaczony      |
+| Tekst główny     | `gray-900`   | Nagłówki, tytuły         |
+| Tekst pomocniczy | `gray-600`   | Opisy, secondary text    |
+| Błąd             | `red-600`    | Komunikaty błędów        |
+| Hover            | `gray-100`   | Tło elementów przy hover |
 
 ---
 
@@ -939,12 +943,12 @@ Sidebar (klik na listę)
 
 ### 8.3. Ochrona przed atakami
 
-| Atak | Ochrona |
-|------|---------|
-| XSS | Sanityzacja inputów, React escaping |
-| CSRF | Supabase Auth tokeny |
-| Injection | Parametryzowane zapytania (Supabase) |
-| Enumeration | Brak informacji czy email istnieje |
+| Atak        | Ochrona                              |
+| ----------- | ------------------------------------ |
+| XSS         | Sanityzacja inputów, React escaping  |
+| CSRF        | Supabase Auth tokeny                 |
+| Injection   | Parametryzowane zapytania (Supabase) |
+| Enumeration | Brak informacji czy email istnieje   |
 
 ### 8.4. Obsługa sesji
 
@@ -956,20 +960,20 @@ Sidebar (klik na listę)
 
 ## 9. Integracja z API - podsumowanie
 
-| Widok/Komponent | Endpointy | Metody |
-|-----------------|-----------|--------|
-| Login | Supabase Auth | `signInWithPassword` |
-| Register | Supabase Auth | `signUp` |
-| Dashboard (init) | `/api/profile`, `/api/lists` | GET |
-| Sidebar | `/api/lists`, `/api/profile` | GET, POST, PATCH, DELETE |
-| TaskList | `/api/lists/:listId/tasks` | GET |
-| TaskCard | `/api/tasks/:id` | PATCH, DELETE |
-| TaskModal (create) | `/api/lists/:listId/tasks` | POST |
-| TaskModal (edit) | `/api/tasks/:id` | PATCH |
-| AI Suggestion | `/api/ai/suggest` | POST |
-| AI Decision | `/api/ai-interactions/:id` | PATCH |
-| Reorder | `/api/lists/:listId/tasks/reorder` | POST |
-| Onboarding | `/api/profile/onboarding/complete` | POST |
+| Widok/Komponent    | Endpointy                          | Metody                   |
+| ------------------ | ---------------------------------- | ------------------------ |
+| Login              | Supabase Auth                      | `signInWithPassword`     |
+| Register           | Supabase Auth                      | `signUp`                 |
+| Dashboard (init)   | `/api/profile`, `/api/lists`       | GET                      |
+| Sidebar            | `/api/lists`, `/api/profile`       | GET, POST, PATCH, DELETE |
+| TaskList           | `/api/lists/:listId/tasks`         | GET                      |
+| TaskCard           | `/api/tasks/:id`                   | PATCH, DELETE            |
+| TaskModal (create) | `/api/lists/:listId/tasks`         | POST                     |
+| TaskModal (edit)   | `/api/tasks/:id`                   | PATCH                    |
+| AI Suggestion      | `/api/ai/suggest`                  | POST                     |
+| AI Decision        | `/api/ai-interactions/:id`         | PATCH                    |
+| Reorder            | `/api/lists/:listId/tasks/reorder` | POST                     |
+| Onboarding         | `/api/profile/onboarding/complete` | POST                     |
 
 ---
 
@@ -977,13 +981,13 @@ Sidebar (klik na listę)
 
 ### 10.1. Decyzje do podjęcia przy implementacji
 
-| Kwestia | Rekomendacja |
-|---------|--------------|
+| Kwestia                | Rekomendacja                                        |
+| ---------------------- | --------------------------------------------------- |
 | Biblioteka drag & drop | `@dnd-kit/core` (lżejsza) lub `react-beautiful-dnd` |
-| Format dat | Relatywny ("2 godz. temu") z `date-fns` |
-| Animacje | CSS transitions (bez dodatkowej biblioteki) |
-| Język UI | Angielski (zgodnie z kodem) |
-| Minimalna szerokość | 1024px |
+| Format dat             | Relatywny ("2 godz. temu") z `date-fns`             |
+| Animacje               | CSS transitions (bez dodatkowej biblioteki)         |
+| Język UI               | Angielski (zgodnie z kodem)                         |
+| Minimalna szerokość    | 1024px                                              |
 
 ### 10.2. Potencjalne usprawnienia post-MVP
 

@@ -121,21 +121,11 @@ export function RegisterForm() {
             />
             <Label htmlFor={termsId} className="text-sm font-normal leading-tight cursor-pointer">
               Akceptuję{" "}
-              <a
-                href="/terms"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                 regulamin
               </a>{" "}
               i{" "}
-              <a
-                href="/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
                 politykę prywatności
               </a>
             </Label>

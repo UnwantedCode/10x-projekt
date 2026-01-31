@@ -129,8 +129,7 @@ function PriorityGroup({ priority, tasks, onTaskStatusChange }: PriorityGroupPro
 
   const config = PRIORITY_CONFIGS[priority];
 
-  const PriorityIcon =
-    priority === 3 ? AlertCircleIcon : priority === 2 ? ArrowRightIcon : ArrowDownIcon;
+  const PriorityIcon = priority === 3 ? AlertCircleIcon : priority === 2 ? ArrowRightIcon : ArrowDownIcon;
 
   return (
     <section aria-labelledby={`priority-${priority}-heading`}>

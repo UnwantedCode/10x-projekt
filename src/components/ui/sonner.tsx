@@ -1,4 +1,4 @@
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+import { Toaster as Sonner, type ToasterProps } from "sonner";
 
 // =============================================================================
 // Icons (inline SVG to avoid lucide-react dependency issues)
@@ -19,7 +19,7 @@ function CheckCircleIcon({ className }: { className?: string }) {
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
       <polyline points="22 4 12 14.01 9 11.01" />
     </svg>
-  )
+  );
 }
 
 function InfoIcon({ className }: { className?: string }) {
@@ -38,7 +38,7 @@ function InfoIcon({ className }: { className?: string }) {
       <path d="M12 16v-4" />
       <path d="M12 8h.01" />
     </svg>
-  )
+  );
 }
 
 function AlertTriangleIcon({ className }: { className?: string }) {
@@ -57,7 +57,7 @@ function AlertTriangleIcon({ className }: { className?: string }) {
       <path d="M12 9v4" />
       <path d="M12 17h.01" />
     </svg>
-  )
+  );
 }
 
 function XCircleIcon({ className }: { className?: string }) {
@@ -76,7 +76,7 @@ function XCircleIcon({ className }: { className?: string }) {
       <path d="m15 9-6 6" />
       <path d="m9 9 6 6" />
     </svg>
-  )
+  );
 }
 
 function Loader2Icon({ className }: { className?: string }) {
@@ -93,7 +93,7 @@ function Loader2Icon({ className }: { className?: string }) {
     >
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
     </svg>
-  )
+  );
 }
 
 // =============================================================================
@@ -122,7 +122,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

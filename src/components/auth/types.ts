@@ -118,3 +118,53 @@ export interface PasswordStrengthResult {
   /** Human-readable label in Polish */
   label: string;
 }
+
+// =============================================================================
+// Forgot Password Form Types
+// =============================================================================
+
+/**
+ * Values of forgot password form fields
+ */
+export interface ForgotPasswordFormValues {
+  /** User's email address */
+  email: string;
+}
+
+/**
+ * Forgot password form validation errors
+ */
+export interface ForgotPasswordFormErrors {
+  /** Email field validation error */
+  email?: string;
+}
+
+/**
+ * State of the forgot password form
+ */
+export interface ForgotPasswordFormState {
+  /** Whether form is being submitted */
+  isLoading: boolean;
+  /** Whether form has been submitted successfully */
+  isSubmitted: boolean;
+}
+
+/**
+ * Return type of useForgotPasswordForm hook
+ */
+export interface UseForgotPasswordFormReturn {
+  /** Current form values */
+  values: ForgotPasswordFormValues;
+  /** Validation errors */
+  errors: ForgotPasswordFormErrors;
+  /** Whether form is being submitted */
+  isLoading: boolean;
+  /** Whether form has been submitted */
+  isSubmitted: boolean;
+  /** Handler for field value changes */
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  /** Handler for field blur - validates field */
+  handleBlur: (e: React.FocusEvent<HTMLInputElement>) => void;
+  /** Handler for form submission */
+  handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+}

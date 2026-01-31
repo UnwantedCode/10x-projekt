@@ -196,7 +196,11 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
         {!isLoading && !hasTasks ? (
           <EmptyState type="no-tasks" onAction={handleStartAddTask} />
         ) : (
-          <TaskList tasksByPriority={tasksByPriority} isLoading={isLoading} onTaskStatusChange={handleTaskStatusChange} />
+          <TaskList
+            tasksByPriority={tasksByPriority}
+            isLoading={isLoading}
+            onTaskStatusChange={handleTaskStatusChange}
+          />
         )}
 
         {/* Load more trigger for infinite scroll */}

@@ -23,9 +23,7 @@ const registered = Astro.url.searchParams.get("registered") === "true";
     {
       registered && (
         <Alert variant="success">
-          <AlertDescription>
-            Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.
-          </AlertDescription>
+          <AlertDescription>Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.</AlertDescription>
         </Alert>
       )
     }
