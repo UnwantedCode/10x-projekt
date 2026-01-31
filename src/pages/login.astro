@@ -1,6 +1,7 @@
 ---
 import AuthLayout from "@/layouts/AuthLayout.astro";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Check if user is already logged in
 const supabase = Astro.locals.supabase;
@@ -12,8 +13,22 @@ const {
 if (session) {
   return Astro.redirect("/dashboard");
 }
+
+// Check for registration success message
+const registered = Astro.url.searchParams.get("registered") === "true";
 ---
 
 <AuthLayout title="Logowanie | AI Task Manager">
-  <LoginForm client:load />
+  <div class="w-full space-y-4">
+    {
+      registered && (
+        <Alert variant="success">
+          <AlertDescription>
+            Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.
+          </AlertDescription>
+        </Alert>
+      )
+    }
+    <LoginForm client:load />
+  </div>
 </AuthLayout>
