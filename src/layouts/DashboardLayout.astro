@@ -1,0 +1,58 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+}
+
+const { title = "Dashboard | AI Task Manager" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="AI Task Manager - Dashboard" />
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-background antialiased">
+    <!-- Skip link for accessibility -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none"
+    >
+      Przejdź do głównej treści
+    </a>
+
+    <div class="flex h-screen flex-col">
+      <!-- Header with navigation -->
+      <header role="banner" class="border-b border-border bg-card">
+        <slot name="header" />
+      </header>
+
+      <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar with lists -->
+        <aside
+          role="complementary"
+          aria-label="Panel list zadań"
+          class="w-64 flex-shrink-0 border-r border-border bg-card overflow-y-auto"
+        >
+          <slot name="sidebar" />
+        </aside>
+
+        <!-- Main content area -->
+        <main
+          id="main-content"
+          role="main"
+          aria-label="Zawartość główna"
+          class="flex-1 overflow-y-auto bg-background"
+        >
+          <slot name="content" />
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

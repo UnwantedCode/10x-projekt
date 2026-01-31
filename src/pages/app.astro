@@ -1,0 +1,41 @@
+---
+import "../styles/global.css";
+import { Dashboard } from "@/components/dashboard/Dashboard";
+
+// Server-side authentication check
+const supabase = Astro.locals.supabase;
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+// Redirect to login if not authenticated
+if (!session) {
+  return Astro.redirect("/login?redirectTo=/app");
+}
+
+// Get user email for display
+const userEmail = session.user.email ?? "";
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content="AI Task Manager - Dashboard" />
+    <title>Dashboard | AI Task Manager</title>
+  </head>
+  <body class="min-h-screen bg-background antialiased">
+    <!-- Skip link for accessibility - links to main content in Dashboard component -->
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+    >
+      Przejdź do głównej treści
+    </a>
+
+    <Dashboard client:load userEmail={userEmail} />
+  </body>
+</html>

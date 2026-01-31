@@ -8,9 +8,9 @@ const {
   data: { session },
 } = await supabase.auth.getSession();
 
-// Redirect to dashboard if already authenticated
+// Redirect to app if already authenticated
 if (session) {
-  return Astro.redirect("/dashboard");
+  return Astro.redirect("/app");
 }
 ---
 

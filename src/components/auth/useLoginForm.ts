@@ -143,7 +143,7 @@ export function useLoginForm(): UseLoginFormReturn {
         if (data.session) {
           // Check for redirectTo parameter
           const params = new URLSearchParams(window.location.search);
-          const redirectTo = params.get("redirectTo") || "/dashboard";
+          const redirectTo = params.get("redirect") || params.get("redirectTo") || "/app";
           window.location.href = redirectTo;
         }
       } catch {
