@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -98,6 +98,24 @@ function SparklesIcon({ className }: { className?: string }) {
   );
 }
 
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </svg>
+  );
+}
+
 // =============================================================================
 // Constants
 // =============================================================================
@@ -145,20 +163,14 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSuggesting, setIsSuggesting] = useState(false);
   const [suggestionJustification, setSuggestionJustification] = useState<string | null>(null);
-  const suggestionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Clear justification when user changes title, description or priority
-  useEffect(() => {
-    return () => {
-      if (suggestionTimeoutRef.current) clearTimeout(suggestionTimeoutRef.current);
-    };
-  }, []);
+  const isAISuggestionRef = useRef(false);
 
   const resetForm = useCallback(() => {
     setTitle("");
     setDescription("");
     setPriority(DEFAULT_PRIORITY);
     setErrors({});
+    setSuggestionJustification(null);
     setIsExpanded(false);
   }, []);
 
@@ -213,7 +225,11 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
 
   const handlePriorityChange = useCallback((value: string) => {
     setPriority(Number(value) as TaskPriority);
-    setSuggestionJustification(null);
+    // Don't clear justification if priority was set by AI suggestion
+    if (!isAISuggestionRef.current) {
+      setSuggestionJustification(null);
+    }
+    isAISuggestionRef.current = false;
   }, []);
 
   const handleRequestSuggestion = useCallback(async () => {
@@ -222,10 +238,6 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
 
     setIsSuggesting(true);
     setSuggestionJustification(null);
-    if (suggestionTimeoutRef.current) {
-      clearTimeout(suggestionTimeoutRef.current);
-      suggestionTimeoutRef.current = null;
-    }
 
     try {
       const data = await suggestPriority({
@@ -233,9 +245,9 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
         title: trimmedTitle,
         description: description.trim() || null,
       });
+      isAISuggestionRef.current = true;
       setPriority(data.suggestedPriority as TaskPriority);
       setSuggestionJustification(data.justification);
-      suggestionTimeoutRef.current = setTimeout(() => setSuggestionJustification(null), 8000);
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Nie udało się pobrać sugestii. Spróbuj za chwilę.";
       toast.error(message, { duration: 5000 });
@@ -383,14 +395,24 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
 
           {/* AI suggestion justification */}
           {suggestionJustification && (
-            <p
-              className="text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border/50"
+            <div
+              className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border/50"
               role="status"
               aria-live="polite"
             >
-              <span className="font-medium text-foreground/80">Sugestia AI: </span>
-              {suggestionJustification}
-            </p>
+              <p className="flex-1">
+                <span className="font-medium text-foreground/80">Sugestia AI: </span>
+                {suggestionJustification}
+              </p>
+              <button
+                type="button"
+                onClick={() => setSuggestionJustification(null)}
+                className="shrink-0 p-0.5 rounded hover:bg-muted transition-colors"
+                aria-label="Zamknij sugestię"
+              >
+                <XIcon className="h-3.5 w-3.5" />
+              </button>
+            </div>
           )}
         </div>
       </div>

@@ -9,15 +9,15 @@ import type {
   RecordAIDecisionCommand,
   TaskPriority,
 } from "@/types";
-import { createHash } from "crypto";
+import { createOpenRouterService, type ChatMessage } from "./openrouter.service";
+import { OpenRouterError } from "@/lib/errors/openrouter.error";
+import { sanitizePromptInput, hashPrompt } from "@/lib/utils/prompt.utils";
 
 // =============================================================================
 // Constants
 // =============================================================================
 
 const DEFAULT_MODEL = "openai/gpt-4o-mini";
-const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const AI_REQUEST_TIMEOUT_MS = 30000;
 
 // =============================================================================
 // Types
@@ -80,170 +80,87 @@ function mapEntityToDTO(entity: AIInteractionEntity): AIInteractionDTO {
 }
 
 // =============================================================================
-// OpenRouter Helper Functions
+// OpenRouter Integration
 // =============================================================================
 
-/**
- * Sanitizes text to prevent prompt injection attacks
- * Removes potential control characters and limits length
- */
-function sanitizeForPrompt(text: string, maxLength = 500): string {
-  return text.replace(/```/g, "").replace(/\{/g, "(").replace(/\}/g, ")").substring(0, maxLength);
+interface AIPrioritySuggestion {
+  priority: 1 | 2 | 3;
+  justification: string;
+  tags: string[];
 }
 
-/**
- * Generates SHA256 hash of prompt for caching/logging purposes
- */
-function hashPrompt(prompt: string): string {
-  return createHash("sha256").update(prompt).digest("hex");
-}
+const PRIORITY_SUGGESTION_SCHEMA = {
+  type: "object" as const,
+  properties: {
+    priority: { type: "integer" as const, enum: [1, 2, 3] },
+    justification: { type: "string" as const, maxLength: 300 },
+    tags: {
+      type: "array" as const,
+      items: { type: "string" as const },
+    },
+  },
+  required: ["priority", "justification", "tags"],
+  additionalProperties: false,
+};
+
+const VALID_TAGS = ["deadline", "impact", "complexity", "stakeholders", "dependencies", "risk"];
 
 /**
- * Builds the AI prompt from title and description
+ * Calls OpenRouter API using OpenRouterService to get AI suggestion
  */
-function buildPrompt(title: string, description: string | null): string {
-  const sanitizedTitle = sanitizeForPrompt(title, 200);
-  const sanitizedDescription = description ? sanitizeForPrompt(description, 500) : "Brak opisu";
+async function callOpenRouter(title: string, description: string | null): Promise<AIServiceResponse> {
+  const openrouter = createOpenRouterService();
 
-  return `Jesteś asystentem do zarządzania zadaniami. Przeanalizuj poniższe zadanie i zasugeruj priorytet (1=niski, 2=średni, 3=wysoki).
+  const sanitizedTitle = sanitizePromptInput(title, { maxLength: 200 });
+  const sanitizedDescription = description ? sanitizePromptInput(description, { maxLength: 500 }) : "Brak opisu";
+
+  const messages: ChatMessage[] = [
+    {
+      role: "system",
+      content: `Jesteś asystentem do zarządzania zadaniami. Analizujesz zadania i sugerujesz priorytety.
+
+Priorytety:
+- 1 = niski (zadania, które można odłożyć)
+- 2 = średni (normalne zadania do wykonania)
+- 3 = wysoki (pilne zadania z deadline'ami lub wysokim wpływem)
+
+Dostępne tagi: deadline, impact, complexity, stakeholders, dependencies, risk`,
+    },
+    {
+      role: "user",
+      content: `Przeanalizuj poniższe zadanie i zasugeruj priorytet.
 
 Tytuł: ${sanitizedTitle}
-Opis: ${sanitizedDescription}
+Opis: ${sanitizedDescription}`,
+    },
+  ];
 
-Odpowiedz w formacie JSON:
-{
-  "priority": <1|2|3>,
-  "justification": "<krótkie uzasadnienie po polsku, max 300 znaków>",
-  "tags": ["<tag1>", "<tag2>"]
-}
+  const response = await openrouter.chatWithSchema<AIPrioritySuggestion>({
+    messages,
+    schema: PRIORITY_SUGGESTION_SCHEMA,
+    schemaName: "priority_suggestion",
+    temperature: 0.3,
+    maxTokens: 500,
+  });
 
-Dostępne tagi: deadline, impact, complexity, stakeholders, dependencies, risk`;
-}
-
-/**
- * Validates and normalizes the parsed AI response
- */
-function validateAndNormalizeResponse(parsed: unknown): AIServiceResponse {
-  const obj = parsed as Record<string, unknown>;
-
-  // Validate priority
-  const priority = obj.priority;
-  let suggestedPriority: TaskPriority = 2;
-  if (priority === 1 || priority === 2 || priority === 3) {
-    suggestedPriority = priority;
-  }
-
-  // Validate justification
-  const justification =
-    typeof obj.justification === "string" ? obj.justification.substring(0, 300) : "Brak uzasadnienia";
-
-  // Validate tags
-  const validTags = ["deadline", "impact", "complexity", "stakeholders", "dependencies", "risk"];
-  const tags = Array.isArray(obj.tags)
-    ? obj.tags.filter((tag): tag is string => typeof tag === "string" && validTags.includes(tag))
-    : [];
+  // Validate and normalize response
+  const priority = response.content.priority;
+  const suggestedPriority: TaskPriority = priority === 1 || priority === 2 || priority === 3 ? priority : 2;
 
   return {
     suggestedPriority,
-    justification,
-    justificationTags: tags,
+    justification: response.content.justification.substring(0, 300),
+    justificationTags: response.content.tags.filter((tag) => VALID_TAGS.includes(tag)),
   };
 }
 
 /**
- * Parses AI response JSON with fallback handling
- * Attempts to extract JSON from response text if direct parsing fails
+ * Builds prompt hash for logging purposes
  */
-function parseAIResponse(responseText: string): AIServiceResponse {
-  // Try direct JSON parsing
-  try {
-    const parsed = JSON.parse(responseText);
-    return validateAndNormalizeResponse(parsed);
-  } catch {
-    // Try to extract JSON from text
-    const jsonMatch = responseText.match(/\{[\s\S]*?\}/);
-    if (jsonMatch) {
-      try {
-        const parsed = JSON.parse(jsonMatch[0]);
-        return validateAndNormalizeResponse(parsed);
-      } catch {
-        // Fall through to default
-      }
-    }
-  }
-
-  // Fallback to default values
-  console.error("Failed to parse AI response, using defaults:", responseText);
-  return {
-    suggestedPriority: 2,
-    justification: "Nie udało się przeanalizować zadania",
-    justificationTags: [],
-  };
-}
-
-/**
- * Calls OpenRouter API to get AI suggestion
- */
-async function callOpenRouter(prompt: string): Promise<AIServiceResponse> {
-  const apiKey = import.meta.env.OPENROUTER_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("OPENROUTER_API_KEY is not configured");
-  }
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), AI_REQUEST_TIMEOUT_MS);
-
-  try {
-    const response = await fetch(OPENROUTER_API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "HTTP-Referer": "https://10x-projekt.local",
-        "X-Title": "10x AI Task Manager",
-      },
-      body: JSON.stringify({
-        model: DEFAULT_MODEL,
-        messages: [
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        temperature: 0.3,
-        max_tokens: 500,
-      }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("OpenRouter API error:", response.status, errorText);
-      throw new Error(`OpenRouter API error: ${response.status}`);
-    }
-
-    const data = (await response.json()) as {
-      choices?: { message?: { content?: string } }[];
-    };
-
-    const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error("Empty response from OpenRouter API");
-    }
-
-    return parseAIResponse(content);
-  } catch (error) {
-    clearTimeout(timeoutId);
-
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new Error("AI service request timed out");
-    }
-
-    throw error;
-  }
+function buildPromptHash(title: string, description: string | null): string {
+  const sanitizedTitle = sanitizePromptInput(title, { maxLength: 200 });
+  const sanitizedDescription = description ? sanitizePromptInput(description, { maxLength: 500 }) : "Brak opisu";
+  return hashPrompt(`${sanitizedTitle}|${sanitizedDescription}`);
 }
 
 // =============================================================================
@@ -278,7 +195,8 @@ async function saveInteraction(
   supabase: SupabaseClient,
   userId: string,
   taskId: string,
-  prompt: string,
+  title: string,
+  description: string | null,
   response: AIServiceResponse
 ): Promise<string> {
   const { data, error } = await supabase
@@ -287,7 +205,7 @@ async function saveInteraction(
       user_id: userId,
       task_id: taskId,
       model: DEFAULT_MODEL,
-      prompt_hash: hashPrompt(prompt),
+      prompt_hash: buildPromptHash(title, description),
       suggested_priority: response.suggestedPriority,
       justification: response.justification,
       justification_tags: response.justificationTags,
@@ -341,14 +259,17 @@ export async function suggestPriority(
     }
   }
 
-  // 2. Build prompt and call AI
-  const prompt = buildPrompt(command.title, command.description ?? null);
+  // 2. Call AI service
   let aiResponse: AIServiceResponse;
 
   try {
-    aiResponse = await callOpenRouter(prompt);
+    aiResponse = await callOpenRouter(command.title, command.description ?? null);
   } catch (error) {
-    console.error("AI service error:", error);
+    if (error instanceof OpenRouterError) {
+      console.error("OpenRouter error:", error.code, error.message);
+    } else {
+      console.error("AI service error:", error);
+    }
     return {
       success: false,
       error: "ai_service_error",
@@ -362,7 +283,14 @@ export async function suggestPriority(
 
   if (command.taskId) {
     try {
-      interactionId = await saveInteraction(supabase, userId, command.taskId, prompt, aiResponse);
+      interactionId = await saveInteraction(
+        supabase,
+        userId,
+        command.taskId,
+        command.title,
+        command.description ?? null,
+        aiResponse
+      );
     } catch {
       return {
         success: false,
