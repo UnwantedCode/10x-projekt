@@ -1,15 +1,14 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
 
-import { suggestPriority } from "@/lib/api/dashboard.api";
-import { ApiError } from "@/lib/api/errors";
 import type { CreateTaskCommand, TaskPriority } from "@/types";
 import { PRIORITY_CONFIGS } from "./types";
+import { useAISuggestion } from "./hooks/useAISuggestion";
+import { AISuggestionPanel } from "./AISuggestionPanel";
 
 // =============================================================================
 // Types
@@ -43,40 +42,6 @@ function PlusIcon({ className }: { className?: string }) {
   );
 }
 
-function ChevronDownIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
-
-function ChevronUpIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="m18 15-6-6-6 6" />
-    </svg>
-  );
-}
-
 function SparklesIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -94,24 +59,6 @@ function SparklesIcon({ className }: { className?: string }) {
       <path d="M19 17v4" />
       <path d="M3 5h4" />
       <path d="M17 19h4" />
-    </svg>
-  );
-}
-
-function XIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
     </svg>
   );
 }
@@ -161,18 +108,29 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>(DEFAULT_PRIORITY);
   const [errors, setErrors] = useState<FormErrors>({});
-  const [isSuggesting, setIsSuggesting] = useState(false);
-  const [suggestionJustification, setSuggestionJustification] = useState<string | null>(null);
-  const isAISuggestionRef = useRef(false);
+
+  const {
+    suggestion,
+    isLoading: isSuggesting,
+    isProcessingDecision,
+    requestSuggestion,
+    acceptSuggestion,
+    modifySuggestion,
+    rejectSuggestion,
+    clearSuggestion,
+  } = useAISuggestion({
+    taskId: null,
+    onPriorityUpdate: setPriority,
+  });
 
   const resetForm = useCallback(() => {
     setTitle("");
     setDescription("");
     setPriority(DEFAULT_PRIORITY);
     setErrors({});
-    setSuggestionJustification(null);
+    clearSuggestion();
     setIsExpanded(false);
-  }, []);
+  }, [clearSuggestion]);
 
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
@@ -214,47 +172,20 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
     setErrors((prev) => ({ ...prev, title: undefined }));
-    setSuggestionJustification(null);
   }, []);
 
   const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(e.target.value);
     setErrors((prev) => ({ ...prev, description: undefined }));
-    setSuggestionJustification(null);
   }, []);
 
   const handlePriorityChange = useCallback((value: string) => {
     setPriority(Number(value) as TaskPriority);
-    // Don't clear justification if priority was set by AI suggestion
-    if (!isAISuggestionRef.current) {
-      setSuggestionJustification(null);
-    }
-    isAISuggestionRef.current = false;
   }, []);
 
-  const handleRequestSuggestion = useCallback(async () => {
-    const trimmedTitle = title.trim();
-    if (!trimmedTitle) return;
-
-    setIsSuggesting(true);
-    setSuggestionJustification(null);
-
-    try {
-      const data = await suggestPriority({
-        taskId: null,
-        title: trimmedTitle,
-        description: description.trim() || null,
-      });
-      isAISuggestionRef.current = true;
-      setPriority(data.suggestedPriority as TaskPriority);
-      setSuggestionJustification(data.justification);
-    } catch (err) {
-      const message = err instanceof ApiError ? err.message : "Nie udało się pobrać sugestii. Spróbuj za chwilę.";
-      toast.error(message, { duration: 5000 });
-    } finally {
-      setIsSuggesting(false);
-    }
-  }, [title, description]);
+  const handleRequestSuggestion = useCallback(() => {
+    requestSuggestion(title, description.trim() || null);
+  }, [title, description, requestSuggestion]);
 
   // Collapsed state - just show a button to expand
   if (!isExpanded) {
@@ -364,13 +295,16 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
                 variant="outline"
                 size="sm"
                 onClick={handleRequestSuggestion}
-                disabled={isSubmitting || isSuggesting || !title.trim()}
+                disabled={isSubmitting || isSuggesting || isProcessingDecision || !title.trim()}
                 className="shrink-0 gap-1.5"
                 aria-label="Zasugeruj priorytet na podstawie tytułu i opisu"
               >
                 {isSuggesting ? (
                   <>
-                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
+                    <span
+                      className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+                      aria-hidden
+                    />
                     <span className="hidden sm:inline">Sugeruję...</span>
                   </>
                 ) : (
@@ -393,26 +327,16 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
             </div>
           </div>
 
-          {/* AI suggestion justification */}
-          {suggestionJustification && (
-            <div
-              className="flex items-start gap-2 text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border/50"
-              role="status"
-              aria-live="polite"
-            >
-              <p className="flex-1">
-                <span className="font-medium text-foreground/80">Sugestia AI: </span>
-                {suggestionJustification}
-              </p>
-              <button
-                type="button"
-                onClick={() => setSuggestionJustification(null)}
-                className="shrink-0 p-0.5 rounded hover:bg-muted transition-colors"
-                aria-label="Zamknij sugestię"
-              >
-                <XIcon className="h-3.5 w-3.5" />
-              </button>
-            </div>
+          {/* AI suggestion panel */}
+          {suggestion && (
+            <AISuggestionPanel
+              suggestion={suggestion}
+              currentPriority={priority}
+              onAccept={acceptSuggestion}
+              onModify={modifySuggestion}
+              onReject={rejectSuggestion}
+              isProcessing={isProcessingDecision}
+            />
           )}
         </div>
       </div>

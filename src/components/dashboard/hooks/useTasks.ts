@@ -120,7 +120,7 @@ export function useTasks(listId: string | null): UseTasksReturn {
 
     async function loadTasks() {
       if (!listId) return; // TypeScript guard
-      
+
       setIsLoading(true);
       setError(null);
 

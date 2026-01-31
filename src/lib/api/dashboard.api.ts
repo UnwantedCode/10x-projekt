@@ -17,6 +17,8 @@ import type {
   SuccessResponseDTO,
   AISuggestCommand,
   AISuggestionDTO,
+  RecordAIDecisionCommand,
+  AIInteractionDTO,
 } from "@/types";
 
 import type { TaskFilterState } from "@/components/dashboard/types";
@@ -283,6 +285,23 @@ export async function suggestPriority(command: AISuggestCommand): Promise<AISugg
     body: JSON.stringify(command),
   });
   return handleResponse<AISuggestionDTO>(response);
+}
+
+/**
+ * Records user's decision on an AI suggestion.
+ * Note: Only works when interaction exists in DB (i.e. taskId was provided to suggest).
+ * For create flow (taskId=null), interaction is not persisted – do not call this.
+ */
+export async function recordAIDecision(
+  interactionId: string,
+  command: RecordAIDecisionCommand
+): Promise<AIInteractionDTO> {
+  const response = await safeFetch(`/api/ai-interactions/${interactionId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(command),
+  });
+  return handleResponse<AIInteractionDTO>(response);
 }
 
 // =============================================================================

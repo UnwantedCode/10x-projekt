@@ -13,7 +13,10 @@ const registered = Astro.url.searchParams.get("registered") === "true";
   <div class="w-full space-y-4">
     {
       registered && (
-        <Alert variant="default" class="border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100">
+        <Alert
+          variant="default"
+          class="border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100"
+        >
           <AlertDescription>
             Rejestracja zakończona pomyślnie! Sprawdź swoją skrzynkę email, aby aktywować konto.
           </AlertDescription>

@@ -46,7 +46,7 @@ export function useInfiniteScroll({
 
   // Store callback in ref to avoid re-creating observer
   const onLoadMoreRef = useRef(onLoadMore);
-  
+
   // Update ref in useEffect to comply with React rules (no ref access during render)
   useEffect(() => {
     onLoadMoreRef.current = onLoadMore;
