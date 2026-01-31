@@ -1,9 +1,6 @@
 import { useState, useCallback } from "react";
-import { createClient } from "@supabase/supabase-js";
 
 import type { LoginFormValues, LoginFormErrors, UseLoginFormReturn } from "./types";
-
-const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MIN_PASSWORD_LENGTH = 6;
@@ -55,17 +52,6 @@ function validateForm(values: LoginFormValues): LoginFormErrors {
 }
 
 /**
- * Maps Supabase auth errors to user-friendly messages
- */
-function mapAuthError(errorMessage: string): string {
-  if (errorMessage.includes("Email not confirmed")) {
-    return "Adres email nie został potwierdzony. Sprawdź swoją skrzynkę.";
-  }
-  // Generic message for all other auth errors (prevents user enumeration)
-  return "Nieprawidłowy email lub hasło";
-}
-
-/**
  * Custom hook for login form state management and submission
  */
 export function useLoginForm(): UseLoginFormReturn {
@@ -91,6 +77,7 @@ export function useLoginForm(): UseLoginFormReturn {
           ...prev,
           [fieldName]: fieldError,
           form: undefined, // Clear form error on input change
+          emailNotConfirmed: undefined, // Clear email not confirmed error
         }));
       }
     },
@@ -130,22 +117,29 @@ export function useLoginForm(): UseLoginFormReturn {
       setErrors({});
 
       try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: values.email,
-          password: values.password,
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: values.email,
+            password: values.password,
+          }),
         });
 
-        if (error) {
-          setErrors({ form: mapAuthError(error.message) });
+        const data = await response.json();
+
+        if (!response.ok) {
+          setErrors({
+            form: data.error,
+            emailNotConfirmed: data.code === "EMAIL_NOT_CONFIRMED",
+          });
           return;
         }
 
-        if (data.session) {
-          // Check for redirectTo parameter
-          const params = new URLSearchParams(window.location.search);
-          const redirectTo = params.get("redirect") || params.get("redirectTo") || "/app";
-          window.location.href = redirectTo;
-        }
+        // Przekierowanie - użyj tylko redirectTo
+        const params = new URLSearchParams(window.location.search);
+        const redirectTo = params.get("redirectTo") || data.redirectTo || "/app";
+        window.location.href = redirectTo;
       } catch {
         setErrors({ form: "Błąd połączenia z serwerem. Spróbuj ponownie." });
       } finally {

@@ -5,7 +5,8 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import type { TaskFilterState, TaskSortField, SortOrder } from "@/types";
+import type { TaskSortField, SortOrder } from "@/types";
+import type { TaskFilterState } from "./types";
 import { SEARCH_DEBOUNCE_MS } from "./types";
 
 // =============================================================================

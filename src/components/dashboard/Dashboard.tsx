@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { createClient } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
@@ -9,12 +9,6 @@ import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { MainContent } from "./MainContent";
 import { OnboardingWizard } from "./OnboardingWizard";
-
-// =============================================================================
-// Supabase Client for Browser
-// =============================================================================
-
-const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
 // =============================================================================
 // Types
@@ -29,6 +23,12 @@ interface DashboardProps {
 // =============================================================================
 
 export function Dashboard({ userEmail }: DashboardProps) {
+  // Create Supabase client lazily to avoid errors during module initialization
+  const supabase = useMemo(
+    () => createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY),
+    []
+  );
+
   // Dashboard state and actions
   const {
     lists,

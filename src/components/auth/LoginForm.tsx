@@ -21,11 +21,20 @@ export function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-        {errors.form && (
+        {errors.emailNotConfirmed ? (
+          <Alert
+            variant="default"
+            className="border-amber-500 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100"
+          >
+            <AlertDescription>
+              Twoje konto wymaga aktywacji. Sprawdź swoją skrzynkę email i kliknij link aktywacyjny.
+            </AlertDescription>
+          </Alert>
+        ) : errors.form ? (
           <Alert variant="destructive">
             <AlertDescription>{errors.form}</AlertDescription>
           </Alert>
-        )}
+        ) : null}
 
         <div className="space-y-2">
           <Label htmlFor={emailId}>Email</Label>

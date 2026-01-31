@@ -1,10 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "sonner";
 
+import { suggestPriority } from "@/lib/api/dashboard.api";
+import { ApiError } from "@/lib/api/errors";
 import type { CreateTaskCommand, TaskPriority } from "@/types";
 import { PRIORITY_CONFIGS } from "./types";
 
@@ -74,6 +77,27 @@ function ChevronUpIcon({ className }: { className?: string }) {
   );
 }
 
+function SparklesIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
+      <path d="M5 3v4" />
+      <path d="M19 17v4" />
+      <path d="M3 5h4" />
+      <path d="M17 19h4" />
+    </svg>
+  );
+}
+
 // =============================================================================
 // Constants
 // =============================================================================
@@ -119,6 +143,16 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>(DEFAULT_PRIORITY);
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [suggestionJustification, setSuggestionJustification] = useState<string | null>(null);
+  const suggestionTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear justification when user changes title, description or priority
+  useEffect(() => {
+    return () => {
+      if (suggestionTimeoutRef.current) clearTimeout(suggestionTimeoutRef.current);
+    };
+  }, []);
 
   const resetForm = useCallback(() => {
     setTitle("");
@@ -168,16 +202,47 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
   const handleTitleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
     setErrors((prev) => ({ ...prev, title: undefined }));
+    setSuggestionJustification(null);
   }, []);
 
   const handleDescriptionChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(e.target.value);
     setErrors((prev) => ({ ...prev, description: undefined }));
+    setSuggestionJustification(null);
   }, []);
 
   const handlePriorityChange = useCallback((value: string) => {
     setPriority(Number(value) as TaskPriority);
+    setSuggestionJustification(null);
   }, []);
+
+  const handleRequestSuggestion = useCallback(async () => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
+
+    setIsSuggesting(true);
+    setSuggestionJustification(null);
+    if (suggestionTimeoutRef.current) {
+      clearTimeout(suggestionTimeoutRef.current);
+      suggestionTimeoutRef.current = null;
+    }
+
+    try {
+      const data = await suggestPriority({
+        taskId: null,
+        title: trimmedTitle,
+        description: description.trim() || null,
+      });
+      setPriority(data.suggestedPriority as TaskPriority);
+      setSuggestionJustification(data.justification);
+      suggestionTimeoutRef.current = setTimeout(() => setSuggestionJustification(null), 8000);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Nie udało się pobrać sugestii. Spróbuj za chwilę.";
+      toast.error(message, { duration: 5000 });
+    } finally {
+      setIsSuggesting(false);
+    }
+  }, [title, description]);
 
   // Collapsed state - just show a button to expand
   if (!isExpanded) {
@@ -260,38 +325,73 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
         </div>
 
         {/* Priority and actions row */}
-        <div className="flex items-center justify-between gap-3">
-          {/* Priority selector */}
-          <div className="flex items-center gap-2">
-            <Label htmlFor="task-priority" className="text-sm text-muted-foreground whitespace-nowrap">
-              Priorytet:
-            </Label>
-            <Select value={String(priority)} onValueChange={handlePriorityChange} disabled={isSubmitting}>
-              <SelectTrigger id="task-priority" className="w-[140px]" aria-label="Wybierz priorytet">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {([3, 2, 1] as TaskPriority[]).map((p) => {
-                  const config = PRIORITY_CONFIGS[p];
-                  return (
-                    <SelectItem key={p} value={String(p)}>
-                      <span className={config.color}>{config.label}</span>
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* Priority selector + AI suggestion */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Label htmlFor="task-priority" className="text-sm text-muted-foreground whitespace-nowrap">
+                Priorytet:
+              </Label>
+              <Select value={String(priority)} onValueChange={handlePriorityChange} disabled={isSubmitting}>
+                <SelectTrigger id="task-priority" className="w-[140px]" aria-label="Wybierz priorytet">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {([3, 2, 1] as TaskPriority[]).map((p) => {
+                    const config = PRIORITY_CONFIGS[p];
+                    return (
+                      <SelectItem key={p} value={String(p)}>
+                        <span className={config.color}>{config.label}</span>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleRequestSuggestion}
+                disabled={isSubmitting || isSuggesting || !title.trim()}
+                className="shrink-0 gap-1.5"
+                aria-label="Zasugeruj priorytet na podstawie tytułu i opisu"
+              >
+                {isSuggesting ? (
+                  <>
+                    <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />
+                    <span className="hidden sm:inline">Sugeruję...</span>
+                  </>
+                ) : (
+                  <>
+                    <SparklesIcon className="h-4 w-4" />
+                    <span className="hidden sm:inline">Zasugeruj priorytet</span>
+                  </>
+                )}
+              </Button>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="ghost" size="sm" onClick={resetForm} disabled={isSubmitting}>
+                Anuluj
+              </Button>
+              <Button type="submit" size="sm" disabled={isSubmitting || !title.trim()}>
+                {isSubmitting ? "Dodawanie..." : "Dodaj"}
+              </Button>
+            </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-2">
-            <Button type="button" variant="ghost" size="sm" onClick={resetForm} disabled={isSubmitting}>
-              Anuluj
-            </Button>
-            <Button type="submit" size="sm" disabled={isSubmitting || !title.trim()}>
-              {isSubmitting ? "Dodawanie..." : "Dodaj"}
-            </Button>
-          </div>
+          {/* AI suggestion justification */}
+          {suggestionJustification && (
+            <p
+              className="text-xs text-muted-foreground bg-muted/50 rounded-md px-3 py-2 border border-border/50"
+              role="status"
+              aria-live="polite"
+            >
+              <span className="font-medium text-foreground/80">Sugestia AI: </span>
+              {suggestionJustification}
+            </p>
+          )}
         </div>
       </div>
 

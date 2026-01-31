@@ -14,7 +14,6 @@ import type {
  */
 const DEFAULT_LIMIT = 50;
 const DEFAULT_OFFSET = 0;
-const DEFAULT_STATUS = 1; // TODO status
 const DEFAULT_SORT = "sort_order" as const;
 const DEFAULT_ORDER = "asc" as const;
 
@@ -78,18 +77,20 @@ export async function getTasksByListId(
 ): Promise<TasksResponseDTO> {
   const limit = params.limit ?? DEFAULT_LIMIT;
   const offset = params.offset ?? DEFAULT_OFFSET;
-  const status = params.status ?? DEFAULT_STATUS;
   const sort = params.sort ?? DEFAULT_SORT;
   const order = params.order ?? DEFAULT_ORDER;
 
-  // Build query with filters
+  // Build query with filters (status filter only when explicitly requested; omit = show all)
   let query = supabase
     .from("tasks")
     .select("id, list_id, title, description, priority, status, sort_order, done_at, created_at, updated_at", {
       count: "exact",
     })
-    .eq("list_id", listId)
-    .eq("status", status);
+    .eq("list_id", listId);
+
+  if (params.status !== undefined && params.status !== null) {
+    query = query.eq("status", params.status);
+  }
 
   // Apply priority filter if provided
   if (params.priority !== undefined) {

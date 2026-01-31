@@ -3,16 +3,7 @@ import AuthLayout from "@/layouts/AuthLayout.astro";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Check if user is already logged in
-const supabase = Astro.locals.supabase;
-const {
-  data: { session },
-} = await supabase.auth.getSession();
-
-// Redirect to app if already authenticated
-if (session) {
-  return Astro.redirect("/app");
-}
+// Middleware handles redirect for authenticated users
 
 // Check for registration success message
 const registered = Astro.url.searchParams.get("registered") === "true";
@@ -22,8 +13,10 @@ const registered = Astro.url.searchParams.get("registered") === "true";
   <div class="w-full space-y-4">
     {
       registered && (
-        <Alert variant="success">
-          <AlertDescription>Rejestracja zakończona pomyślnie! Możesz się teraz zalogować.</AlertDescription>
+        <Alert variant="default" class="border-green-500 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-100">
+          <AlertDescription>
+            Rejestracja zakończona pomyślnie! Sprawdź swoją skrzynkę email, aby aktywować konto.
+          </AlertDescription>
         </Alert>
       )
     }

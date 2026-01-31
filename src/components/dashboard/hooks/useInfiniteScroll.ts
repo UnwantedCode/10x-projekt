@@ -21,7 +21,7 @@ export interface UseInfiniteScrollOptions {
 
 export interface UseInfiniteScrollReturn {
   /** Ref to attach to the trigger element */
-  triggerRef: React.RefObject<HTMLDivElement>;
+  triggerRef: React.RefObject<HTMLDivElement | null>;
   /** Whether the trigger element is currently visible */
   isIntersecting: boolean;
 }
@@ -46,7 +46,11 @@ export function useInfiniteScroll({
 
   // Store callback in ref to avoid re-creating observer
   const onLoadMoreRef = useRef(onLoadMore);
-  onLoadMoreRef.current = onLoadMore;
+  
+  // Update ref in useEffect to comply with React rules (no ref access during render)
+  useEffect(() => {
+    onLoadMoreRef.current = onLoadMore;
+  }, [onLoadMore]);
 
   const handleIntersection = useCallback(
     (entries: IntersectionObserverEntry[]) => {

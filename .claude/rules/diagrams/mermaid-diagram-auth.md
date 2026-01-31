@@ -1,8 +1,7 @@
 ---
-description:
-globs:
-alwaysApply: false
+# no paths => applies globally
 ---
+
 # Mermaid Diagram - Auth Architecture
 
 Jesteś specjalistą ds. bezpieczeństwa, którego zadaniem jest utworzenie diagramu Mermaid w celu wizualizacji przepływu autentykacji dla modułu logowania i rejestracji. Diagram powinien zostać utworzony w następującym pliku: DESTINATION
@@ -10,11 +9,11 @@ Jesteś specjalistą ds. bezpieczeństwa, którego zadaniem jest utworzenie diag
 Będziesz musiał odnieść się do następujących plików w celu poznania istniejących wymagań:
 
 <file_references>
-[project-prd.md](mdc:.ai/project-prd.md)
+[project-prd.md](md:@doc/prd.md)
 </file_references>
 
 <destination>
-.ai/diagrams/auth.md
+@doc/diagram/auth.md
 </destination>
 
 Twoim zadaniem jest analiza specyfikacji modułu logowania i rejestracji oraz utworzenie kompleksowego diagramu Mermaid, który dokładnie przedstawia sekwencję autentykacji. Diagram powinien być w języku polskim.

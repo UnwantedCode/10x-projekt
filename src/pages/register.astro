@@ -2,16 +2,7 @@
 import AuthLayout from "@/layouts/AuthLayout.astro";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 
-// Check if user is already logged in
-const supabase = Astro.locals.supabase;
-const {
-  data: { session },
-} = await supabase.auth.getSession();
-
-// Redirect to app if already authenticated
-if (session) {
-  return Astro.redirect("/app");
-}
+// Middleware handles redirect for authenticated users
 ---
 
 <AuthLayout title="Rejestracja | AI Task Manager">

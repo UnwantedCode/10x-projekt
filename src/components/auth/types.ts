@@ -24,6 +24,8 @@ export interface LoginFormErrors {
   password?: string;
   /** General form error (e.g., server error, invalid credentials) */
   form?: string;
+  /** Flag indicating email not confirmed error */
+  emailNotConfirmed?: boolean;
 }
 
 /**

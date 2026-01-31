@@ -119,6 +119,8 @@ export function useTasks(listId: string | null): UseTasksReturn {
     abortControllerRef.current = new AbortController();
 
     async function loadTasks() {
+      if (!listId) return; // TypeScript guard
+      
       setIsLoading(true);
       setError(null);
 

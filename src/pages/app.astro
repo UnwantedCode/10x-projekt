@@ -2,19 +2,15 @@
 import "../styles/global.css";
 import { Dashboard } from "@/components/dashboard/Dashboard";
 
-// Server-side authentication check
-const supabase = Astro.locals.supabase;
-const {
-  data: { session },
-} = await supabase.auth.getSession();
+// Middleware handles authentication - locals.user is guaranteed to be set
+const { user } = Astro.locals;
 
-// Redirect to login if not authenticated
-if (!session) {
+// This check is a safeguard, but middleware should have already redirected
+if (!user) {
   return Astro.redirect("/login?redirectTo=/app");
 }
 
-// Get user email for display
-const userEmail = session.user.email ?? "";
+const userEmail = user.email ?? "";
 ---
 
 <!doctype html>

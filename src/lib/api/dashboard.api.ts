@@ -5,6 +5,7 @@
 import type {
   ProfileDTO,
   ListDTO,
+  TaskDTO,
   ListsResponseDTO,
   TasksResponseDTO,
   CreateListCommand,
@@ -14,6 +15,8 @@ import type {
   UpdateProfileCommand,
   CompleteOnboardingCommand,
   SuccessResponseDTO,
+  AISuggestCommand,
+  AISuggestionDTO,
 } from "@/types";
 
 import type { TaskFilterState } from "@/components/dashboard/types";
@@ -59,6 +62,14 @@ async function handleResponse<T>(response: Response): Promise<T> {
   if (response.status === 409) {
     const data = await response.json().catch(() => ({}));
     throw new ConflictError(data.message || "Konflikt danych.");
+  }
+
+  if (response.status === 503) {
+    const data = await response.json().catch(() => ({}));
+    throw new ApiError(
+      (data as { message?: string }).message ?? "Sugestie AI są tymczasowo niedostępne. Spróbuj za chwilę.",
+      503
+    );
   }
 
   if (response.status >= 500) {
@@ -256,6 +267,22 @@ export async function deleteTask(taskId: string): Promise<SuccessResponseDTO> {
     method: "DELETE",
   });
   return handleResponse<SuccessResponseDTO>(response);
+}
+
+// =============================================================================
+// AI Suggestions API
+// =============================================================================
+
+/**
+ * Requests AI priority suggestion for a task (by title/description or existing taskId)
+ */
+export async function suggestPriority(command: AISuggestCommand): Promise<AISuggestionDTO> {
+  const response = await safeFetch("/api/ai/suggest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(command),
+  });
+  return handleResponse<AISuggestionDTO>(response);
 }
 
 // =============================================================================

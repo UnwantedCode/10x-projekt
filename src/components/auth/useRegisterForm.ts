@@ -1,7 +1,4 @@
 import { useState, useCallback } from "react";
-import type { AuthError } from "@supabase/supabase-js";
-
-import { supabaseBrowser } from "@/db/supabase.browser";
 
 import type { RegisterFormValues, RegisterFormErrors, UseRegisterFormReturn } from "./types";
 
@@ -73,28 +70,6 @@ function validateForm(values: RegisterFormValues): RegisterFormErrors {
   }
 
   return errors;
-}
-
-/**
- * Maps Supabase auth errors to user-friendly messages in Polish
- */
-function mapAuthError(error: AuthError): string {
-  const message = error.message.toLowerCase();
-
-  if (message.includes("user already registered") || message.includes("already exists")) {
-    return "Konto z tym adresem email już istnieje";
-  }
-  if (message.includes("invalid email")) {
-    return "Podany adres email jest nieprawidłowy";
-  }
-  if (message.includes("password") && message.includes("weak")) {
-    return "Hasło jest zbyt słabe";
-  }
-  if (message.includes("signups not allowed") || message.includes("signup disabled")) {
-    return "Rejestracja jest obecnie wyłączona";
-  }
-
-  return "Wystąpił błąd podczas rejestracji. Spróbuj ponownie.";
 }
 
 /**
@@ -188,13 +163,21 @@ export function useRegisterForm(): UseRegisterFormReturn {
       setErrors({});
 
       try {
-        const { error } = await supabaseBrowser.auth.signUp({
-          email: values.email,
-          password: values.password,
+        const response = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: values.email,
+            password: values.password,
+            confirmPassword: values.confirmPassword,
+            acceptedTerms: values.acceptedTerms,
+          }),
         });
 
-        if (error) {
-          setErrors({ form: mapAuthError(error) });
+        const data = await response.json();
+
+        if (!response.ok) {
+          setErrors({ form: data.error });
           return;
         }
 

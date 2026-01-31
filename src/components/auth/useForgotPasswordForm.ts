@@ -1,9 +1,6 @@
 import { useState, useCallback } from "react";
-import { createClient } from "@supabase/supabase-js";
 
 import type { ForgotPasswordFormValues, ForgotPasswordFormErrors, UseForgotPasswordFormReturn } from "./types";
-
-const supabase = createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY);
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -85,12 +82,14 @@ export function useForgotPasswordForm(): UseForgotPasswordFormReturn {
       setErrors({});
 
       try {
-        await supabase.auth.resetPasswordForEmail(values.email.trim(), {
-          redirectTo: `${window.location.origin}/reset-password`,
+        await fetch("/api/auth/forgot-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: values.email.trim() }),
         });
-      } catch (error) {
+        // Always show success regardless of response (prevents account enumeration)
+      } catch {
         // Intentionally ignore errors - always show success to prevent account enumeration
-        console.error("Password reset error:", error);
       } finally {
         setIsLoading(false);
         // Always show success message regardless of API response
