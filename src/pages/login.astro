@@ -1,0 +1,19 @@
+---
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { LoginForm } from "@/components/auth/LoginForm";
+
+// Check if user is already logged in
+const supabase = Astro.locals.supabase;
+const {
+  data: { session },
+} = await supabase.auth.getSession();
+
+// Redirect to dashboard if already authenticated
+if (session) {
+  return Astro.redirect("/dashboard");
+}
+---
+
+<AuthLayout title="Logowanie | AI Task Manager">
+  <LoginForm client:load />
+</AuthLayout>
