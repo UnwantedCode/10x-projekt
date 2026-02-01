@@ -2,6 +2,7 @@ import { useCallback, useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 import type { ListDTO, TaskDTO, CreateTaskCommand, UpdateTaskCommand, TaskStatus } from "@/types";
+import { getErrorMessage } from "@/lib/api/errors";
 
 import { useTasks } from "./hooks/useTasks";
 import { useInfiniteScroll } from "./hooks/useInfiniteScroll";
@@ -103,6 +104,8 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
   const [isSubmittingTask, setIsSubmittingTask] = useState(false);
   const [editingTask, setEditingTask] = useState<TaskDTO | null>(null);
   const [isSavingTask, setIsSavingTask] = useState(false);
+  const [isDeletingTask, setIsDeletingTask] = useState(false);
+  const [deleteTaskError, setDeleteTaskError] = useState<string | null>(null);
 
   // Tasks hook - fetch tasks for active list
   const {
@@ -120,6 +123,7 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
     updateTask,
     updateTaskStatus,
     reorderTasks,
+    deleteTask,
     clearError: clearTasksError,
   } = useTasks(activeList?.id ?? null);
 
@@ -203,7 +207,27 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
 
   const handleCloseEdit = useCallback(() => {
     setEditingTask(null);
+    setDeleteTaskError(null);
   }, []);
+
+  const handleDeleteTask = useCallback(
+    async (taskId: string) => {
+      setIsDeletingTask(true);
+      setDeleteTaskError(null);
+      try {
+        await deleteTask(taskId);
+        toast.success("Zadanie zostało usunięte");
+        setEditingTask(null);
+      } catch (err) {
+        setDeleteTaskError(getErrorMessage(err));
+        clearTasksError();
+        throw err;
+      } finally {
+        setIsDeletingTask(false);
+      }
+    },
+    [deleteTask, clearTasksError]
+  );
 
   const handleStartAddTask = useCallback(() => {
     // This is handled by InlineTaskInput's expand state
@@ -269,7 +293,10 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
         isOpen={!!editingTask}
         onClose={handleCloseEdit}
         onSave={handleSaveTask}
+        onDelete={handleDeleteTask}
         isSaving={isSavingTask}
+        isDeleting={isDeletingTask}
+        deleteError={deleteTaskError}
       />
     </div>
   );

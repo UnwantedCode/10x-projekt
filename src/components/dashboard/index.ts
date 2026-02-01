@@ -16,6 +16,7 @@ export { TaskCard } from "./TaskCard";
 export { InlineTaskInput } from "./InlineTaskInput";
 
 // Utility components
+export { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
 export { EmptyState } from "./EmptyState";
 export { OnboardingWizard } from "./OnboardingWizard";
 
@@ -25,6 +26,7 @@ export { useTasks } from "./hooks/useTasks";
 export { useInfiniteScroll } from "./hooks/useInfiniteScroll";
 
 // Types
+export type { DeleteConfirmationDialogProps, DeleteItemType } from "./DeleteConfirmationDialog";
 export type {
   TaskFilterState,
   TasksByPriority,

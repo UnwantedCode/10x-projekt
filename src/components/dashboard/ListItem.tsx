@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import type { ListDTO } from "@/types";
+import { DeleteConfirmationDialog } from "./DeleteConfirmationDialog";
 
 // =============================================================================
 // Types
@@ -109,6 +110,8 @@ export function ListItem({ list, isActive, onSelect, onUpdate, onDelete }: ListI
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -186,26 +189,29 @@ export function ListItem({ list, isActive, onSelect, onUpdate, onDelete }: ListI
     [handleSaveEdit, handleCancelEdit]
   );
 
-  const handleDelete = useCallback(
-    async (e: React.MouseEvent) => {
-      e.stopPropagation();
+  const handleDeleteClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteError(null);
+    setIsDeleteConfirmOpen(true);
+  }, []);
 
-      if (!window.confirm(`Czy na pewno chcesz usunąć listę "${list.name}"?`)) {
-        return;
-      }
+  const handleConfirmDelete = useCallback(async () => {
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await onDelete();
+      setIsDeleteConfirmOpen(false);
+    } catch (err) {
+      setDeleteError(err instanceof Error ? err.message : "Błąd usuwania listy.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [onDelete]);
 
-      setIsDeleting(true);
-
-      try {
-        await onDelete();
-      } catch {
-        // Error handled by parent
-      } finally {
-        setIsDeleting(false);
-      }
-    },
-    [list.name, onDelete]
-  );
+  const handleCancelDelete = useCallback(() => {
+    setIsDeleteConfirmOpen(false);
+    setDeleteError(null);
+  }, []);
 
   // Edit mode
   if (isEditing) {
@@ -287,7 +293,7 @@ export function ListItem({ list, isActive, onSelect, onUpdate, onDelete }: ListI
             size="icon"
             variant="ghost"
             className="h-6 w-6 text-destructive hover:text-destructive"
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             disabled={isDeleting}
             aria-label={`Usuń listę ${list.name}`}
           >
@@ -295,6 +301,19 @@ export function ListItem({ list, isActive, onSelect, onUpdate, onDelete }: ListI
           </Button>
         </div>
       </button>
+
+      <DeleteConfirmationDialog
+        open={isDeleteConfirmOpen}
+        onOpenChange={(open) => {
+          if (!open) handleCancelDelete();
+          else setIsDeleteConfirmOpen(true);
+        }}
+        itemType="list"
+        itemName={list.name}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+        error={deleteError}
+      />
     </li>
   );
 }

@@ -8,9 +8,15 @@ import {
   updateTask as apiUpdateTask,
   updateTaskStatus as apiUpdateTaskStatus,
   reorderTasks as apiReorderTasks,
+  deleteTask as apiDeleteTask,
 } from "@/lib/api/dashboard.api";
 
-import { isUnauthorizedError, handleUnauthorizedError, getErrorMessage } from "@/lib/api/errors";
+import {
+  isUnauthorizedError,
+  handleUnauthorizedError,
+  getErrorMessage,
+  NotFoundError,
+} from "@/lib/api/errors";
 
 import type { TaskFilterState, TasksByPriority } from "../types";
 import { DEFAULT_FILTER_STATE, TASKS_PAGE_SIZE } from "../types";
@@ -39,6 +45,7 @@ export interface UseTasksReturn {
   updateTask: (taskId: string, command: UpdateTaskCommand) => Promise<TaskDTO>;
   updateTaskStatus: (taskId: string, status: TaskStatus) => Promise<void>;
   reorderTasks: (taskOrders: TaskOrderItem[]) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
   refreshTasks: () => Promise<void>;
   clearError: () => void;
 }
@@ -340,6 +347,38 @@ export function useTasks(listId: string | null): UseTasksReturn {
     [listId, tasks, handleError]
   );
 
+  const deleteTaskAction = useCallback(
+    async (taskId: string): Promise<void> => {
+      // Optimistic update: remove task from list
+      const previousTasks = tasks;
+      const removedTask = tasks.find((t) => t.id === taskId);
+
+      setTasks((prev) => prev.filter((task) => task.id !== taskId));
+      setPagination((prev) => (prev ? { ...prev, total: Math.max(0, prev.total - 1) } : null));
+
+      try {
+        await apiDeleteTask(taskId);
+        setError(null);
+      } catch (err) {
+        // 404: task already deleted — keep optimistic state (plan: treat as "already removed")
+        if (err instanceof NotFoundError) {
+          setError(null);
+          return;
+        }
+        // Rollback on other errors
+        setTasks(previousTasks);
+        if (removedTask) {
+          setPagination((prev) =>
+            prev ? { ...prev, total: prev.total + 1 } : null
+          );
+        }
+        handleError(err);
+        throw err;
+      }
+    },
+    [tasks, handleError]
+  );
+
   const refreshTasks = useCallback(async (): Promise<void> => {
     if (!listId) return;
 
@@ -386,6 +425,7 @@ export function useTasks(listId: string | null): UseTasksReturn {
     updateTask: updateTaskAction,
     updateTaskStatus: updateTaskStatusAction,
     reorderTasks: reorderTasksAction,
+    deleteTask: deleteTaskAction,
     refreshTasks,
     clearError,
   };
