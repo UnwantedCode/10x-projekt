@@ -11,12 +11,7 @@ import {
   deleteTask as apiDeleteTask,
 } from "@/lib/api/dashboard.api";
 
-import {
-  isUnauthorizedError,
-  handleUnauthorizedError,
-  getErrorMessage,
-  NotFoundError,
-} from "@/lib/api/errors";
+import { isUnauthorizedError, handleUnauthorizedError, getErrorMessage, NotFoundError } from "@/lib/api/errors";
 
 import type { TaskFilterState, TasksByPriority } from "../types";
 import { DEFAULT_FILTER_STATE, TASKS_PAGE_SIZE } from "../types";
@@ -368,9 +363,7 @@ export function useTasks(listId: string | null): UseTasksReturn {
         // Rollback on other errors
         setTasks(previousTasks);
         if (removedTask) {
-          setPagination((prev) =>
-            prev ? { ...prev, total: prev.total + 1 } : null
-          );
+          setPagination((prev) => (prev ? { ...prev, total: prev.total + 1 } : null));
         }
         handleError(err);
         throw err;

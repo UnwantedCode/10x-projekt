@@ -23,7 +23,7 @@ test.describe("Login Page", () => {
   test("should show validation error for empty email", async ({ loginPage, page }) => {
     // Click outside the email field first to ensure proper form state
     await loginPage.passwordInput.click();
-    
+
     // Submit empty form
     await loginPage.submit();
 
@@ -34,18 +34,18 @@ test.describe("Login Page", () => {
   test("should show validation error for invalid email format", async ({ loginPage, page }) => {
     // Wait for page to be fully loaded and stable
     await page.waitForLoadState("networkidle");
-    
+
     // Email field has autoFocus, type directly into it
     await loginPage.emailInput.fill("invalid-email");
     await loginPage.passwordInput.fill("password123");
-    
+
     // Verify values are set before clicking submit
     await expect(loginPage.emailInput).toHaveValue("invalid-email");
     await expect(loginPage.passwordInput).toHaveValue("password123");
-    
+
     // Click submit and wait for validation error to appear
     await loginPage.submitButton.click();
-    
+
     // The validation should show immediately (no API call for invalid format)
     await expect(page.getByText("Nieprawidłowy format adresu email")).toBeVisible();
   });

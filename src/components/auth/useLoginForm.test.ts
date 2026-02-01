@@ -16,10 +16,10 @@ const originalLocation = window.location;
 describe("useLoginForm", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock fetch
     globalThis.fetch = mockFetch;
-    
+
     // Mock window.location with writable href
     Object.defineProperty(window, "location", {
       value: {

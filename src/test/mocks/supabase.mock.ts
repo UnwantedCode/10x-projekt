@@ -15,20 +15,7 @@ export function createMockSupabaseClient(overrides?: {
   const selectResult = overrides?.selectResult ?? defaultSelectResult;
   const updateResult = overrides?.updateResult ?? defaultUpdateResult;
 
-  // Create chainable mock that returns itself until terminal method
-  const createChainableMock = (terminalResult: { data: unknown; error: unknown }) => {
-    const chainable = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue(terminalResult),
-      update: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      delete: vi.fn().mockReturnThis(),
-    };
-    return chainable;
-  };
-
-  const fromMock = vi.fn().mockImplementation((table: string) => {
+  const fromMock = vi.fn().mockImplementation(() => {
     // Return different chainable based on expected operation
     const chainable = {
       select: vi.fn().mockReturnValue({
@@ -83,17 +70,13 @@ export function createProfileMockSupabase(config: {
       return {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue(
-              config.getProfileResult ?? { data: null, error: { code: "PGRST116" } }
-            ),
+            single: vi.fn().mockResolvedValue(config.getProfileResult ?? { data: null, error: { code: "PGRST116" } }),
           }),
         }),
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             select: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue(
-                config.updateProfileResult ?? { data: null, error: null }
-              ),
+              single: vi.fn().mockResolvedValue(config.updateProfileResult ?? { data: null, error: null }),
             }),
           }),
         }),
@@ -105,9 +88,7 @@ export function createProfileMockSupabase(config: {
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue(
-                config.listCheckResult ?? { data: null, error: { code: "PGRST116" } }
-              ),
+              single: vi.fn().mockResolvedValue(config.listCheckResult ?? { data: null, error: { code: "PGRST116" } }),
             }),
           }),
         }),

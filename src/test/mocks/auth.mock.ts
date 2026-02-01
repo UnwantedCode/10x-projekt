@@ -60,9 +60,7 @@ export function createMockSupabaseAuth(config?: {
 
   return {
     auth: {
-      signInWithPassword: vi
-        .fn()
-        .mockResolvedValue(config?.signInResponse ?? defaultSignInResponse),
+      signInWithPassword: vi.fn().mockResolvedValue(config?.signInResponse ?? defaultSignInResponse),
       signUp: vi.fn().mockResolvedValue(
         config?.signUpResponse ?? {
           data: { user: null },
@@ -84,9 +82,7 @@ export function createMockSupabaseAuth(config?: {
 /**
  * Creates a successful login response
  */
-export function createSuccessfulLoginResponse(
-  user: MockAuthUser = sampleUser
-): MockAuthResponse {
+export function createSuccessfulLoginResponse(user: MockAuthUser = sampleUser): MockAuthResponse {
   return {
     data: {
       user,
@@ -119,9 +115,7 @@ export function createEmailNotConfirmedResponse(): MockAuthResponse {
 /**
  * Creates a successful registration response
  */
-export function createSuccessfulSignUpResponse(
-  user: MockAuthUser = sampleUser
-): MockAuthResponse {
+export function createSuccessfulSignUpResponse(user: MockAuthUser = sampleUser): MockAuthResponse {
   return {
     data: {
       user,
@@ -221,12 +215,7 @@ export const validEmails = [
   "user@subdomain.example.co.uk",
 ];
 
-export const validPasswords = [
-  "123456",
-  "password",
-  "very-long-password-with-special-chars!@#$%",
-  "a".repeat(100),
-];
+export const validPasswords = ["123456", "password", "very-long-password-with-special-chars!@#$%", "a".repeat(100)];
 
 // =============================================================================
 // Response Helpers
@@ -242,10 +231,7 @@ export async function parseJsonResponse<T = unknown>(response: Response): Promis
 /**
  * Asserts that response is a successful JSON response
  */
-export async function expectSuccessResponse(
-  response: Response,
-  expectedStatus = 200
-) {
+export async function expectSuccessResponse(response: Response, expectedStatus = 200) {
   expect(response.status).toBe(expectedStatus);
   expect(response.headers.get("Content-Type")).toBe("application/json");
   const data = await parseJsonResponse(response);
@@ -256,11 +242,7 @@ export async function expectSuccessResponse(
 /**
  * Asserts that response is an error JSON response
  */
-export async function expectErrorResponse(
-  response: Response,
-  expectedStatus: number,
-  expectedErrorContains?: string
-) {
+export async function expectErrorResponse(response: Response, expectedStatus: number, expectedErrorContains?: string) {
   expect(response.status).toBe(expectedStatus);
   expect(response.headers.get("Content-Type")).toBe("application/json");
   const data = await parseJsonResponse<{ error: string }>(response);

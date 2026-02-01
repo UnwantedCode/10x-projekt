@@ -207,7 +207,6 @@ export function InlineTaskInput({ onSubmit, isSubmitting }: InlineTaskInputProps
             placeholder="Tytuł zadania"
             maxLength={MAX_TITLE_LENGTH}
             disabled={isSubmitting}
-            autoFocus
             aria-invalid={!!errors.title}
             aria-describedby={errors.title ? "title-error" : undefined}
           />

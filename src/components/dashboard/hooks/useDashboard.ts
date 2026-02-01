@@ -217,7 +217,6 @@ export function useDashboard(): UseDashboardReturn {
       // Optimistic update
       const previousLists = lists;
       const previousProfile = profile;
-      const deletedList = lists.find((list) => list.id === id);
 
       setLists((prev) => prev.filter((list) => list.id !== id));
 

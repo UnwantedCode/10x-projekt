@@ -33,10 +33,7 @@ function createMockSupabase(authResponse: {
 /**
  * Creates a mock APIContext for Astro endpoints
  */
-function createMockContext(
-  body: unknown,
-  supabase: SupabaseClient
-): APIContext {
+function createMockContext(body: unknown, supabase: SupabaseClient): APIContext {
   return {
     request: {
       json: vi.fn().mockResolvedValue(body),
@@ -120,10 +117,7 @@ describe("/api/auth/login", () => {
       it("should reject invalid email format", async () => {
         // Arrange
         const supabase = createMockSupabase({ data: { user: null }, error: null });
-        const context = createMockContext(
-          { email: "invalid-email", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "invalid-email", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -137,10 +131,7 @@ describe("/api/auth/login", () => {
       it("should reject email without @ symbol", async () => {
         // Arrange
         const supabase = createMockSupabase({ data: { user: null }, error: null });
-        const context = createMockContext(
-          { email: "userexample.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "userexample.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -158,7 +149,7 @@ describe("/api/auth/login", () => {
 
         // Act
         const response = await POST(context);
-        const data = await parseResponse(response);
+        await parseResponse(response);
 
         // Assert
         expect(response.status).toBe(400);
@@ -170,10 +161,7 @@ describe("/api/auth/login", () => {
           data: { user: { id: "user-123", email: "user@example.com" } },
           error: null,
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -188,10 +176,7 @@ describe("/api/auth/login", () => {
           data: { user: { id: "user-123", email: "user@mail.example.com" } },
           error: null,
         });
-        const context = createMockContext(
-          { email: "user@mail.example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@mail.example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -206,10 +191,7 @@ describe("/api/auth/login", () => {
           data: { user: { id: "user-123", email: "user+tag@example.com" } },
           error: null,
         });
-        const context = createMockContext(
-          { email: "user+tag@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "user+tag@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -241,7 +223,7 @@ describe("/api/auth/login", () => {
 
         // Act
         const response = await POST(context);
-        const data = await parseResponse(response);
+        await parseResponse(response);
 
         // Assert
         expect(response.status).toBe(400);
@@ -250,10 +232,7 @@ describe("/api/auth/login", () => {
       it("should reject password shorter than 6 characters", async () => {
         // Arrange
         const supabase = createMockSupabase({ data: { user: null }, error: null });
-        const context = createMockContext(
-          { email: "user@example.com", password: "12345" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "12345" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -270,10 +249,7 @@ describe("/api/auth/login", () => {
           data: { user: { id: "user-123", email: "user@example.com" } },
           error: null,
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: "123456" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "123456" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -285,10 +261,7 @@ describe("/api/auth/login", () => {
       it("should reject password at 5 characters (below boundary)", async () => {
         // Arrange
         const supabase = createMockSupabase({ data: { user: null }, error: null });
-        const context = createMockContext(
-          { email: "user@example.com", password: "12345" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "12345" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -304,10 +277,7 @@ describe("/api/auth/login", () => {
           data: { user: { id: "user-123", email: "user@example.com" } },
           error: null,
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: longPassword },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: longPassword }, supabase);
 
         // Act
         const response = await POST(context);
@@ -411,10 +381,7 @@ describe("/api/auth/login", () => {
           data: { user: { id: "user-123", email: "user@example.com" } },
           error: null,
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -434,10 +401,7 @@ describe("/api/auth/login", () => {
           data: { user: { id: "user-123", email: "user@example.com" } },
           error: null,
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -453,10 +417,7 @@ describe("/api/auth/login", () => {
           data: { user: { id: "user-123", email: "test@example.com" } },
           error: null,
         });
-        const context = createMockContext(
-          { email: "test@example.com", password: "secretpass" },
-          supabase
-        );
+        const context = createMockContext({ email: "test@example.com", password: "secretpass" }, supabase);
 
         // Act
         await POST(context);
@@ -477,10 +438,7 @@ describe("/api/auth/login", () => {
           data: { user: null },
           error: { message: "Invalid login credentials" },
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: "wrongpassword" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "wrongpassword" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -497,10 +455,7 @@ describe("/api/auth/login", () => {
           data: { user: null },
           error: { message: "User not found" },
         });
-        const context = createMockContext(
-          { email: "nonexistent@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "nonexistent@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -518,10 +473,7 @@ describe("/api/auth/login", () => {
           data: { user: null },
           error: { message: "Email not confirmed" },
         });
-        const context = createMockContext(
-          { email: "unconfirmed@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "unconfirmed@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -539,10 +491,7 @@ describe("/api/auth/login", () => {
           data: { user: null },
           error: { message: "Email not confirmed" },
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -558,10 +507,7 @@ describe("/api/auth/login", () => {
           data: { user: null },
           error: { message: "Invalid credentials" },
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: "wrongpass" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "wrongpass" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -599,10 +545,7 @@ describe("/api/auth/login", () => {
             signInWithPassword: vi.fn().mockRejectedValue(new Error("Unexpected error")),
           },
         } as unknown as SupabaseClient;
-        const context = createMockContext(
-          { email: "user@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);
@@ -626,10 +569,7 @@ describe("/api/auth/login", () => {
         data: { user: { id: "1", email: "test@test.com" } },
         error: null,
       });
-      const context = createMockContext(
-        { email: "test@test.com", password: "password123" },
-        supabase
-      );
+      const context = createMockContext({ email: "test@test.com", password: "password123" }, supabase);
 
       // Act
       const response = await POST(context);
@@ -656,10 +596,7 @@ describe("/api/auth/login", () => {
         data: { user: null },
         error: { message: "Invalid credentials" },
       });
-      const context = createMockContext(
-        { email: "user@example.com", password: "wrongpass" },
-        supabase
-      );
+      const context = createMockContext({ email: "user@example.com", password: "wrongpass" }, supabase);
 
       // Act
       const response = await POST(context);
@@ -680,10 +617,7 @@ describe("/api/auth/login", () => {
         data: { user: { id: "1", email: "użytkownik@example.com" } },
         error: null,
       });
-      const context = createMockContext(
-        { email: "użytkownik@example.com", password: "password123" },
-        supabase
-      );
+      const context = createMockContext({ email: "użytkownik@example.com", password: "password123" }, supabase);
 
       // Act
       const response = await POST(context);
@@ -701,10 +635,7 @@ describe("/api/auth/login", () => {
         data: { user: { id: "1", email: "user@example.com" } },
         error: null,
       });
-      const context = createMockContext(
-        { email: "user@example.com", password: "hasło123żółć" },
-        supabase
-      );
+      const context = createMockContext({ email: "user@example.com", password: "hasło123żółć" }, supabase);
 
       // Act
       const response = await POST(context);
@@ -739,10 +670,7 @@ describe("/api/auth/login", () => {
         data: { user: { id: "1", email: "User@Example.COM" } },
         error: null,
       });
-      const context = createMockContext(
-        { email: "User@Example.COM", password: "password123" },
-        supabase
-      );
+      const context = createMockContext({ email: "User@Example.COM", password: "password123" }, supabase);
 
       // Act
       await POST(context);
@@ -761,10 +689,7 @@ describe("/api/auth/login", () => {
         data: { user: { id: "1", email: "user@example.com" } },
         error: null,
       });
-      const context = createMockContext(
-        { email: "user@example.com", password: specialPassword },
-        supabase
-      );
+      const context = createMockContext({ email: "user@example.com", password: specialPassword }, supabase);
 
       // Act
       const response = await POST(context);
@@ -779,10 +704,7 @@ describe("/api/auth/login", () => {
         data: { user: { id: "1", email: "user@example.com" } },
         error: null,
       });
-      const context = createMockContext(
-        { email: "user@example.com", password: "      " },
-        supabase
-      );
+      const context = createMockContext({ email: "user@example.com", password: "      " }, supabase);
 
       // Act
       const response = await POST(context);
@@ -803,10 +725,7 @@ describe("/api/auth/login", () => {
         data: { user: null },
         error: { message: "Database connection failed: ECONNREFUSED 127.0.0.1:5432" },
       });
-      const context = createMockContext(
-        { email: "user@example.com", password: "password123" },
-        supabase
-      );
+      const context = createMockContext({ email: "user@example.com", password: "password123" }, supabase);
 
       // Act
       const response = await POST(context);
@@ -832,10 +751,7 @@ describe("/api/auth/login", () => {
           data: { user: null },
           error: { message: errorMessage },
         });
-        const context = createMockContext(
-          { email: "user@example.com", password: "password123" },
-          supabase
-        );
+        const context = createMockContext({ email: "user@example.com", password: "password123" }, supabase);
 
         // Act
         const response = await POST(context);

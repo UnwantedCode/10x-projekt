@@ -138,7 +138,6 @@ export function Dashboard({ userEmail }: DashboardProps) {
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
           <aside
-            role="complementary"
             aria-label="Panel nawigacji list"
             className="w-64 flex-shrink-0 border-r border-border bg-card overflow-hidden"
           >

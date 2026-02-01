@@ -47,7 +47,8 @@ export function TaskEditDialog({
 
   const handleSubmit = useCallback(
     async (command: UpdateTaskCommand) => {
-      await onSave(task!.id, command);
+      if (!task) return;
+      await onSave(task.id, command);
     },
     [task, onSave]
   );

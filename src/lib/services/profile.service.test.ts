@@ -1,10 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { getProfile, updateProfile, completeOnboarding } from "./profile.service";
 import type { SupabaseClient } from "@/db/supabase.client";
-import {
-  sampleProfileEntity,
-  sampleProfileEntityNoList,
-} from "@/test/mocks/supabase.mock";
+import { sampleProfileEntity, sampleProfileEntityNoList } from "@/test/mocks/supabase.mock";
 
 // =============================================================================
 // Test Helpers
@@ -13,15 +10,17 @@ import {
 /**
  * Creates a typed mock Supabase client with configurable behavior
  */
-function createMockSupabase(options: {
-  profiles?: {
-    selectResult?: { data: unknown; error: unknown };
-    updateResult?: { data: unknown; error: unknown };
-  };
-  lists?: {
-    selectResult?: { data: unknown; error: unknown };
-  };
-} = {}) {
+function createMockSupabase(
+  options: {
+    profiles?: {
+      selectResult?: { data: unknown; error: unknown };
+      updateResult?: { data: unknown; error: unknown };
+    };
+    lists?: {
+      selectResult?: { data: unknown; error: unknown };
+    };
+  } = {}
+) {
   const profilesSelectResult = options.profiles?.selectResult ?? { data: null, error: null };
   const profilesUpdateResult = options.profiles?.updateResult ?? { data: null, error: null };
   const listsSelectResult = options.lists?.selectResult ?? { data: null, error: null };
@@ -159,7 +158,7 @@ describe("profile.service", () => {
             selectResult: { data: null, error: { code: "UNKNOWN", message: "DB error" } },
           },
         });
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
         // Act
         const result = await getProfile(supabase, "user-123");
@@ -250,9 +249,7 @@ describe("profile.service", () => {
         // Assert
         expect(result.success).toBe(true);
         // Verify lists table was never queried
-        const listsCalls = mockFrom.mock.calls.filter(
-          (call: unknown[]) => call[0] === "lists"
-        );
+        const listsCalls = mockFrom.mock.calls.filter((call: unknown[]) => call[0] === "lists");
         expect(listsCalls).toHaveLength(0);
       });
     });
@@ -333,7 +330,7 @@ describe("profile.service", () => {
             updateResult: { data: null, error: { code: "UNKNOWN", message: "Unexpected" } },
           },
         });
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
         // Act
         const result = await updateProfile(supabase, "user-123", { activeListId: "list-id" });
@@ -453,7 +450,7 @@ describe("profile.service", () => {
             updateResult: { data: null, error: { code: "UNKNOWN", message: "Error" } },
           },
         });
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
         // Act
         const result = await completeOnboarding(supabase, "user-123", { version: 1 });

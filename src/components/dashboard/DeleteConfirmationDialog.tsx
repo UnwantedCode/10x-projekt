@@ -84,7 +84,7 @@ export function DeleteConfirmationDialog({
           </p>
         )}
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleCancel} disabled={isDeleting} autoFocus>
+          <AlertDialogCancel onClick={handleCancel} disabled={isDeleting}>
             Anuluj
           </AlertDialogCancel>
           <AlertDialogAction
