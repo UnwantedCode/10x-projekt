@@ -13,7 +13,16 @@ Backend - Supabase jako kompleksowe rozwiązanie backendowe:
 - Jest rozwiązaniem open source, które można hostować lokalnie lub na własnym serwerze
 - Posiada wbudowaną autentykację użytkowników
 
+Testowanie:
+
+- Vitest z React Testing Library dla testów jednostkowych, komponentowych i integracyjnych
+  - Vitest to nowoczesny i szybki framework do testowania, w pełni kompatybilny z Vite, na którym opiera się Astro
+  - React Testing Library promuje dobre praktyki testowania komponentów z perspektywy użytkownika
+- Playwright dla testów End-to-End (E2E)
+  - Nowoczesne narzędzie od Microsoftu, zapewniające szybkie i niezawodne testy E2E na wszystkich głównych silnikach przeglądarek
+  - Umożliwia łatwą obsługę scenariuszy logowania i testowanie złożonych interakcji
+
 CI/CD i Hosting:
 
-- Github Actions do tworzenia pipeline’ów CI/CD
+- Github Actions do tworzenia pipeline'ów CI/CD
 - SMALL.pl

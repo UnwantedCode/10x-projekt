@@ -59,6 +59,11 @@ Tooling:
 - **ESLint** + **Prettier** (linting & formatting)
 - **Husky** + **lint-staged** (pre-commit quality gates)
 
+Testing:
+
+- **Vitest** + **React Testing Library** (unit, component, and integration tests)
+- **Playwright** (E2E tests)
+
 CI/CD & hosting:
 
 - **GitHub Actions**
