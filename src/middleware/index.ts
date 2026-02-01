@@ -4,7 +4,6 @@ import { createSupabaseServerInstance } from "../db/supabase.client";
 
 // Trasy publiczne - dostępne bez logowania
 const PUBLIC_PATHS = [
-  "/",
   "/login",
   "/register",
   "/forgot-password",
@@ -13,8 +12,8 @@ const PUBLIC_PATHS = [
   "/api/auth/forgot-password",
 ];
 
-// Trasy auth - przekierowanie zalogowanych do /app
-const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
+// Trasy auth - przekierowanie zalogowanych do /app, niezalogowanych do /login
+const AUTH_PATHS = ["/", "/login", "/register", "/forgot-password"];
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
   const supabase = createSupabaseServerInstance({

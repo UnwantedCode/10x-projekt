@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useMemo } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { useCallback, useEffect } from "react";
 import { toast } from "sonner";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -23,12 +22,6 @@ interface DashboardProps {
 // =============================================================================
 
 export function Dashboard({ userEmail }: DashboardProps) {
-  // Create Supabase client lazily to avoid errors during module initialization
-  const supabase = useMemo(
-    () => createClient(import.meta.env.PUBLIC_SUPABASE_URL, import.meta.env.PUBLIC_SUPABASE_ANON_KEY),
-    []
-  );
-
   // Dashboard state and actions
   const {
     lists,
@@ -60,7 +53,14 @@ export function Dashboard({ userEmail }: DashboardProps) {
 
   // Handlers
   const handleLogout = useCallback(async () => {
-    await supabase.auth.signOut();
+    try {
+      const response = await fetch("/api/auth/logout", { method: "POST" });
+      if (!response.ok) {
+        throw new Error("Logout failed");
+      }
+    } catch {
+      // Even if API call fails, redirect to login
+    }
     window.location.href = "/login";
   }, []);
 
