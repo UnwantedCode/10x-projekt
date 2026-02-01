@@ -34,7 +34,6 @@ Kiedy będziesz gotowy do utworzenia diagramu, postępuj zgodnie z poniższymi w
    ```
 
 2. Uwzględnij następujące elementy w swoim diagramie:
-
    - Ścieżki użytkownika oparte na istniejących wymaganiach
    - Korzystanie z aplikacji jako niezalogowany użytkownik
    - Dostęp do głównej funkcjonalności aplikacji
@@ -47,7 +46,6 @@ Kiedy będziesz gotowy do utworzenia diagramu, postępuj zgodnie z poniższymi w
    - Skupienie się na ścieżkach biznesowych, a nie aspektach technicznych
 
 3. Przestrzegaj tych zasad składni Mermaid:
-
    - Stany początkowe i końcowe muszą być poprawnie zdefiniowane:
      ```
      [*] --> StronaGlowna

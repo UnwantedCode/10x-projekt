@@ -19,6 +19,8 @@ import type {
   AISuggestionDTO,
   RecordAIDecisionCommand,
   AIInteractionDTO,
+  ReorderTasksCommand,
+  ReorderTasksResponseDTO,
 } from "@/types";
 
 import type { TaskFilterState } from "@/components/dashboard/types";
@@ -269,6 +271,18 @@ export async function deleteTask(taskId: string): Promise<SuccessResponseDTO> {
     method: "DELETE",
   });
   return handleResponse<SuccessResponseDTO>(response);
+}
+
+/**
+ * Reorders tasks in a list
+ */
+export async function reorderTasks(listId: string, command: ReorderTasksCommand): Promise<ReorderTasksResponseDTO> {
+  const response = await safeFetch(`/api/lists/${listId}/tasks/reorder`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(command),
+  });
+  return handleResponse<ReorderTasksResponseDTO>(response);
 }
 
 // =============================================================================

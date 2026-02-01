@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 import type { TaskDTO, TaskStatus } from "@/types";
 import { PRIORITY_CONFIGS } from "./types";
@@ -13,6 +14,30 @@ import { PRIORITY_CONFIGS } from "./types";
 interface TaskCardProps {
   task: TaskDTO;
   onStatusChange: (status: TaskStatus) => void;
+  onEdit?: (task: TaskDTO) => void;
+}
+
+// =============================================================================
+// Icons
+// =============================================================================
+
+function PencilIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
+      <path d="m15 5 4 4" />
+    </svg>
+  );
 }
 
 // =============================================================================
@@ -66,7 +91,7 @@ function formatRelativeTime(dateString: string): string {
 // Component
 // =============================================================================
 
-export function TaskCard({ task, onStatusChange }: TaskCardProps) {
+export function TaskCard({ task, onStatusChange, onEdit }: TaskCardProps) {
   const priorityConfig = PRIORITY_CONFIGS[task.priority as 1 | 2 | 3];
   const isDone = task.status === 2;
 
@@ -76,6 +101,10 @@ export function TaskCard({ task, onStatusChange }: TaskCardProps) {
     },
     [onStatusChange]
   );
+
+  const handleEditClick = useCallback(() => {
+    onEdit?.(task);
+  }, [onEdit, task]);
 
   const relativeTime = useMemo(() => formatRelativeTime(task.createdAt), [task.createdAt]);
 
@@ -113,10 +142,24 @@ export function TaskCard({ task, onStatusChange }: TaskCardProps) {
               {task.title}
             </h3>
 
-            {/* Priority badge */}
-            <Badge variant="secondary" className={`shrink-0 text-xs ${priorityConfig.color} ${priorityConfig.bgColor}`}>
-              {priorityConfig.label}
-            </Badge>
+            {/* Priority badge + Edit button */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {onEdit && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleEditClick}
+                  className="h-6 w-6 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+                  aria-label={`Edytuj zadanie "${task.title}"`}
+                >
+                  <PencilIcon className="h-3.5 w-3.5" />
+                </Button>
+              )}
+              <Badge variant="secondary" className={`text-xs ${priorityConfig.color} ${priorityConfig.bgColor}`}>
+                {priorityConfig.label}
+              </Badge>
+            </div>
           </div>
 
           {/* Description */}

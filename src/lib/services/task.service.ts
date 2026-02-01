@@ -451,7 +451,27 @@ export async function reorderTasks(
     };
   }
 
-  // Update sort_order for each task
+  // Phase 1: Set temporary sort_order values (offset by large number to avoid conflicts)
+  // This is needed because of the unique constraint on (list_id, sort_order)
+  const TEMP_OFFSET = 1000000;
+  for (const item of command.taskOrders) {
+    const { error: tempUpdateError } = await supabase
+      .from("tasks")
+      .update({ sort_order: item.sortOrder + TEMP_OFFSET })
+      .eq("id", item.id)
+      .eq("list_id", listId);
+
+    if (tempUpdateError) {
+      console.error("Database error setting temp sort order:", tempUpdateError);
+      return {
+        success: false,
+        error: "database_error",
+        message: "An unexpected error occurred while updating task order",
+      };
+    }
+  }
+
+  // Phase 2: Set final sort_order values
   let updatedCount = 0;
   for (const item of command.taskOrders) {
     const { error: updateError } = await supabase

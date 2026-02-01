@@ -5,11 +5,13 @@
 Dokument opisuje plan wdrożenia brakującej funkcjonalności związanej z sugestiami AI w formularzu zadania. Obecna implementacja (`InlineTaskInput`) wyświetla sugestię i automatycznie ustawia priorytet, ale **nie rejestruje decyzji użytkownika** ani **nie oferuje wyboru** między akceptacją, modyfikacją i odrzuceniem.
 
 **Zakres planu:**
+
 - Frontend: panel akcji, rejestracja decyzji, hook, flow
 - Backend: brak zmian – endpoint `PATCH /api/ai-interactions/:id` istnieje i działa
 - Integracja API: funkcja `recordAIDecision` w kliencie API
 
 **Odniesienia:**
+
 - `doc/view_implementation_plan/task-form-modal-view-implementation-plan.md` – szczegóły UI i flow
 - `doc/api_implementation_plan/record-ai-decision-endpoint-implementation-plan.md` – specyfikacja endpointu
 - `.claude/rules/general.md`, `frontend.md`, `backend.md` – reguły projektowe
@@ -20,15 +22,15 @@ Dokument opisuje plan wdrożenia brakującej funkcjonalności związanej z suges
 
 ### 2.1 Obecny stan
 
-| Element | Status | Uwagi |
-|---------|--------|-------|
-| `POST /api/ai/suggest` | ✅ Działa | Wywoływany z `suggestPriority()` |
-| `PATCH /api/ai-interactions/:id` | ✅ Backend gotowy | Brak wywołania z frontendu |
-| `recordAIDecision` w `dashboard.api.ts` | ❌ Brak | Endpoint nieużywany |
-| Przechowywanie `interactionId` | ❌ Brak | Zwracane przez API, ignorowane |
-| Panel z Akceptuj / Modyfikuj / Odrzuć | ❌ Brak | Tylko wyświetlenie uzasadnienia |
-| `RejectionReasonInput` | ❌ Brak | Brak pola powodu odrzucenia |
-| `useAISuggestion` | ❌ Brak | Logika inline w `InlineTaskInput` |
+| Element                                 | Status            | Uwagi                             |
+| --------------------------------------- | ----------------- | --------------------------------- |
+| `POST /api/ai/suggest`                  | ✅ Działa         | Wywoływany z `suggestPriority()`  |
+| `PATCH /api/ai-interactions/:id`        | ✅ Backend gotowy | Brak wywołania z frontendu        |
+| `recordAIDecision` w `dashboard.api.ts` | ❌ Brak           | Endpoint nieużywany               |
+| Przechowywanie `interactionId`          | ❌ Brak           | Zwracane przez API, ignorowane    |
+| Panel z Akceptuj / Modyfikuj / Odrzuć   | ❌ Brak           | Tylko wyświetlenie uzasadnienia   |
+| `RejectionReasonInput`                  | ❌ Brak           | Brak pola powodu odrzucenia       |
+| `useAISuggestion`                       | ❌ Brak           | Logika inline w `InlineTaskInput` |
 
 ### 2.2 Ograniczenie: flow tworzenia zadania (taskId = null)
 
@@ -37,6 +39,7 @@ Gdy `taskId` jest `null` (nowe zadanie), backend **nie zapisuje** interakcji do 
 **Konsekwencja:** `PATCH /api/ai-interactions/:id` zwróci **404** dla interakcji z flow tworzenia.
 
 **Rozwiązanie w tym planie:**
+
 - **taskId podany (edycja)**: zawsze wywoływać `recordAIDecision`
 - **taskId = null (tworzenie)**: nie wywoływać `recordAIDecision`; decyzja użytkownika aktualizuje tylko stan formularza (priorytet / odrzucenie)
 
@@ -132,6 +135,7 @@ export async function recordAIDecision(
 ```
 
 **Obsługa błędów:**
+
 - `handleResponse` obsługuje 400, 401, 404, 409, 500
 - 404 – interakcja nie istnieje (np. flow tworzenia) → toast z komunikatem
 - 409 – decyzja już zapisana → ukryć panel, kontynuować z formularzem
@@ -194,13 +198,13 @@ interface UseAISuggestionReturn {
 
 ### 6.3 Przepływ stanu
 
-| Stan | suggestion | isLoading | isProcessingDecision |
-|------|------------|-----------|----------------------|
-| Idle | null | false | false |
-| Requesting | null | true | false |
-| Has suggestion | AISuggestionDTO | false | false |
-| Accepting/Modifying/Rejecting | AISuggestionDTO | false | true |
-| After decision | null | false | false |
+| Stan                          | suggestion      | isLoading | isProcessingDecision |
+| ----------------------------- | --------------- | --------- | -------------------- |
+| Idle                          | null            | false     | false                |
+| Requesting                    | null            | true      | false                |
+| Has suggestion                | AISuggestionDTO | false     | false                |
+| Accepting/Modifying/Rejecting | AISuggestionDTO | false     | true                 |
+| After decision                | null            | false     | false                |
 
 ---
 
@@ -222,16 +226,19 @@ interface RejectionReasonInputProps {
 ```
 
 **Elementy:**
+
 - `Input` lub `Textarea` z licznikiem znaków (max 300)
 - Przycisk "Potwierdź odrzucenie" (primary)
 - Przycisk "Anuluj" (ghost)
 
 **Walidacja:**
+
 - Min 1 znak (trimmed)
 - Max 300 znaków
 - Błąd przy pustym lub za długim tekście
 
 **Accessibility:**
+
 - `aria-label` dla pola
 - `aria-describedby` dla licznika i błędu
 - `aria-busy` podczas `isProcessing`
@@ -254,6 +261,7 @@ interface AISuggestionPanelProps {
 ```
 
 **Elementy:**
+
 1. Badge sugerowanego priorytetu (np. `PriorityBadge` / `PRIORITY_CONFIGS`)
 2. Tekst uzasadnienia (`suggestion.justification`)
 3. Opcjonalnie: tagi (`justificationTags`)
@@ -263,19 +271,23 @@ interface AISuggestionPanelProps {
 7. Warunkowe `RejectionReasonInput` po kliknięciu "Odrzuć"
 
 **Logika modyfikacji:**
+
 - Dropdown: Niski (1), Średni (2), Wysoki (3) – bez `suggestion.suggestedPriority`
 - Po wyborze: `onModify(priority)`
 
 **Logika odrzucenia:**
+
 - Klik "Odrzuć" → pokazanie `RejectionReasonInput`
 - Potwierdzenie z walidowanym powodem → `onReject(reason)`
 - Anulowanie → ukrycie pola, panel nadal widoczny
 
 **Stylowanie:**
+
 - Karta/panel (`Card` lub div z border), spójne z resztą UI
 - Kolory priorytetów zgodne z `PRIORITY_CONFIGS`
 
 **Accessibility:**
+
 - `role="status"` lub `aria-live="polite"` dla dynamicznej treści
 - `aria-label` dla przycisków
 
@@ -286,11 +298,13 @@ interface AISuggestionPanelProps {
 ### 8.1 Zmiana flow
 
 **Obecnie:**
+
 1. Klik "Zasugeruj priorytet" → `suggestPriority`
 2. Odpowiedź → od razu `setPriority(data.suggestedPriority)`, wyświetlenie uzasadnienia
 3. Brak wyboru użytkownika
 
 **Docelowo:**
+
 1. Klik "Zasugeruj priorytet" → `requestSuggestion`
 2. Odpowiedź → zapis `suggestion` (z `interactionId`), **bez** automatycznej zmiany priorytetu
 3. Render `AISuggestionPanel`
@@ -323,15 +337,15 @@ const {
 - Przycisk "Zasugeruj priorytet" – bez zmian (już istnieje)
 - Zamiast bloku z `suggestionJustification`:
   - `{suggestion && (
-      <AISuggestionPanel
-        suggestion={suggestion}
-        currentPriority={priority}
-        onAccept={acceptSuggestion}
-        onModify={modifySuggestion}
-        onReject={rejectSuggestion}
-        isProcessing={isProcessingDecision}
-      />
-    )}`
+  <AISuggestionPanel
+    suggestion={suggestion}
+    currentPriority={priority}
+    onAccept={acceptSuggestion}
+    onModify={modifySuggestion}
+    onReject={rejectSuggestion}
+    isProcessing={isProcessingDecision}
+  />
+)}`
 - `suggestionError` → toast lub lokalny komunikat błędu
 
 ### 8.4 Usunięcie
@@ -347,20 +361,20 @@ const {
 
 ### 9.1 Frontend
 
-| Błąd | Akcja |
-|------|-------|
-| 503 (AI niedostępne) | Toast, `clearError`, użytkownik ustawia priorytet ręcznie |
-| 404 (interakcja nie istnieje) | Toast "Decyzja nie została zapisana", `clearSuggestion` |
-| 409 (decyzja już zapisana) | Toast "Decyzja została już zapisana", `clearSuggestion` |
-| Sieć / 500 | Toast z komunikatem, `clearError` |
+| Błąd                          | Akcja                                                     |
+| ----------------------------- | --------------------------------------------------------- |
+| 503 (AI niedostępne)          | Toast, `clearError`, użytkownik ustawia priorytet ręcznie |
+| 404 (interakcja nie istnieje) | Toast "Decyzja nie została zapisana", `clearSuggestion`   |
+| 409 (decyzja już zapisana)    | Toast "Decyzja została już zapisana", `clearSuggestion`   |
+| Sieć / 500                    | Toast z komunikatem, `clearError`                         |
 
 ### 9.2 Walidacja
 
-| Miejsce | Warunek | Komunikat |
-|---------|---------|-----------|
-| RejectionReasonInput | Pusty | "Podaj powód odrzucenia sugestii" |
+| Miejsce              | Warunek      | Komunikat                                |
+| -------------------- | ------------ | ---------------------------------------- |
+| RejectionReasonInput | Pusty        | "Podaj powód odrzucenia sugestii"        |
 | RejectionReasonInput | > 300 znaków | "Powód może mieć maksymalnie 300 znaków" |
-| Przycisk "Zasugeruj" | Brak tytułu | Przycisk disabled |
+| Przycisk "Zasugeruj" | Brak tytułu  | Przycisk disabled                        |
 
 ---
 
@@ -418,6 +432,7 @@ const {
 ### Krok 7: Przygotowanie do flow edycji (TaskFormDialog)
 
 Gdy pojawi się modal edycji z `taskId`:
+
 1. Przekazać `taskId` do `useAISuggestion`
 2. W `requestSuggestion` użyć `taskId` w `AISuggestCommand`
 3. Hook automatycznie wywoła `recordAIDecision` przy Accept/Modify/Reject

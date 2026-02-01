@@ -130,7 +130,7 @@ sequenceDiagram
     U->>B: Wejście na /register
     B->>RA: GET /register
     RA->>RA: getSession() - sprawdzenie sesji
-    
+
     alt Użytkownik zalogowany
         RA-->>B: Redirect do /app
     else Użytkownik niezalogowany
@@ -141,7 +141,7 @@ sequenceDiagram
     U->>RF: Wypełnia email, hasło, potwierdzenie, regulamin
     RF->>URF: handleChange(), handleBlur()
     URF->>URF: validateField() - walidacja on-blur
-    
+
     alt Błąd walidacji
         URF-->>RF: Pokaż błąd przy polu
         RF-->>U: Wyświetl komunikat błędu
@@ -150,13 +150,13 @@ sequenceDiagram
     U->>RF: Kliknięcie "Zarejestruj się"
     RF->>URF: handleSubmit()
     URF->>URF: validateForm() - walidacja wszystkich pól
-    
+
     alt Błąd walidacji formularza
         URF-->>RF: setErrors()
         RF-->>U: Wyświetl błędy, focus na pierwszym polu
     else Walidacja OK
         URF->>SB: signUp({ email, password })
-        
+
         alt Błąd Supabase
             SB-->>URF: error (already exists, invalid email, etc.)
             URF->>URF: mapAuthError()
@@ -190,7 +190,7 @@ sequenceDiagram
     U->>B: Wejście na /login
     B->>LA: GET /login
     LA->>LA: getSession()
-    
+
     alt Użytkownik już zalogowany
         LA-->>B: Redirect do /app
     else Użytkownik niezalogowany
@@ -206,13 +206,13 @@ sequenceDiagram
     U->>LF: Kliknięcie "Zaloguj się"
     LF->>ULF: handleSubmit()
     ULF->>ULF: validateForm()
-    
+
     alt Błąd walidacji
         ULF-->>LF: setErrors()
         LF-->>U: Wyświetl błędy
     else Walidacja OK
         ULF->>SB: signInWithPassword({ email, password })
-        
+
         alt Błąd logowania
             SB-->>ULF: error
             ULF->>ULF: mapAuthError()<br/>"Nieprawidłowy email lub hasło"
@@ -352,7 +352,7 @@ sequenceDiagram
     B->>LA: GET /login?redirectTo=/app
     LA-->>B: Formularz logowania
     B-->>U: "Sesja wygasła. Zaloguj się ponownie."
-    
+
     U->>LA: Loguje się ponownie
     LA->>B: Redirect do /app (z redirectTo)
     B-->>U: Powrót do dashboardu
@@ -386,9 +386,9 @@ sequenceDiagram
     U->>FF: Wprowadza email
     FF->>UFF: handleSubmit()
     UFF->>SB: resetPasswordForEmail(email, {redirectTo})
-    
+
     Note over UFF,SB: Zawsze pokazuj sukces<br/>(zapobieganie enumeracji kont)
-    
+
     SB-->>UFF: response (ignorowany)
     UFF-->>FF: setIsSubmitted(true)
     FF-->>U: "Sprawdź swoją skrzynkę"
@@ -401,7 +401,7 @@ sequenceDiagram
         RA->>SB: Weryfikacja tokena
         SB-->>RA: Sesja z tokenem reset
         RA-->>B: Renderuj ResetPasswordForm
-        
+
         U->>RF: Wprowadza nowe hasło
         RF->>SB: updateUser({ password })
         SB-->>RF: success
@@ -419,28 +419,28 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> Niezalogowany: Wejście na stronę
-    
+
     Niezalogowany --> Rejestracja: /register
     Niezalogowany --> Logowanie: /login
     Niezalogowany --> OdzyskiwanieHasla: /forgot-password
-    
+
     Rejestracja --> Logowanie: Sukces rejestracji
     Rejestracja --> Rejestracja: Błąd walidacji
-    
+
     Logowanie --> Zalogowany: Sukces logowania
     Logowanie --> Logowanie: Błędne dane
     Logowanie --> OdzyskiwanieHasla: "Zapomniałeś hasła?"
-    
+
     OdzyskiwanieHasla --> Logowanie: Link wysłany / Powrót
-    
+
     Zalogowany --> Dashboard: /app
     Dashboard --> Dashboard: Operacje na listach/zadaniach
     Dashboard --> SesjaWygasla: Token JWT wygasa
     Dashboard --> Niezalogowany: Wylogowanie
-    
+
     SesjaWygasla --> Logowanie: Automatyczny redirect
     Logowanie --> Dashboard: Redirect do poprzedniej strony
-    
+
     state Zalogowany {
         [*] --> Onboarding: Pierwsze logowanie
         Onboarding --> PustaLista: Zakończ onboarding
@@ -455,37 +455,37 @@ stateDiagram-v2
 
 ### 10.1. Komponenty biorące udział w autentykacji
 
-| Typ | Nazwa | Ścieżka | Status |
-|-----|-------|---------|--------|
-| Strona Astro | login.astro | `src/pages/login.astro` | ✅ Istnieje |
-| Strona Astro | register.astro | `src/pages/register.astro` | ✅ Istnieje |
-| Strona Astro | forgot-password.astro | `src/pages/forgot-password.astro` | ✅ Istnieje |
-| Strona Astro | reset-password.astro | `src/pages/reset-password.astro` | ⚠️ Do utworzenia |
-| Strona Astro | app.astro | `src/pages/app.astro` | ✅ Istnieje |
-| Layout | AuthLayout.astro | `src/layouts/AuthLayout.astro` | ✅ Istnieje |
-| Komponent React | LoginForm | `src/components/auth/LoginForm.tsx` | ✅ Istnieje |
-| Komponent React | RegisterForm | `src/components/auth/RegisterForm.tsx` | ✅ Istnieje |
-| Komponent React | ForgotPasswordForm | `src/components/auth/ForgotPasswordForm.tsx` | ✅ Istnieje |
-| Komponent React | ResetPasswordForm | `src/components/auth/ResetPasswordForm.tsx` | ⚠️ Do utworzenia |
-| Komponent React | Dashboard | `src/components/dashboard/Dashboard.tsx` | ✅ Istnieje |
-| Komponent React | Header | `src/components/dashboard/Header.tsx` | ✅ Istnieje |
-| Hook | useLoginForm | `src/components/auth/useLoginForm.ts` | ✅ Istnieje |
-| Hook | useRegisterForm | `src/components/auth/useRegisterForm.ts` | ✅ Istnieje |
-| Hook | useForgotPasswordForm | `src/components/auth/useForgotPasswordForm.ts` | ✅ Istnieje |
-| Hook | useResetPasswordForm | `src/components/auth/useResetPasswordForm.ts` | ⚠️ Do utworzenia |
-| Hook | usePasswordStrength | `src/components/auth/usePasswordStrength.ts` | ✅ Istnieje |
-| Middleware | index.ts | `src/middleware/index.ts` | ⚠️ Wymaga rozszerzenia |
-| Klient Supabase | supabase.client.ts | `src/db/supabase.client.ts` | ✅ Istnieje |
-| Klient Supabase | supabase.browser.ts | `src/db/supabase.browser.ts` | ✅ Istnieje |
+| Typ             | Nazwa                 | Ścieżka                                        | Status                 |
+| --------------- | --------------------- | ---------------------------------------------- | ---------------------- |
+| Strona Astro    | login.astro           | `src/pages/login.astro`                        | ✅ Istnieje            |
+| Strona Astro    | register.astro        | `src/pages/register.astro`                     | ✅ Istnieje            |
+| Strona Astro    | forgot-password.astro | `src/pages/forgot-password.astro`              | ✅ Istnieje            |
+| Strona Astro    | reset-password.astro  | `src/pages/reset-password.astro`               | ⚠️ Do utworzenia       |
+| Strona Astro    | app.astro             | `src/pages/app.astro`                          | ✅ Istnieje            |
+| Layout          | AuthLayout.astro      | `src/layouts/AuthLayout.astro`                 | ✅ Istnieje            |
+| Komponent React | LoginForm             | `src/components/auth/LoginForm.tsx`            | ✅ Istnieje            |
+| Komponent React | RegisterForm          | `src/components/auth/RegisterForm.tsx`         | ✅ Istnieje            |
+| Komponent React | ForgotPasswordForm    | `src/components/auth/ForgotPasswordForm.tsx`   | ✅ Istnieje            |
+| Komponent React | ResetPasswordForm     | `src/components/auth/ResetPasswordForm.tsx`    | ⚠️ Do utworzenia       |
+| Komponent React | Dashboard             | `src/components/dashboard/Dashboard.tsx`       | ✅ Istnieje            |
+| Komponent React | Header                | `src/components/dashboard/Header.tsx`          | ✅ Istnieje            |
+| Hook            | useLoginForm          | `src/components/auth/useLoginForm.ts`          | ✅ Istnieje            |
+| Hook            | useRegisterForm       | `src/components/auth/useRegisterForm.ts`       | ✅ Istnieje            |
+| Hook            | useForgotPasswordForm | `src/components/auth/useForgotPasswordForm.ts` | ✅ Istnieje            |
+| Hook            | useResetPasswordForm  | `src/components/auth/useResetPasswordForm.ts`  | ⚠️ Do utworzenia       |
+| Hook            | usePasswordStrength   | `src/components/auth/usePasswordStrength.ts`   | ✅ Istnieje            |
+| Middleware      | index.ts              | `src/middleware/index.ts`                      | ⚠️ Wymaga rozszerzenia |
+| Klient Supabase | supabase.client.ts    | `src/db/supabase.client.ts`                    | ✅ Istnieje            |
+| Klient Supabase | supabase.browser.ts   | `src/db/supabase.browser.ts`                   | ✅ Istnieje            |
 
 ### 10.2. Metody Supabase Auth używane w projekcie
 
-| Metoda | Użycie | Plik |
-|--------|--------|------|
-| `signInWithPassword()` | Logowanie | `useLoginForm.ts` |
-| `signUp()` | Rejestracja | `useRegisterForm.ts` |
-| `signOut()` | Wylogowanie | `Dashboard.tsx` |
-| `resetPasswordForEmail()` | Wysłanie linku reset | `useForgotPasswordForm.ts` |
-| `updateUser()` | Zmiana hasła | `useResetPasswordForm.ts` (do utworzenia) |
-| `getSession()` | Weryfikacja sesji (SSR) | `login.astro`, `register.astro`, `app.astro` |
-| `getUser()` | Weryfikacja w API | `src/pages/api/**/*.ts` |
+| Metoda                    | Użycie                  | Plik                                         |
+| ------------------------- | ----------------------- | -------------------------------------------- |
+| `signInWithPassword()`    | Logowanie               | `useLoginForm.ts`                            |
+| `signUp()`                | Rejestracja             | `useRegisterForm.ts`                         |
+| `signOut()`               | Wylogowanie             | `Dashboard.tsx`                              |
+| `resetPasswordForEmail()` | Wysłanie linku reset    | `useForgotPasswordForm.ts`                   |
+| `updateUser()`            | Zmiana hasła            | `useResetPasswordForm.ts` (do utworzenia)    |
+| `getSession()`            | Weryfikacja sesji (SSR) | `login.astro`, `register.astro`, `app.astro` |
+| `getUser()`               | Weryfikacja w API       | `src/pages/api/**/*.ts`                      |

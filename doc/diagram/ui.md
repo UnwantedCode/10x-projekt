@@ -178,20 +178,21 @@ flowchart TD
 
 ## Legenda
 
-| Kolor | Typ elementu |
-|-------|--------------|
-| 🔵 Niebieski | Strony i Layouty Astro (server-side) |
-| 🔷 Cyjan | Komponenty React (client-side) |
-| 🟣 Fioletowy | Hooki React |
-| 🟡 Pomarańczowy | Typy TypeScript |
-| 🟢 Zielony | Integracja Supabase |
-| 🔴 Czerwony | Middleware |
-| 🟣 Różowy | Endpointy API |
-| ⚫ Szary | Operacje Auth |
+| Kolor           | Typ elementu                         |
+| --------------- | ------------------------------------ |
+| 🔵 Niebieski    | Strony i Layouty Astro (server-side) |
+| 🔷 Cyjan        | Komponenty React (client-side)       |
+| 🟣 Fioletowy    | Hooki React                          |
+| 🟡 Pomarańczowy | Typy TypeScript                      |
+| 🟢 Zielony      | Integracja Supabase                  |
+| 🔴 Czerwony     | Middleware                           |
+| 🟣 Różowy       | Endpointy API                        |
+| ⚫ Szary        | Operacje Auth                        |
 
 ## Opis przepływów
 
 ### 1. Rejestracja (US-001)
+
 1. Użytkownik wchodzi na `/register`
 2. `AuthLayout` renderuje `RegisterForm`
 3. `RegisterForm` używa `useRegisterForm` do zarządzania stanem
@@ -200,6 +201,7 @@ flowchart TD
 6. Sukces → przekierowanie do `/login?registered=true`
 
 ### 2. Logowanie (US-002)
+
 1. Użytkownik wchodzi na `/login`
 2. `AuthLayout` renderuje `LoginForm`
 3. `LoginForm` używa `useLoginForm` do zarządzania stanem
@@ -208,6 +210,7 @@ flowchart TD
 6. Błąd → wyświetlenie komunikatu
 
 ### 3. Odzyskiwanie hasła (dodatkowe)
+
 1. Użytkownik klika "Zapomniałeś hasła?" na stronie logowania
 2. Przekierowanie do `/forgot-password`
 3. `ForgotPasswordForm` używa `useForgotPasswordForm`
@@ -215,12 +218,14 @@ flowchart TD
 5. Zawsze wyświetla `SuccessMessage` (zapobiega enumeracji kont)
 
 ### 4. Wylogowanie (US-004)
+
 1. Użytkownik klika przycisk wylogowania w `Header`
 2. `Dashboard` wywołuje `signOut()`
 3. Supabase czyści sesję
 4. Przekierowanie do `/login`
 
 ### 5. Ochrona tras (US-003)
+
 1. Middleware przechwytuje każde żądanie
 2. `SessionCheck` weryfikuje sesję via `getSession()`
 3. Brak sesji → redirect do `/login`
@@ -228,27 +233,29 @@ flowchart TD
 
 ## Komponenty zaktualizowane dla modułu Auth
 
-| Komponent | Aktualizacja | Status |
-|-----------|--------------|--------|
-| `LoginForm.tsx` | Formularz logowania | ✅ Zaimplementowane |
-| `RegisterForm.tsx` | Formularz rejestracji z walidacją | ✅ Zaimplementowane |
-| `ForgotPasswordForm.tsx` | Formularz reset hasła | ✅ Zaimplementowane |
-| `PasswordStrengthIndicator.tsx` | Wskaźnik siły hasła | ✅ Zaimplementowane |
-| `useLoginForm.ts` | Hook logowania | ✅ Zaimplementowane |
-| `useRegisterForm.ts` | Hook rejestracji | ✅ Zaimplementowane |
-| `useForgotPasswordForm.ts` | Hook reset hasła | ✅ Zaimplementowane |
-| `usePasswordStrength.ts` | Hook siły hasła | ✅ Zaimplementowane |
-| `types.ts` | Typy auth | ✅ Zaimplementowane |
-| `middleware/index.ts` | Ochrona tras | ⚠️ Do rozszerzenia |
+| Komponent                       | Aktualizacja                      | Status              |
+| ------------------------------- | --------------------------------- | ------------------- |
+| `LoginForm.tsx`                 | Formularz logowania               | ✅ Zaimplementowane |
+| `RegisterForm.tsx`              | Formularz rejestracji z walidacją | ✅ Zaimplementowane |
+| `ForgotPasswordForm.tsx`        | Formularz reset hasła             | ✅ Zaimplementowane |
+| `PasswordStrengthIndicator.tsx` | Wskaźnik siły hasła               | ✅ Zaimplementowane |
+| `useLoginForm.ts`               | Hook logowania                    | ✅ Zaimplementowane |
+| `useRegisterForm.ts`            | Hook rejestracji                  | ✅ Zaimplementowane |
+| `useForgotPasswordForm.ts`      | Hook reset hasła                  | ✅ Zaimplementowane |
+| `usePasswordStrength.ts`        | Hook siły hasła                   | ✅ Zaimplementowane |
+| `types.ts`                      | Typy auth                         | ✅ Zaimplementowane |
+| `middleware/index.ts`           | Ochrona tras                      | ⚠️ Do rozszerzenia  |
 
 ## Zależności między komponentami
 
 ### Komponenty współdzielone
+
 - `AuthLayout.astro` - używany przez wszystkie strony auth
 - `DashboardLayout.astro` - używany przez strony chronione
 - `types.ts` - typy dla wszystkich hooków auth
 
 ### Komponenty specyficzne
+
 - `LoginForm` + `useLoginForm` - tylko dla `/login`
 - `RegisterForm` + `useRegisterForm` + `PasswordStrengthIndicator` - tylko dla `/register`
 - `ForgotPasswordForm` + `useForgotPasswordForm` - tylko dla `/forgot-password`

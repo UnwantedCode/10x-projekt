@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 
-import type { TaskDTO, PaginationDTO, CreateTaskCommand, TaskStatus } from "@/types";
+import type { TaskDTO, PaginationDTO, CreateTaskCommand, UpdateTaskCommand, TaskStatus, TaskOrderItem } from "@/types";
 
 import {
   fetchTasks,
   createTask as apiCreateTask,
+  updateTask as apiUpdateTask,
   updateTaskStatus as apiUpdateTaskStatus,
+  reorderTasks as apiReorderTasks,
 } from "@/lib/api/dashboard.api";
 
 import { isUnauthorizedError, handleUnauthorizedError, getErrorMessage } from "@/lib/api/errors";
@@ -34,7 +36,9 @@ export interface UseTasksReturn {
   resetFilters: () => void;
   loadMore: () => Promise<void>;
   createTask: (command: CreateTaskCommand) => Promise<TaskDTO>;
+  updateTask: (taskId: string, command: UpdateTaskCommand) => Promise<TaskDTO>;
   updateTaskStatus: (taskId: string, status: TaskStatus) => Promise<void>;
+  reorderTasks: (taskOrders: TaskOrderItem[]) => Promise<void>;
   refreshTasks: () => Promise<void>;
   clearError: () => void;
 }
@@ -238,6 +242,40 @@ export function useTasks(listId: string | null): UseTasksReturn {
     [listId, filters.sort, filters.order, handleError]
   );
 
+  const updateTaskAction = useCallback(
+    async (taskId: string, command: UpdateTaskCommand): Promise<TaskDTO> => {
+      // Optimistic update
+      const previousTasks = tasks;
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId
+            ? {
+                ...task,
+                ...command,
+                updatedAt: new Date().toISOString(),
+              }
+            : task
+        )
+      );
+
+      try {
+        const updatedTask = await apiUpdateTask(taskId, command);
+
+        // Replace optimistic update with actual data
+        setTasks((prev) => prev.map((task) => (task.id === taskId ? updatedTask : task)));
+
+        setError(null);
+        return updatedTask;
+      } catch (err) {
+        // Rollback on error
+        setTasks(previousTasks);
+        handleError(err);
+        throw err;
+      }
+    },
+    [tasks, handleError]
+  );
+
   const updateTaskStatusAction = useCallback(
     async (taskId: string, status: TaskStatus): Promise<void> => {
       // Optimistic update
@@ -271,6 +309,35 @@ export function useTasks(listId: string | null): UseTasksReturn {
       }
     },
     [tasks, filters.status, handleError]
+  );
+
+  const reorderTasksAction = useCallback(
+    async (taskOrders: TaskOrderItem[]): Promise<void> => {
+      if (!listId) return;
+
+      // Optimistic update
+      const previousTasks = tasks;
+      const orderMap = new Map(taskOrders.map((o) => [o.id, o.sortOrder]));
+
+      setTasks((prev) => {
+        const updated = prev.map((task) => ({
+          ...task,
+          sortOrder: orderMap.get(task.id) ?? task.sortOrder,
+        }));
+        return updated.sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0));
+      });
+
+      try {
+        await apiReorderTasks(listId, { taskOrders });
+        setError(null);
+      } catch (err) {
+        // Rollback on error
+        setTasks(previousTasks);
+        handleError(err);
+        throw err;
+      }
+    },
+    [listId, tasks, handleError]
   );
 
   const refreshTasks = useCallback(async (): Promise<void> => {
@@ -316,7 +383,9 @@ export function useTasks(listId: string | null): UseTasksReturn {
     resetFilters,
     loadMore,
     createTask: createTaskAction,
+    updateTask: updateTaskAction,
     updateTaskStatus: updateTaskStatusAction,
+    reorderTasks: reorderTasksAction,
     refreshTasks,
     clearError,
   };

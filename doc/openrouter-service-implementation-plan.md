@@ -127,7 +127,7 @@ const service = createOpenRouterService();
 const response = await service.chat({
   messages: [
     { role: "system", content: "Jesteś pomocnym asystentem." },
-    { role: "user", content: "Czym jest TypeScript?" }
+    { role: "user", content: "Czym jest TypeScript?" },
   ],
   temperature: 0.7,
 });
@@ -160,7 +160,7 @@ interface PrioritySuggestion {
 const response = await service.chatWithSchema<PrioritySuggestion>({
   messages: [
     { role: "system", content: "Analizujesz zadania i sugerujesz priorytety." },
-    { role: "user", content: "Tytuł: Przygotuj raport\nOpis: Raport kwartalny dla zarządu" }
+    { role: "user", content: "Tytuł: Przygotuj raport\nOpis: Raport kwartalny dla zarządu" },
   ],
   schema: {
     type: "object",
@@ -169,11 +169,11 @@ const response = await service.chatWithSchema<PrioritySuggestion>({
       justification: { type: "string", maxLength: 300 },
       tags: {
         type: "array",
-        items: { type: "string" }
-      }
+        items: { type: "string" },
+      },
     },
     required: ["priority", "justification", "tags"],
-    additionalProperties: false
+    additionalProperties: false,
   },
   schemaName: "priority_suggestion",
   temperature: 0.3,
@@ -481,41 +481,32 @@ export class OpenRouterError extends Error {
    * Czy błąd jest tymczasowy i warto ponowić żądanie
    */
   get isRetryable(): boolean {
-    return [
-      "RATE_LIMITED",
-      "SERVICE_UNAVAILABLE",
-      "TIMEOUT",
-      "NETWORK_ERROR",
-    ].includes(this.code);
+    return ["RATE_LIMITED", "SERVICE_UNAVAILABLE", "TIMEOUT", "NETWORK_ERROR"].includes(this.code);
   }
 
   /**
    * Czy błąd jest związany z konfiguracją
    */
   get isConfigError(): boolean {
-    return [
-      "UNAUTHORIZED",
-      "INSUFFICIENT_CREDITS",
-      "INVALID_CONFIG",
-    ].includes(this.code);
+    return ["UNAUTHORIZED", "INSUFFICIENT_CREDITS", "INVALID_CONFIG"].includes(this.code);
   }
 }
 ```
 
 ### 5.2 Scenariusze błędów i ich obsługa
 
-| Scenariusz | Kod błędu | Status HTTP | Wiadomość dla użytkownika |
-|------------|-----------|-------------|---------------------------|
-| Brak klucza API | `INVALID_CONFIG` | - | "AI service is not configured" |
-| Nieprawidłowy klucz API | `UNAUTHORIZED` | 401 | "AI service authentication failed" |
-| Brak środków na koncie | `INSUFFICIENT_CREDITS` | 402 | "AI service temporarily unavailable" |
-| Przekroczenie limitu żądań | `RATE_LIMITED` | 429 | "AI service is busy, please try again" |
-| Timeout żądania | `TIMEOUT` | - | "AI service took too long to respond" |
-| Błąd sieci | `NETWORK_ERROR` | - | "Could not connect to AI service" |
-| Błąd serwera OpenRouter | `SERVICE_UNAVAILABLE` | 5xx | "AI service temporarily unavailable" |
-| Nieprawidłowe żądanie | `BAD_REQUEST` | 400 | "Invalid request to AI service" |
-| Pusta odpowiedź | `EMPTY_RESPONSE` | - | "AI service returned empty response" |
-| Błąd parsowania JSON | `PARSE_ERROR` | - | "Could not understand AI response" |
+| Scenariusz                 | Kod błędu              | Status HTTP | Wiadomość dla użytkownika              |
+| -------------------------- | ---------------------- | ----------- | -------------------------------------- |
+| Brak klucza API            | `INVALID_CONFIG`       | -           | "AI service is not configured"         |
+| Nieprawidłowy klucz API    | `UNAUTHORIZED`         | 401         | "AI service authentication failed"     |
+| Brak środków na koncie     | `INSUFFICIENT_CREDITS` | 402         | "AI service temporarily unavailable"   |
+| Przekroczenie limitu żądań | `RATE_LIMITED`         | 429         | "AI service is busy, please try again" |
+| Timeout żądania            | `TIMEOUT`              | -           | "AI service took too long to respond"  |
+| Błąd sieci                 | `NETWORK_ERROR`        | -           | "Could not connect to AI service"      |
+| Błąd serwera OpenRouter    | `SERVICE_UNAVAILABLE`  | 5xx         | "AI service temporarily unavailable"   |
+| Nieprawidłowe żądanie      | `BAD_REQUEST`          | 400         | "Invalid request to AI service"        |
+| Pusta odpowiedź            | `EMPTY_RESPONSE`       | -           | "AI service returned empty response"   |
+| Błąd parsowania JSON       | `PARSE_ERROR`          | -           | "Could not understand AI response"     |
 
 ### 5.3 Przykład obsługi błędów w warstwie API
 
@@ -546,9 +537,7 @@ export const POST: APIRoute = async (context) => {
       return new Response(
         JSON.stringify({
           error: "AI_SERVICE_ERROR",
-          message: error.isConfigError
-            ? "AI service is not available"
-            : "AI service temporarily unavailable",
+          message: error.isConfigError ? "AI service is not available" : "AI service temporarily unavailable",
         }),
         { status: statusMap[error.code] }
       );
@@ -578,7 +567,7 @@ export const POST: APIRoute = async (context) => {
 
 ```typescript
 // .env
-OPENROUTER_API_KEY=sk-or-v1-xxxxxxxxxxxxx
+OPENROUTER_API_KEY = sk - or - v1 - xxxxxxxxxxxxx;
 
 // Nigdy nie logować klucza
 console.log("API Key:", this.apiKey); // ❌ ZABRONIONE
@@ -589,29 +578,28 @@ console.log("API configured:", !!this.apiKey); // ✅ OK
 
 Ochrona przed prompt injection:
 
-```typescript
+````typescript
 /**
  * Sanityzuje tekst przed włączeniem do promptu AI
  */
-export function sanitizePromptInput(
-  text: string,
-  options: { maxLength?: number } = {}
-): string {
+export function sanitizePromptInput(text: string, options: { maxLength?: number } = {}): string {
   const maxLength = options.maxLength ?? 1000;
 
-  return text
-    // Usuń potencjalne instrukcje sterujące
-    .replace(/```/g, "")
-    .replace(/\{/g, "(")
-    .replace(/\}/g, ")")
-    // Usuń znaki kontrolne
-    .replace(/[\x00-\x1F\x7F]/g, "")
-    // Ogranicz długość
-    .substring(0, maxLength)
-    // Usuń nadmiarowe białe znaki
-    .trim();
+  return (
+    text
+      // Usuń potencjalne instrukcje sterujące
+      .replace(/```/g, "")
+      .replace(/\{/g, "(")
+      .replace(/\}/g, ")")
+      // Usuń znaki kontrolne
+      .replace(/[\x00-\x1F\x7F]/g, "")
+      // Ogranicz długość
+      .substring(0, maxLength)
+      // Usuń nadmiarowe białe znaki
+      .trim()
+  );
 }
-```
+````
 
 ### 6.3 Walidacja odpowiedzi
 
@@ -657,9 +645,7 @@ class RateLimiter {
     const userRequests = this.requests.get(userId) ?? [];
 
     // Usuń stare żądania
-    const recentRequests = userRequests.filter(
-      (timestamp) => now - timestamp < windowMs
-    );
+    const recentRequests = userRequests.filter((timestamp) => now - timestamp < windowMs);
 
     if (recentRequests.length >= maxRequests) {
       return false;
@@ -688,10 +674,13 @@ interface AIRequestLog {
 
 function logAIRequest(log: AIRequestLog): void {
   // Wysyłaj do systemu logowania
-  console.info("[AI Request]", JSON.stringify({
-    ...log,
-    // Nigdy nie loguj surowej treści promptu
-  }));
+  console.info(
+    "[AI Request]",
+    JSON.stringify({
+      ...log,
+      // Nigdy nie loguj surowej treści promptu
+    })
+  );
 }
 ```
 
@@ -995,10 +984,7 @@ export class OpenRouterService {
     };
   }
 
-  private async executeRequest(
-    body: OpenRouterRequestBody,
-    timeout: number
-  ): Promise<OpenRouterApiResponse> {
+  private async executeRequest(body: OpenRouterRequestBody, timeout: number): Promise<OpenRouterApiResponse> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -1023,10 +1009,7 @@ export class OpenRouterService {
     }
   }
 
-  private parseResponse<T>(
-    apiResponse: OpenRouterApiResponse,
-    hasJsonSchema: boolean
-  ): T {
+  private parseResponse<T>(apiResponse: OpenRouterApiResponse, hasJsonSchema: boolean): T {
     const content = apiResponse.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -1121,18 +1104,13 @@ export function createOpenRouterService(): OpenRouterService {
   const apiKey = import.meta.env.OPENROUTER_API_KEY;
 
   if (!apiKey) {
-    throw new OpenRouterError(
-      "OPENROUTER_API_KEY environment variable is not set",
-      "INVALID_CONFIG"
-    );
+    throw new OpenRouterError("OPENROUTER_API_KEY environment variable is not set", "INVALID_CONFIG");
   }
 
   return new OpenRouterService({
     apiKey,
     defaultModel: import.meta.env.OPENROUTER_MODEL,
-    defaultTimeout: import.meta.env.OPENROUTER_TIMEOUT
-      ? parseInt(import.meta.env.OPENROUTER_TIMEOUT, 10)
-      : undefined,
+    defaultTimeout: import.meta.env.OPENROUTER_TIMEOUT ? parseInt(import.meta.env.OPENROUTER_TIMEOUT, 10) : undefined,
     siteUrl: import.meta.env.SITE_URL,
     siteName: import.meta.env.SITE_NAME,
   });
@@ -1146,15 +1124,12 @@ export type { ChatMessage, ChatOptions, ChatResponse, JsonSchema, ResponseFormat
 
 **Plik:** `src/lib/utils/prompt.utils.ts`
 
-```typescript
+````typescript
 /**
  * Sanityzuje tekst przed włączeniem do promptu AI
  * Chroni przed prompt injection
  */
-export function sanitizePromptInput(
-  text: string,
-  options: { maxLength?: number } = {}
-): string {
+export function sanitizePromptInput(text: string, options: { maxLength?: number } = {}): string {
   const maxLength = options.maxLength ?? 1000;
 
   return text
@@ -1176,7 +1151,7 @@ export async function hashPrompt(prompt: string): Promise<string> {
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
 }
-```
+````
 
 ### Krok 6: Refaktoryzacja istniejącego aiInteraction.service.ts
 
@@ -1215,9 +1190,7 @@ async function callOpenRouter(title: string, description: string | null): Promis
   const openrouter = createOpenRouterService();
 
   const sanitizedTitle = sanitizePromptInput(title, { maxLength: 200 });
-  const sanitizedDescription = description
-    ? sanitizePromptInput(description, { maxLength: 500 })
-    : "Brak opisu";
+  const sanitizedDescription = description ? sanitizePromptInput(description, { maxLength: 500 }) : "Brak opisu";
 
   const messages: ChatMessage[] = [
     {
@@ -1289,6 +1262,7 @@ curl -X POST http://localhost:3000/api/ai/suggest \
 3. **Test response_format (JSON Schema):**
 
 Sprawdź czy odpowiedź zawiera poprawną strukturę:
+
 - `suggestedPriority`: 1, 2 lub 3
 - `justification`: string max 300 znaków
 - `justificationTags`: tablica stringów z dozwolonych tagów

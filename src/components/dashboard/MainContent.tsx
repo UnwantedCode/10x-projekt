@@ -1,15 +1,17 @@
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
-import type { ListDTO, CreateTaskCommand, TaskStatus } from "@/types";
+import type { ListDTO, TaskDTO, CreateTaskCommand, UpdateTaskCommand, TaskStatus } from "@/types";
 
 import { useTasks } from "./hooks/useTasks";
 import { useInfiniteScroll } from "./hooks/useInfiniteScroll";
+import { useTaskReorder } from "./hooks/useTaskReorder";
 
 import { FilterToolbar } from "./FilterToolbar";
 import { TaskList } from "./TaskList";
 import { InlineTaskInput } from "./InlineTaskInput";
 import { EmptyState } from "./EmptyState";
+import { TaskEditDialog } from "./TaskEditDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // =============================================================================
@@ -99,9 +101,12 @@ function ListHeader({ listName, totalCount, isLoading }: ListHeaderProps) {
 
 export function MainContent({ activeList, onStartCreateList }: MainContentProps) {
   const [isSubmittingTask, setIsSubmittingTask] = useState(false);
+  const [editingTask, setEditingTask] = useState<TaskDTO | null>(null);
+  const [isSavingTask, setIsSavingTask] = useState(false);
 
   // Tasks hook - fetch tasks for active list
   const {
+    tasks,
     tasksByPriority,
     filters,
     isLoading,
@@ -112,9 +117,21 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
     setFilters,
     loadMore,
     createTask,
+    updateTask,
     updateTaskStatus,
+    reorderTasks,
     clearError: clearTasksError,
   } = useTasks(activeList?.id ?? null);
+
+  // Determine if DnD is enabled (custom sort order)
+  const isDragEnabled = useMemo(() => filters.sort === "sort_order" && !isLoading, [filters.sort, isLoading]);
+
+  // Task reorder hook
+  const { sensors, handleDragEnd, sortableItems } = useTaskReorder({
+    tasks,
+    onReorder: reorderTasks,
+    enabled: isDragEnabled,
+  });
 
   // Show error toast when tasks error changes
   useEffect(() => {
@@ -164,6 +181,30 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
     [updateTaskStatus]
   );
 
+  const handleEditTask = useCallback((task: TaskDTO) => {
+    setEditingTask(task);
+  }, []);
+
+  const handleSaveTask = useCallback(
+    async (taskId: string, command: UpdateTaskCommand) => {
+      setIsSavingTask(true);
+      try {
+        await updateTask(taskId, command);
+        toast.success("Zadanie zostało zaktualizowane");
+        setEditingTask(null);
+      } catch {
+        // Error handled by hook
+      } finally {
+        setIsSavingTask(false);
+      }
+    },
+    [updateTask]
+  );
+
+  const handleCloseEdit = useCallback(() => {
+    setEditingTask(null);
+  }, []);
+
   const handleStartAddTask = useCallback(() => {
     // This is handled by InlineTaskInput's expand state
     // Just a placeholder for EmptyState action
@@ -198,8 +239,14 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
         ) : (
           <TaskList
             tasksByPriority={tasksByPriority}
+            tasks={tasks}
             isLoading={isLoading}
             onTaskStatusChange={handleTaskStatusChange}
+            onTaskEdit={handleEditTask}
+            isDragEnabled={isDragEnabled}
+            sensors={sensors}
+            onDragEnd={handleDragEnd}
+            sortableItems={sortableItems}
           />
         )}
 
@@ -215,6 +262,15 @@ export function MainContent({ activeList, onStartCreateList }: MainContentProps)
       <div className="border-t border-border bg-card p-4">
         <InlineTaskInput listId={activeList.id} onSubmit={handleCreateTask} isSubmitting={isSubmittingTask} />
       </div>
+
+      {/* Edit task dialog */}
+      <TaskEditDialog
+        task={editingTask}
+        isOpen={!!editingTask}
+        onClose={handleCloseEdit}
+        onSave={handleSaveTask}
+        isSaving={isSavingTask}
+      />
     </div>
   );
 }

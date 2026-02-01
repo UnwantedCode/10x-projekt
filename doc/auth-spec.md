@@ -10,21 +10,21 @@ Niniejszy dokument definiuje szczegółową architekturę modułu autentykacji d
 
 #### 1.2.1. Funkcjonalności wymagane przez PRD
 
-| Funkcjonalność | User Story | Status obecny |
-|----------------|------------|---------------|
-| Rejestracja konta | US-001 | Zaimplementowane |
-| Logowanie | US-002 | Zaimplementowane |
-| Bezpieczny dostęp i autoryzacja | US-003 | Częściowo zaimplementowane |
-| Wylogowanie | US-004 | Zaimplementowane |
+| Funkcjonalność                  | User Story | Status obecny              |
+| ------------------------------- | ---------- | -------------------------- |
+| Rejestracja konta               | US-001     | Zaimplementowane           |
+| Logowanie                       | US-002     | Zaimplementowane           |
+| Bezpieczny dostęp i autoryzacja | US-003     | Częściowo zaimplementowane |
+| Wylogowanie                     | US-004     | Zaimplementowane           |
 
 #### 1.2.2. Funkcjonalności dodatkowe (poza zakresem PRD MVP)
 
 > **Uwaga:** Poniższe funkcjonalności nie są wymagane przez PRD, ale zostały zaimplementowane jako standardowa praktyka UX oraz ze względu na zgodność z RODO (punkt 1.5 PRD). Decyzja o ich włączeniu do MVP powinna być podjęta przez Product Ownera.
 
-| Funkcjonalność | Uzasadnienie | Status obecny |
-|----------------|--------------|---------------|
-| Odzyskiwanie hasła (forgot-password) | Standardowa praktyka UX, bezpieczeństwo | Zaimplementowane |
-| Akceptacja regulaminu przy rejestracji | Zgodność z RODO (PRD 1.5) | Zaimplementowane |
+| Funkcjonalność                         | Uzasadnienie                            | Status obecny    |
+| -------------------------------------- | --------------------------------------- | ---------------- |
+| Odzyskiwanie hasła (forgot-password)   | Standardowa praktyka UX, bezpieczeństwo | Zaimplementowane |
+| Akceptacja regulaminu przy rejestracji | Zgodność z RODO (PRD 1.5)               | Zaimplementowane |
 
 ### 1.3. Stack technologiczny
 
@@ -45,25 +45,25 @@ Niniejszy dokument definiuje szczegółową architekturę modułu autentykacji d
 
 Strony dostępne dla niezalogowanych użytkowników, renderowane w `AuthLayout`:
 
-| Ścieżka | Strona Astro | Komponent React | Stan | Wymagane przez PRD |
-|---------|--------------|-----------------|------|-------------------|
-| `/login` | `login.astro` | `LoginForm` | Istnieje | ✅ US-002 |
-| `/register` | `register.astro` | `RegisterForm` | Istnieje | ✅ US-001 |
-| `/forgot-password` | `forgot-password.astro` | `ForgotPasswordForm` | Istnieje | ❌ Dodatkowe |
+| Ścieżka            | Strona Astro            | Komponent React      | Stan     | Wymagane przez PRD |
+| ------------------ | ----------------------- | -------------------- | -------- | ------------------ |
+| `/login`           | `login.astro`           | `LoginForm`          | Istnieje | ✅ US-002          |
+| `/register`        | `register.astro`        | `RegisterForm`       | Istnieje | ✅ US-001          |
+| `/forgot-password` | `forgot-password.astro` | `ForgotPasswordForm` | Istnieje | ❌ Dodatkowe       |
 
 #### 2.1.2. Strony chronione (tryb non-auth)
 
 Strony wymagające autoryzacji, renderowane z weryfikacją sesji:
 
-| Ścieżka | Strona Astro | Komponent React | Stan |
-|---------|--------------|-----------------|------|
-| `/app` | `app.astro` | `Dashboard` | Istnieje |
+| Ścieżka | Strona Astro | Komponent React | Stan     |
+| ------- | ------------ | --------------- | -------- |
+| `/app`  | `app.astro`  | `Dashboard`     | Istnieje |
 
 #### 2.1.3. Strona główna
 
-| Ścieżka | Strona Astro | Komponent | Stan |
-|---------|--------------|-----------|------|
-| `/` | `index.astro` | `Welcome` | Istnieje (publiczna) |
+| Ścieżka | Strona Astro  | Komponent | Stan                 |
+| ------- | ------------- | --------- | -------------------- |
+| `/`     | `index.astro` | `Welcome` | Istnieje (publiczna) |
 
 ### 2.2. Layouty
 
@@ -72,6 +72,7 @@ Strony wymagające autoryzacji, renderowane z weryfikacją sesji:
 Layout dla stron autentykacji z wycentrowanym formularzem.
 
 **Struktura:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │              min-h-screen                   │
@@ -84,6 +85,7 @@ Layout dla stron autentykacji z wycentrowanym formularzem.
 ```
 
 **Odpowiedzialności:**
+
 - Minimalny layout z tłem `bg-background`
 - Centrowanie zawartości
 - Przekazywanie tytułu strony
@@ -93,6 +95,7 @@ Layout dla stron autentykacji z wycentrowanym formularzem.
 Layout dla stron chronionych z nawigacją i sidebarem.
 
 **Struktura:**
+
 ```
 ┌─────────────────────────────────────────────┐
 │                  HEADER                     │
@@ -103,6 +106,7 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 ```
 
 **Odpowiedzialności:**
+
 - Skip link dla dostępności
 - Sloty: `header`, `sidebar`, `content`
 - Landmarks semantyczne (`<header>`, `<aside>`, `<main>`)
@@ -113,16 +117,17 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 
 **Lokalizacja:** `src/components/auth/`
 
-| Komponent | Hook | Stan | Wymagane przez PRD |
-|-----------|------|------|-------------------|
-| `LoginForm.tsx` | `useLoginForm.ts` | Istnieje | ✅ US-002 |
-| `RegisterForm.tsx` | `useRegisterForm.ts` | Istnieje | ✅ US-001 |
-| `ForgotPasswordForm.tsx` | `useForgotPasswordForm.ts` | Istnieje | ❌ Dodatkowe |
-| `PasswordStrengthIndicator.tsx` | `usePasswordStrength.ts` | Istnieje | ❌ Dodatkowe (UX) |
+| Komponent                       | Hook                       | Stan     | Wymagane przez PRD |
+| ------------------------------- | -------------------------- | -------- | ------------------ |
+| `LoginForm.tsx`                 | `useLoginForm.ts`          | Istnieje | ✅ US-002          |
+| `RegisterForm.tsx`              | `useRegisterForm.ts`       | Istnieje | ✅ US-001          |
+| `ForgotPasswordForm.tsx`        | `useForgotPasswordForm.ts` | Istnieje | ❌ Dodatkowe       |
+| `PasswordStrengthIndicator.tsx` | `usePasswordStrength.ts`   | Istnieje | ❌ Dodatkowe (UX)  |
 
 #### 2.3.2. Rozdzielenie odpowiedzialności
 
 **Strony Astro (server-side):**
+
 - Weryfikacja sesji przy renderowaniu (`getSession()`)
 - Przekierowanie zalogowanych użytkowników z `/login`, `/register`, `/forgot-password` do `/app`
 - Przekierowanie niezalogowanych użytkowników z `/app` do `/login`
@@ -130,6 +135,7 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 - Renderowanie layoutów i przekazywanie props do komponentów React
 
 **Komponenty React (client-side):**
+
 - Zarządzanie stanem formularza (wartości, błędy, touched)
 - Walidacja pól w czasie rzeczywistym (on-blur, on-change)
 - Komunikacja z Supabase Auth SDK
@@ -141,6 +147,7 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 #### 2.4.1. LoginForm
 
 **Pola formularza:**
+
 - `email` - adres email (wymagane)
 - `password` - hasło (wymagane, min. 6 znaków)
 
@@ -160,6 +167,7 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 | Błąd sieci | "Błąd połączenia z serwerem. Spróbuj ponownie." |
 
 **Flow:**
+
 1. Użytkownik wypełnia formularz
 2. Walidacja on-blur dla każdego pola
 3. Submit → walidacja wszystkich pól
@@ -168,12 +176,14 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 6. Błąd → wyświetlenie komunikatu
 
 **Linki nawigacyjne:**
+
 - "Zapomniałeś hasła?" → `/forgot-password`
 - "Nie masz jeszcze konta? Zarejestruj się" → `/register`
 
 #### 2.4.2. RegisterForm
 
 **Pola formularza:**
+
 - `email` - adres email (wymagane)
 - `password` - hasło (wymagane, min. 8 znaków)
 - `confirmPassword` - potwierdzenie hasła (wymagane, musi być identyczne)
@@ -201,9 +211,11 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 | Błąd sieci | "Brak połączenia z serwerem. Sprawdź połączenie internetowe i spróbuj ponownie." |
 
 **Komponenty dodatkowe:**
+
 - `PasswordStrengthIndicator` - wizualny wskaźnik siły hasła
 
 **Flow:**
+
 1. Użytkownik wypełnia formularz
 2. Walidacja real-time dla confirmPassword gdy password się zmienia
 3. Walidacja on-blur dla pozostałych pól
@@ -213,6 +225,7 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 7. Błąd → wyświetlenie komunikatu
 
 **Linki nawigacyjne:**
+
 - "Masz już konto? Zaloguj się" → `/login`
 - Linki do regulaminu i polityki prywatności (otwierają się w nowej karcie)
 
@@ -221,6 +234,7 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 > **Uwaga:** Ten komponent realizuje funkcjonalność odzyskiwania hasła (dodatkową względem PRD MVP) i jest w pełni zaimplementowany.
 
 **Pola formularza:**
+
 - `email` - adres email (wymagane)
 
 **Walidacja:**
@@ -230,15 +244,18 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 | email | Format email | "Podaj poprawny adres email" |
 
 **Stany komponentu:**
+
 - `isLoading` - trwa wysyłanie żądania
 - `isSubmitted` - formularz został wysłany (pokazuje SuccessMessage)
 
 **SuccessMessage:**
+
 - Zawsze wyświetlany po submit (niezależnie od tego czy email istnieje)
 - Tekst: "Jeśli konto z podanym adresem email istnieje, wyślemy link do resetowania hasła."
 - Zapobiega enumeracji kont
 
 **Flow:**
+
 1. Użytkownik wprowadza email
 2. Walidacja on-blur
 3. Submit → walidacja
@@ -246,6 +263,7 @@ Layout dla stron chronionych z nawigacją i sidebarem.
 5. Zawsze wyświetlenie SuccessMessage (ignorowanie błędów API)
 
 **Linki nawigacyjne:**
+
 - "Wróć do logowania" → `/login`
 
 ### 2.5. Typy i interfejsy
@@ -337,31 +355,16 @@ context.locals.supabase = supabaseClient;
 
 ```typescript
 // Trasy publiczne (dostępne bez autoryzacji)
-const PUBLIC_ROUTES = [
-  '/',
-  '/login',
-  '/register',
-  '/forgot-password',
-];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/forgot-password"];
 
 // Trasy API publiczne
-const PUBLIC_API_ROUTES = [
-  '/api/auth/logout',
-];
+const PUBLIC_API_ROUTES = ["/api/auth/logout"];
 
 // Trasy wymagające autoryzacji
-const PROTECTED_ROUTES = [
-  '/app',
-];
+const PROTECTED_ROUTES = ["/app"];
 
 // Prefiksy tras API wymagających autoryzacji
-const PROTECTED_API_PREFIXES = [
-  '/api/lists',
-  '/api/tasks',
-  '/api/profile',
-  '/api/ai',
-  '/api/ai-interactions',
-];
+const PROTECTED_API_PREFIXES = ["/api/lists", "/api/tasks", "/api/profile", "/api/ai", "/api/ai-interactions"];
 ```
 
 **Logika middleware:**
@@ -395,15 +398,18 @@ declare namespace App {
 **Lokalizacja:** `src/pages/api/auth/logout.ts`
 
 **Request:**
+
 - Metoda: POST
 - Body: brak
 - Wymaga autoryzacji: Nie (ale sprawdza sesję)
 
 **Response:**
+
 - Sukces: `200 OK` + `{ success: true }`
 - Po wylogowaniu redirect do `/login`
 
 **Implementacja:**
+
 1. Pobranie sesji z `context.locals`
 2. Wywołanie `supabase.auth.signOut()`
 3. Zwrot sukcesu
@@ -413,6 +419,7 @@ declare namespace App {
 #### 3.3.1. Walidacja client-side
 
 Walidacja w hookach React przed wysłaniem do Supabase:
+
 - Regex dla email: `/^[^\s@]+@[^\s@]+\.[^\s@]+$/`
 - Minimalna długość hasła: 8 znaków (rejestracja), 6 znaków (logowanie)
 - Zgodność haseł (rejestracja)
@@ -421,6 +428,7 @@ Walidacja w hookach React przed wysłaniem do Supabase:
 #### 3.3.2. Walidacja server-side
 
 Supabase Auth wykonuje dodatkową walidację:
+
 - Unikalność email
 - Siła hasła (konfiguracja w Supabase Dashboard)
 - Poprawność tokenów email
@@ -432,6 +440,7 @@ Supabase Auth wykonuje dodatkową walidację:
 **Lokalizacja:** `src/lib/api/errors.ts`
 
 Istniejące klasy błędów:
+
 - `ApiError` - bazowa klasa
 - `UnauthorizedError` (401) - sesja wygasła
 - `NotFoundError` (404) - nie znaleziono zasobu
@@ -445,6 +454,7 @@ Istniejące klasy błędów:
 **Funkcja:** `handleUnauthorizedError(redirectPath)`
 
 **Działanie:**
+
 1. Przekierowanie do `/login?redirectTo=<redirectPath>`
 2. Wyświetlenie toast "Sesja wygasła. Zaloguj się ponownie."
 
@@ -456,7 +466,7 @@ Istniejące klasy błędów:
 
 ```javascript
 export default defineConfig({
-  output: "server",  // SSR dla wszystkich stron
+  output: "server", // SSR dla wszystkich stron
   adapter: node({ mode: "standalone" }),
 });
 ```
@@ -468,7 +478,9 @@ Każda strona auth wykonuje sprawdzenie sesji server-side:
 ```typescript
 // Przykład: login.astro
 const supabase = Astro.locals.supabase;
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 
 if (session) {
   return Astro.redirect("/app");
@@ -482,7 +494,9 @@ Strony chronione weryfikują sesję i przekierowują:
 ```typescript
 // Przykład: app.astro
 const supabase = Astro.locals.supabase;
-const { data: { session } } = await supabase.auth.getSession();
+const {
+  data: { session },
+} = await supabase.auth.getSession();
 
 if (!session) {
   return Astro.redirect("/login?redirectTo=/app");
@@ -511,7 +525,8 @@ const supabaseAnonKey = import.meta.env.SUPABASE_KEY;
 export const supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
 ```
 
-**Użycie:** 
+**Użycie:**
+
 - W middleware: `context.locals.supabase = supabaseClient`
 - W stronach Astro: `Astro.locals.supabase`
 - W endpointach API: `context.locals.supabase`
@@ -531,17 +546,18 @@ export const supabaseBrowser = createClient<Database>(supabaseUrl, supabaseAnonK
 ```
 
 **Użycie:**
+
 - W hookach React (client-side)
 - W komponentach interaktywnych
 
 #### 4.1.3. Zmienne środowiskowe
 
-| Zmienna | Kontekst | Opis |
-|---------|----------|------|
-| `SUPABASE_URL` | Server | URL instancji Supabase |
-| `SUPABASE_KEY` | Server | Klucz API (anon) |
-| `PUBLIC_SUPABASE_URL` | Client | URL dostępny w przeglądarce |
-| `PUBLIC_SUPABASE_ANON_KEY` | Client | Klucz dostępny w przeglądarce |
+| Zmienna                    | Kontekst | Opis                          |
+| -------------------------- | -------- | ----------------------------- |
+| `SUPABASE_URL`             | Server   | URL instancji Supabase        |
+| `SUPABASE_KEY`             | Server   | Klucz API (anon)              |
+| `PUBLIC_SUPABASE_URL`      | Client   | URL dostępny w przeglądarce   |
+| `PUBLIC_SUPABASE_ANON_KEY` | Client   | Klucz dostępny w przeglądarce |
 
 ### 4.2. Przepływy autentykacji
 
@@ -564,6 +580,7 @@ export const supabaseBrowser = createClient<Database>(supabaseUrl, supabaseAnonK
 **Metoda Supabase:** `signUp({ email, password })`
 
 **Uwagi:**
+
 - Email confirmation może być włączony/wyłączony w Supabase Dashboard
 - Trigger bazodanowy tworzy profil użytkownika automatycznie
 
@@ -579,6 +596,7 @@ export const supabaseBrowser = createClient<Database>(supabaseUrl, supabaseAnonK
 **Metoda Supabase:** `signInWithPassword({ email, password })`
 
 **Po sukcesie:**
+
 - Supabase ustawia sesję (JWT w cookies/localStorage)
 - Przekierowanie do `/app` lub `redirectTo` z URL
 
@@ -594,6 +612,7 @@ export const supabaseBrowser = createClient<Database>(supabaseUrl, supabaseAnonK
 **Metoda Supabase:** `signOut()`
 
 **Implementacja w Dashboard:**
+
 - `Header` komponent otrzymuje prop `onLogout`
 - `Dashboard` wywołuje `supabaseBrowser.auth.signOut()` i przekierowuje do `/login`
 
@@ -607,6 +626,7 @@ export const supabaseBrowser = createClient<Database>(supabaseUrl, supabaseAnonK
 ```
 
 **Metoda Supabase:**
+
 - `resetPasswordForEmail(email, { redirectTo })` - wysyłanie linku do resetowania hasła
 
 > **Uwaga:** Po kliknięciu linku w emailu użytkownik zostanie przekierowany zgodnie z konfiguracją Supabase. Formularz do ustawienia nowego hasła jest obsługiwany przez Supabase Dashboard lub może być zaimplementowany w przyszłości.
@@ -616,12 +636,14 @@ export const supabaseBrowser = createClient<Database>(supabaseUrl, supabaseAnonK
 #### 4.3.1. Row Level Security (RLS)
 
 Supabase RLS zapewnia izolację danych użytkowników na poziomie bazy danych:
+
 - Użytkownik widzi tylko swoje listy i zadania
 - Próba dostępu do zasobów innego użytkownika jest blokowana
 
 **Obsługa komunikatu o braku uprawnień (wymagane przez US-003):**
 
 Gdy użytkownik próbuje uzyskać dostęp do zasobów innego użytkownika:
+
 1. RLS blokuje zapytanie na poziomie bazy danych
 2. API zwraca kod `403 Forbidden` lub pusty wynik (w zależności od operacji)
 3. UI wyświetla komunikat: "Nie masz uprawnień do tego zasobu" lub "Nie znaleziono zasobu"
@@ -631,23 +653,25 @@ Gdy użytkownik próbuje uzyskać dostęp do zasobów innego użytkownika:
 #### 4.3.2. Sesja i tokeny
 
 **Zarządzanie sesją:**
+
 - JWT przechowywany w cookies (secure, httpOnly)
 - Automatyczne odświeżanie tokenów przez Supabase SDK
 - Wygaśnięcie sesji → przekierowanie do logowania
 
 **Weryfikacja sesji:**
+
 - Server-side: `supabase.auth.getSession()`
 - Client-side: `supabase.auth.onAuthStateChange()`
 
 #### 4.3.3. Ochrona przed atakami
 
-| Zagrożenie | Zabezpieczenie |
-|------------|----------------|
-| Enumeracja kont | Jednolity komunikat błędu przy logowaniu, sukces zawsze przy reset hasła |
-| XSS | React escaping, sanityzacja inputów |
-| CSRF | Tokeny JWT |
-| Session hijacking | Secure cookies, HTTPS |
-| Brute force | Rate limiting w Supabase (konfiguracja w Dashboard) |
+| Zagrożenie        | Zabezpieczenie                                                           |
+| ----------------- | ------------------------------------------------------------------------ |
+| Enumeracja kont   | Jednolity komunikat błędu przy logowaniu, sukces zawsze przy reset hasła |
+| XSS               | React escaping, sanityzacja inputów                                      |
+| CSRF              | Tokeny JWT                                                               |
+| Session hijacking | Secure cookies, HTTPS                                                    |
+| Brute force       | Rate limiting w Supabase (konfiguracja w Dashboard)                      |
 
 ---
 
@@ -655,35 +679,35 @@ Gdy użytkownik próbuje uzyskać dostęp do zasobów innego użytkownika:
 
 ### 5.1. US-001 Rejestracja konta
 
-| Kryterium akceptacji | Realizacja w architekturze |
-|---------------------|---------------------------|
-| Użytkownik może podać dane rejestracyjne wymagane przez system | `RegisterForm` z polami: email, hasło, potwierdzenie hasła |
-| System tworzy konto i umożliwia zalogowanie po udanej rejestracji | `signUp()` → przekierowanie do `/login?registered=true` |
+| Kryterium akceptacji                                                              | Realizacja w architekturze                                                                                   |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Użytkownik może podać dane rejestracyjne wymagane przez system                    | `RegisterForm` z polami: email, hasło, potwierdzenie hasła                                                   |
+| System tworzy konto i umożliwia zalogowanie po udanej rejestracji                 | `signUp()` → przekierowanie do `/login?registered=true`                                                      |
 | Jeśli dane są niepoprawne lub konto już istnieje, system pokazuje komunikat błędu | Mapowanie błędów Supabase: "Konto z tym adresem email już istnieje", "Podany adres email jest nieprawidłowy" |
 
 ### 5.2. US-002 Logowanie do aplikacji
 
-| Kryterium akceptacji | Realizacja w architekturze |
-|---------------------|---------------------------|
-| Użytkownik może wprowadzić dane logowania i uzyskać dostęp do aplikacji | `LoginForm` z polami: email, hasło → `signInWithPassword()` |
-| Przy błędnych danych logowania system odmawia dostępu i wyświetla czytelny komunikat | Generyczny komunikat: "Nieprawidłowy email lub hasło" (zapobieganie enumeracji) |
-| Po zalogowaniu użytkownik widzi swoje listy i aktualnie aktywną listę (lub stan pusty) | Przekierowanie do `/app` → `Dashboard` z `EmptyState` dla braku list |
+| Kryterium akceptacji                                                                   | Realizacja w architekturze                                                      |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Użytkownik może wprowadzić dane logowania i uzyskać dostęp do aplikacji                | `LoginForm` z polami: email, hasło → `signInWithPassword()`                     |
+| Przy błędnych danych logowania system odmawia dostępu i wyświetla czytelny komunikat   | Generyczny komunikat: "Nieprawidłowy email lub hasło" (zapobieganie enumeracji) |
+| Po zalogowaniu użytkownik widzi swoje listy i aktualnie aktywną listę (lub stan pusty) | Przekierowanie do `/app` → `Dashboard` z `EmptyState` dla braku list            |
 
 ### 5.3. US-003 Bezpieczny dostęp i autoryzacja zasobów
 
-| Kryterium akceptacji | Realizacja w architekturze |
-|---------------------|---------------------------|
-| Użytkownik widzi wyłącznie swoje listy i zadania | Supabase RLS na poziomie bazy danych |
-| Próba dostępu do zasobów innego użytkownika jest blokowana (brak danych i komunikat o braku uprawnień) | RLS blokuje zapytanie → API zwraca 403/404 → komunikat "Nie znaleziono zasobu" |
-| Po wygaśnięciu sesji użytkownik jest proszony o ponowne zalogowanie | `UnauthorizedError` (401) → przekierowanie do `/login?redirectTo=<path>` + toast "Sesja wygasła" |
+| Kryterium akceptacji                                                                                   | Realizacja w architekturze                                                                       |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Użytkownik widzi wyłącznie swoje listy i zadania                                                       | Supabase RLS na poziomie bazy danych                                                             |
+| Próba dostępu do zasobów innego użytkownika jest blokowana (brak danych i komunikat o braku uprawnień) | RLS blokuje zapytanie → API zwraca 403/404 → komunikat "Nie znaleziono zasobu"                   |
+| Po wygaśnięciu sesji użytkownik jest proszony o ponowne zalogowanie                                    | `UnauthorizedError` (401) → przekierowanie do `/login?redirectTo=<path>` + toast "Sesja wygasła" |
 
 ### 5.4. US-004 Wylogowanie
 
-| Kryterium akceptacji | Realizacja w architekturze |
-|---------------------|---------------------------|
-| Użytkownik może wylogować się z aplikacji | `Header` → `UserMenu` → "Wyloguj się" → `signOut()` |
-| Po wylogowaniu dostęp do danych jest zablokowany do czasu ponownego zalogowania | Sesja usunięta, JWT wyczyszczony |
-| Próba wejścia na chronione widoki przekierowuje do logowania | Middleware sprawdza sesję → redirect do `/login` |
+| Kryterium akceptacji                                                            | Realizacja w architekturze                          |
+| ------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Użytkownik może wylogować się z aplikacji                                       | `Header` → `UserMenu` → "Wyloguj się" → `signOut()` |
+| Po wylogowaniu dostęp do danych jest zablokowany do czasu ponownego zalogowania | Sesja usunięta, JWT wyczyszczony                    |
+| Próba wejścia na chronione widoki przekierowuje do logowania                    | Middleware sprawdza sesję → redirect do `/login`    |
 
 ---
 
@@ -770,39 +794,39 @@ Gdy użytkownik próbuje uzyskać dostęp do zasobów innego użytkownika:
 
 > **Uwaga:** Wszystkie komponenty związane z odzyskiwaniem hasła są w pełni zaimplementowane.
 
-| Komponent | Lokalizacja | Status |
-|-----------|-------------|--------|
-| `ForgotPasswordForm.tsx` | `src/components/auth/` | ✅ Zaimplementowane |
+| Komponent                  | Lokalizacja            | Status              |
+| -------------------------- | ---------------------- | ------------------- |
+| `ForgotPasswordForm.tsx`   | `src/components/auth/` | ✅ Zaimplementowane |
 | `useForgotPasswordForm.ts` | `src/components/auth/` | ✅ Zaimplementowane |
 
 ### 7.2. Strony dodatkowe (POZA ZAKRESEM PRD)
 
 > **Uwaga:** Strona forgot-password.astro jest w pełni zaimplementowana.
 
-| Strona | Lokalizacja | Status |
-|--------|-------------|--------|
+| Strona                  | Lokalizacja  | Status              |
+| ----------------------- | ------------ | ------------------- |
 | `forgot-password.astro` | `src/pages/` | ✅ Zaimplementowane |
 
 ### 7.3. Nowe endpointy (OPCJONALNE)
 
-| Endpoint | Lokalizacja | Priorytet |
-|----------|-------------|-----------|
+| Endpoint    | Lokalizacja           | Priorytet                                   |
+| ----------- | --------------------- | ------------------------------------------- |
 | `logout.ts` | `src/pages/api/auth/` | Opcjonalny (wylogowanie działa client-side) |
 
 ### 7.4. Modyfikacje istniejących plików (WYMAGANE PRZEZ PRD)
 
-| Plik | Zmiana | Priorytet | User Story |
-|------|--------|-----------|-----------|
-| `src/middleware/index.ts` | Dodanie pełnej ochrony tras i weryfikacji sesji | Wysoki | US-003, US-004 |
-| `src/env.d.ts` | Rozszerzenie `App.Locals` o session i user | Wysoki | US-003 |
-| `src/lib/api/errors.ts` | Komunikat o braku uprawnień (403) | Średni | US-003 |
+| Plik                      | Zmiana                                          | Priorytet | User Story     |
+| ------------------------- | ----------------------------------------------- | --------- | -------------- |
+| `src/middleware/index.ts` | Dodanie pełnej ochrony tras i weryfikacji sesji | Wysoki    | US-003, US-004 |
+| `src/env.d.ts`            | Rozszerzenie `App.Locals` o session i user      | Wysoki    | US-003         |
+| `src/lib/api/errors.ts`   | Komunikat o braku uprawnień (403)               | Średni    | US-003         |
 
 ### 7.5. Modyfikacje istniejących plików (POZA ZAKRESEM PRD)
 
 > **Uwaga:** Typy dla ForgotPassword są już zaimplementowane w types.ts.
 
-| Plik | Zmiana | Status |
-|------|--------|--------|
+| Plik                           | Zmiana                  | Status              |
+| ------------------------------ | ----------------------- | ------------------- |
 | `src/components/auth/types.ts` | Typy dla ForgotPassword | ✅ Zaimplementowane |
 
 ---
@@ -875,25 +899,25 @@ src/
 ### 9.2. Priorytety implementacji
 
 **Wymagane przez PRD:**
+
 1. **Wysoki**: Rozszerzenie middleware o pełną ochronę tras (US-003)
 2. **Wysoki**: Komunikat o braku uprawnień przy próbie dostępu do cudzych zasobów (US-003)
 
-**Opcjonalne:**
-3. **Niski**: Endpoint logout (obecnie działa client-side)
+**Opcjonalne:** 3. **Niski**: Endpoint logout (obecnie działa client-side)
 
 ### 9.3. Zgodność z wymaganiami PRD
 
-| User Story | Status | Uwagi |
-|------------|--------|-------|
-| US-001 | ✅ Gotowe | RegisterForm w pełni funkcjonalny |
-| US-002 | ✅ Gotowe | LoginForm w pełni funkcjonalny |
-| US-003 | ⚠️ Częściowo | Wymaga rozszerzenia middleware + komunikat o braku uprawnień |
-| US-004 | ✅ Gotowe | Wylogowanie działa w Dashboard |
+| User Story | Status       | Uwagi                                                        |
+| ---------- | ------------ | ------------------------------------------------------------ |
+| US-001     | ✅ Gotowe    | RegisterForm w pełni funkcjonalny                            |
+| US-002     | ✅ Gotowe    | LoginForm w pełni funkcjonalny                               |
+| US-003     | ⚠️ Częściowo | Wymaga rozszerzenia middleware + komunikat o braku uprawnień |
+| US-004     | ✅ Gotowe    | Wylogowanie działa w Dashboard                               |
 
 ### 9.4. Nadmiarowe założenia względem PRD
 
-| Element | Status | Rekomendacja |
-|---------|--------|--------------|
-| Odzyskiwanie hasła (forgot-password) | ✅ Zaimplementowane | Zachować - standardowa praktyka UX |
-| Akceptacja regulaminu | ✅ Zaimplementowane | Zachować - zgodność z RODO (PRD 1.5) |
-| Potwierdzenie email | Opcjonalne w Supabase | Wyłączyć dla MVP (PRD nie wymaga) |
+| Element                              | Status                | Rekomendacja                         |
+| ------------------------------------ | --------------------- | ------------------------------------ |
+| Odzyskiwanie hasła (forgot-password) | ✅ Zaimplementowane   | Zachować - standardowa praktyka UX   |
+| Akceptacja regulaminu                | ✅ Zaimplementowane   | Zachować - zgodność z RODO (PRD 1.5) |
+| Potwierdzenie email                  | Opcjonalne w Supabase | Wyłączyć dla MVP (PRD nie wymaga)    |
