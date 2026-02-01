@@ -25,4 +25,4 @@ Testowanie:
 CI/CD i Hosting:
 
 - Github Actions do tworzenia pipeline'ów CI/CD
-- SMALL.pl
+- Cloudflare

@@ -67,7 +67,7 @@ Testing:
 CI/CD & hosting:
 
 - **GitHub Actions**
-- **SMALL.pl** (deployment target)
+- **Cloudflare** (deployment target)
 
 > See: [`doc/tech-stack.md`](./doc/tech-stack.md) for the rationale and stack notes.
 
