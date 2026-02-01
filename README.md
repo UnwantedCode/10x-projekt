@@ -1,4 +1,4 @@
-# AI Task Manager (MVP)
+# AI Task Manager
 
 ![Version](https://img.shields.io/badge/version-0.0.1-informational)
 
