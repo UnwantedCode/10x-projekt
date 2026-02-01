@@ -1,5 +1,5 @@
 import { test as base } from "@playwright/test";
-import { LoginPage } from "../pages";
+import { LoginPage, RegisterPage } from "../pages";
 
 /**
  * Custom test fixture that provides Page Objects
@@ -7,12 +7,17 @@ import { LoginPage } from "../pages";
  */
 type AuthFixtures = {
   loginPage: LoginPage;
+  registerPage: RegisterPage;
 };
 
 export const test = base.extend<AuthFixtures>({
   loginPage: async ({ page }, use) => {
     const loginPage = new LoginPage(page);
     await use(loginPage);
+  },
+  registerPage: async ({ page }, use) => {
+    const registerPage = new RegisterPage(page);
+    await use(registerPage);
   },
 });
 
