@@ -5,7 +5,7 @@
 A lightweight **web** task manager focused on one thing: helping users decide **what matters most**.  
 Tasks use a simple **3-level priority model** (Low / Medium / High), with **optional AI** acting as a “second opinion” that suggests a priority plus a short justification. Users always stay in control (accept / edit / reject with a reason).
 
-## Table of contents
+## Table of content
 
 - [1. Project name](#1-project-name)
 - [2. Project description](#2-project-description)
